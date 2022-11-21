@@ -3,8 +3,9 @@
 namespace Krugozor\Cover;
 
 /**
- * Обёртка массива, хранилище.
- * Попытка реализации объекта для более удобной работы с массиво-образной структурой данных.
+ * Попытка реализации объекта для более удобной работы с массиво-образной структурой данных,
+ * похожей на \ArrayObject, но заменяющей при инстанцировании класса все
+ * вложенные массивы в аргументе конструктора $data на тип CoverArray.
  */
 class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Serializable
 {
@@ -138,54 +139,73 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
     /**
      * Реализация метода интерфейса ArrayAccess::offsetExists.
      *
-     * @param mixed $key
+     * @param mixed $offset
      * @return bool
      */
-    final public function offsetExists(mixed $key): bool
+    final public function offsetExists(mixed $offset): bool
     {
-        return isset($this->data[$key]);
+        return isset($this->data[$offset]);
     }
 
     /**
      * Реализация метода интерфейса ArrayAccess::offsetUnset.
      *
-     * @param mixed $key
+     * @param mixed $offset
      */
-    final public function offsetUnset(mixed $key): void
+    final public function offsetUnset(mixed $offset): void
     {
-        if (isset($this->data[$key])) {
-            unset($this->data[$key]);
+        if (isset($this->data[$offset])) {
+            unset($this->data[$offset]);
         }
     }
 
     /**
-     * Реализация метода интерфейса ArrayAccess.
+     * Реализация метода интерфейса ArrayAccess::offsetGet.
      *
      * В случае отсутствия запрошенного элемента не генерирует Notice: Undefined index,
      * а создает в вызвавшем его объекте, в хранилище, свойство $key содержащее пустой объект текущего типа.
      *
-     * Таким образом, можно объявлять цепочку вложенных элементов:
-     * $array['non_exists_prop']['non_exists_prop_2']['property'] = true;
+     * Таким образом, можно объявлять цепочку вложенных элементов, пример:
      *
-     * В этом примере будут созданы вложенные объекты $array->non_exists_prop->non_exists_prop_2
-     * а объект non_exists_prop_2 будет содержать свойство property == true:
+     *   $cover = new CoverArray();
+     *   $cover['non_exists_prop']['non_exists_prop_2']['property'] = true;
      *
-     * $array->non_exists_prop->non_exists_prop->property == true
+     * В этом примере будут создана следующая структура:
      *
-     * @param mixed $key
+     *   object(Krugozor\Cover\CoverArray)#1 (1) {
+     *     ["data":protected]=>
+     *     array(1) {
+     *       ["non_exists_prop"]=>
+     *       object(Krugozor\Cover\CoverArray)#2 (1) {
+     *         ["data":protected]=>
+     *         array(1) {
+     *           ["non_exists_prop_2"]=>
+     *           object(Krugozor\Cover\CoverArray)#3 (1) {
+     *             ["data":protected]=>
+     *             array(1) {
+     *               ["property"]=>
+     *               bool(true)
+     *             }
+     *           }
+     *         }
+     *       }
+     *     }
+     *   }
+     *
+     * @param mixed $offset
      * @return $this
      */
-    final public function offsetGet(mixed $key): mixed
+    final public function offsetGet(mixed $offset): mixed
     {
-        if (!isset($this->data[$key])) {
-            $this->data[$key] = new $this();
+        if (!isset($this->data[$offset])) {
+            $this->data[$offset] = new $this();
         }
 
-        return $this->data[$key];
+        return $this->data[$offset];
     }
 
     /**
-     * Реализация интерфейса Serializable.
+     * Реализация метода интерфейса Serializable::serialize.
      *
      * @return string|null
      */
@@ -195,7 +215,7 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
     }
 
     /**
-     * Реализация интерфейса Serializable.
+     * Реализация метода интерфейса Serializable::unserialize.
      *
      * @param string $data
      */
@@ -215,9 +235,13 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
 
     /**
      * Возвращает данные по ключам многомерных массивов через dot-нотацию.
-     * Пример массива: a[b][c]=true
+     *
+     * Пример определения:
+     *   $cover = new CoverArray();
+     *   $cover['non_exists_prop']['non_exists_prop_2']['property'] = true;
+     *
      * Пример доступа:
-     *    $...->get('a.b.c')
+     *    $cover->get('non_exists_prop.non_exists_prop_2.property');
      *
      * @param string $path
      * @param mixed $data
