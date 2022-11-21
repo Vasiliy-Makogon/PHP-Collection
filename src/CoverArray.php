@@ -187,7 +187,7 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
     /**
      * Реализация интерфейса Serializable.
      *
-     * @return string
+     * @return string|null
      */
     final public function serialize(): ?string
     {
@@ -198,9 +198,8 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
      * Реализация интерфейса Serializable.
      *
      * @param string $data
-     * @return void
      */
-    final public function unserialize(string $data): void
+    final public function unserialize($data): void
     {
         $this->setData(unserialize($data));
     }

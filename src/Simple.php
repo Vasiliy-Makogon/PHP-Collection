@@ -13,7 +13,7 @@ trait Simple
      */
     public function __get(string $key): mixed
     {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return $this->data[$key] ?? null;
     }
 
     /**
@@ -51,7 +51,7 @@ trait Simple
      */
     public function item(int|string $key): mixed
     {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return $this->data[$key] ?? null;
     }
 
     /**

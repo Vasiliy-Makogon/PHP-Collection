@@ -1,15 +1,15 @@
 {
     "name":"krugozor/cover",
-    "description": "Библиотека на PHP для более удобной работы с массиво-образной структурой данных в рамках ОО-приложений.",
+    "description": "Попытка реализации более удачного PHP \\ArrayObject.",
     "type":"library",
     "keywords": [
         "array",
-        "arrayobject",
         "object",
-        "object array"
+        "ArrayObject",
+        "php array object"
     ],
     "require":{
-        "php": ">=7.4"
+        "php": ">=8.0"
     },
     "authors": [
         {
@@ -21,6 +21,5 @@
         "psr-4" : {
             "Krugozor\\Cover\\": "src/"
         }
-    },
-    "license": "Apache-2.0"
+    }
 }
