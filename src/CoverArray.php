@@ -3,22 +3,19 @@
 namespace Krugozor\Cover;
 
 /**
- * Попытка реализации объекта для более удобной работы с массиво-образной структурой данных,
- * похожей на \ArrayObject, но заменяющей при инстанцировании класса все
- * вложенные массивы в аргументе конструктора $data на тип CoverArray.
+ * Объектный массив.
+ * @package Krugozor\Cover
  */
-class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Serializable
+class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
 {
     use Simple;
 
     /**
-     * @param array $data
+     * @param array|null $data
      */
-    public function __construct(array $data = array())
+    public function __construct(?array $data = null)
     {
-        foreach ($data as $key => $value) {
-            $this->data[$key] = $this->array2cover($value);
-        }
+        $this->setData($data);
     }
 
     /**
@@ -62,9 +59,9 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
      * Присоединяет один элемент в начало массива.
      *
      * @param mixed $value
-     * @return $this
+     * @return static
      */
-    final public function prepend(mixed $value): self
+    final public function prepend(mixed $value): static
     {
         array_unshift($this->data, $this->array2cover($value));
 
@@ -75,9 +72,9 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
      * Присоединяет один элемент в конец массива.
      *
      * @param mixed $value
-     * @return $this
+     * @return static
      */
-    final public function append(mixed $value): self
+    final public function append(mixed $value): static
     {
         array_push($this->data, $this->array2cover($value));
 
@@ -118,7 +115,15 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
      */
     final public function getDataAsArray(): array
     {
-        return self::object2array($this->data);
+        $data = [];
+
+        foreach ($this->getData() as $key => $value) {
+            $data[$key] = is_object($value) && $value instanceof static
+                ? $value->{__FUNCTION__}()
+                : $value;
+        }
+
+        return $data;
     }
 
     /**
@@ -162,71 +167,33 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
     /**
      * Реализация метода интерфейса ArrayAccess::offsetGet.
      *
-     * В случае отсутствия запрошенного элемента не генерирует Notice: Undefined index,
-     * а создает в вызвавшем его объекте, в хранилище, свойство $key содержащее пустой объект текущего типа.
-     *
-     * Таким образом, можно объявлять цепочку вложенных элементов, пример:
-     *
-     *   $cover = new CoverArray();
-     *   $cover['non_exists_prop']['non_exists_prop_2']['property'] = true;
-     *
-     * В этом примере будут создана следующая структура:
-     *
-     *   object(Krugozor\Cover\CoverArray)#1 (1) {
-     *     ["data":protected]=>
-     *     array(1) {
-     *       ["non_exists_prop"]=>
-     *       object(Krugozor\Cover\CoverArray)#2 (1) {
-     *         ["data":protected]=>
-     *         array(1) {
-     *           ["non_exists_prop_2"]=>
-     *           object(Krugozor\Cover\CoverArray)#3 (1) {
-     *             ["data":protected]=>
-     *             array(1) {
-     *               ["property"]=>
-     *               bool(true)
-     *             }
-     *           }
-     *         }
-     *       }
-     *     }
-     *   }
-     *
      * @param mixed $offset
-     * @return $this
+     * @return mixed
      */
     final public function offsetGet(mixed $offset): mixed
     {
-        if (!isset($this->data[$offset])) {
-            $this->data[$offset] = new $this();
-        }
-
-        return $this->data[$offset];
+        return $this->data[$offset] ?? null;
     }
 
     /**
-     * Реализация метода интерфейса Serializable::serialize.
-     *
-     * @return string|null
-     */
-    final public function serialize(): ?string
-    {
-        return serialize($this->data);
-    }
-
-    /**
-     * Реализация метода интерфейса Serializable::unserialize.
-     *
-     * @param string $data
-     */
-    final public function unserialize($data): void
-    {
-        $this->setData(unserialize($data));
-    }
-
-    /**
-     * @see array_reverse
      * @return array
+     */
+    public function __serialize(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->setData($data);
+    }
+
+    /**
+     * @return array
+     * @see array_reverse
      */
     final public function reverse(): array
     {
@@ -235,71 +202,90 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess, \Seria
 
     /**
      * Возвращает данные по ключам многомерных массивов через dot-нотацию.
-     *
-     * Пример определения:
-     *   $cover = new CoverArray();
-     *   $cover['non_exists_prop']['non_exists_prop_2']['property'] = true;
-     *
-     * Пример доступа:
-     *    $cover->get('non_exists_prop.non_exists_prop_2.property');
+     * Пример:
+     *    $cover->get('prop.prop2.prop3');
+     *    $cover->get('prop.prop2.0');
      *
      * @param string $path
-     * @param mixed $data
      * @return mixed
      */
-    final public function get(string $path, mixed $data = null): mixed
+    final public function get(string $path): mixed
     {
-        if (!$path) {
+        if ($path === '') {
             return null;
         }
 
         list(0 => $key, 1 => $other) = array_pad(explode('.', $path, 2), 2, null);
 
-        $actual_data = $data === null
-            ? ($this->data[$key] ?? null)
-            : $data[$key];
+        $actual_data = $this->data[$key] ?? null;
 
         // Закончились ключи в цепочке следования
-        if (!$other) {
+        if ($other === null) {
             return $actual_data;
         }
 
-        // Попытка вызывать ключ на скалярном значении
-        $selfClass = __CLASS__;
-        if (!is_object($actual_data) || !$actual_data instanceof $selfClass) {
-            return new $this;
+        // Попытка вызывать ключ на значении
+        if (!is_object($actual_data) || !$actual_data instanceof static) {
+            return null;
         }
 
-        return $this->get($other, $actual_data);
+        return $this->data[$key]->get($other);
     }
 
     /**
-     * Преобразует все значения массива $in в массивы, если значения
-     * каких-либо элементов данных будут объекты текущего типа.
-     *
-     * @param array
-     * @return array
+     * @param callable|null $callback
+     * @param int $mode
+     * @return static
+     * @see array_filter
      */
-    final protected static function object2array(array $in): array
+    final public function filter(?callable $callback = null, int $mode = 0): static
     {
-        foreach ($in as $key => $value) {
-            $in[$key] = is_object($value) && $value instanceof self
-                ? $in[$key] = self::object2array($value->getData())
-                : $value;
-        }
-
-        return $in;
+        return new static(array_filter($this->data, $callback, $mode));
     }
 
     /**
-     * Возвращает объект текущего типа ($this), если переданным в метод значением является массив.
-     * Вложенные элементы массива так же становятся объектом типа $this
+     * @param string $separator
+     * @return string
+     */
+    final public function implode(string $separator): string
+    {
+        return implode($separator, $this->data);
+    }
+
+    /**
+     * Применяет callback-функцию ко всем элементам ассоциативного массива.
+     * Пример callback: fn(string $key, string $value): string => "$key: $value"
+     *
+     * @param callable $callback
+     * @return static
+     * @see array_map
+     */
+    final public function mapAssociative(callable $callback): static
+    {
+        return new static(array_map($callback, array_keys($this->data), array_values($this->data)));
+    }
+
+    /**
+     * Применяет callback-функцию ко всем элементам массива.
+     * Пример callback: fn(string $value): string => "value: $value"
+     *
+     * @param callable $callback
+     * @return static
+     */
+    final public function map(callable $callback): static
+    {
+        return new static(array_map($callback, $this->data));
+    }
+
+    /**
+     * Возвращает объект текущего типа, если переданным в метод значением является массив.
+     * Вложенные элементы массива так же становятся объектом текущего типа.
      *
      * @param mixed $value
      * @return mixed
      */
     final protected function array2cover(mixed $value): mixed
     {
-        return is_array($value) ? new $this($value) : $value;
+        return is_array($value) ? new static($value) : $value;
     }
 }
