@@ -2,6 +2,9 @@
 
 namespace Krugozor\Cover;
 
+/**
+ * @package Krugozor\Cover
+ */
 trait Simple
 {
     /** @var array */
@@ -63,22 +66,24 @@ trait Simple
     }
 
     /**
-     * @param array $data
-     * @return $this
+     * @param iterable|null $data
+     * @return static
      */
-    public function setData(array $data): self
+    public function setData(?iterable $data): static
     {
-        foreach ($data as $key => $value) {
-            $this->$key = $value;
+        if ($data) {
+            foreach ($data as $key => $value) {
+                $this->$key = $value;
+            }
         }
 
         return $this;
     }
 
     /**
-     * @return $this
+     * @return static
      */
-    public function clear(): self
+    public function clear(): static
     {
         $this->data = [];
 

@@ -1,6 +1,6 @@
 {
     "name":"krugozor/cover",
-    "description": "Попытка реализации более удачного PHP \\ArrayObject.",
+    "description": "Попытка реализации объектного массива",
     "type":"library",
     "keywords": [
         "array",
@@ -10,6 +10,9 @@
     ],
     "require":{
         "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.3"
     },
     "authors": [
         {
