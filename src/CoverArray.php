@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Krugozor\Cover;
 
 /**
@@ -58,25 +60,29 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     /**
      * Присоединяет один элемент в начало массива.
      *
-     * @param mixed $value
+     * @param mixed ...$args
      * @return static
      */
-    final public function prepend(mixed $value): static
+    final public function prepend(mixed ...$args): static
     {
-        array_unshift($this->data, $this->array2cover($value));
+        foreach ($args as $value) {
+            array_unshift($this->data, $this->array2cover($value));
+        }
 
         return $this;
     }
 
     /**
-     * Присоединяет один элемент в конец массива.
+     * Присоединяет один или более элементов в конец массива.
      *
-     * @param mixed $value
+     * @param mixed ...$args
      * @return static
      */
-    final public function append(mixed $value): static
+    final public function append(mixed ...$args): static
     {
-        array_push($this->data, $this->array2cover($value));
+        foreach ($args as $value) {
+            array_push($this->data, $this->array2cover($value));
+        }
 
         return $this;
     }

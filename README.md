@@ -1,58 +1,72 @@
-# Cover
-`\Krugozor\Cover\CoverArray` - это базовый класс для удобной и гибкой работы с массивами в объектно-ориентированном представлении. Фактически, это "объектный массив". Объекты, производные от `CoverArray` имплементируют PHP-интерфейсы `\IteratorAggregate, \Countable, \ArrayAccess, \Serializable`, для них реализованы магические методы `__set`, `__get`, `__isset`, `__unset` и другие.   
+# Объектный массив на PHP
 
-## Как это работает? 
+`\Krugozor\Cover\CoverArray` - это базовый класс для удобной и гибкой работы с массивами в объектно-ориентированном
+представлении. Фактически, это "объектный массив", которого так не хватает в PHP.
 
-Вы можете создать класс, наследуемый от `CoverArray` или использовать `CoverArray` без наследования. Создадим класс нового типа, наследуемый от базового класса `CoverArray`: 
+## Как это работает?
+
+Вы можете создать класс, наследуемый от `CoverArray` или использовать `CoverArray` без наследования. 
+Создадим класс нового типа, наследуемый от базового класса `CoverArray`:
 
 ```php
-class NewType extends CoverArray
+class NewTypeArray extends CoverArray
 {}
 ```
-Инстанцируем новый объект данного класса. Передадим в конструктор многомерный массив и посмотрим на структуру, которая получится: 
+
+Инстанцируем новый объект данного класса. Передадим в конструктор многомерный массив и посмотрим на структуру, которая
+получится:
 
 ```php
-$data = [
-    'name' => 'Vasiliy',
-    'age' => 35,
+$data = new NewTypeArray([
+    'firstName' => 'Vasiliy',
+    'lastName' => 'Ivanov',
     'langs' => [
-        'backend' => ['php'],
-        'frontend' => ['js', 'html']
-    ]
-];
+        'backend' => ['PHP', 'MySql'],
+        'frontend' => ['HTML', 'CSS 1', 'JavaScript', 'CSS 2', 'CSS3']
+    ],
+]);
 
-$cover = new CoverArray($data);
-var_dump($cover);
+var_dump($data);
 ```
-результат отладки: 
+
+Результат отладки:
+
 ```
-object(NewType)#1 (1) {
+object(Krugozor\Cover\Tests\NewTypeArray)#4 (1) {
   ["data":protected]=>
   array(3) {
-    ["name"]=>
+    ["firstName"]=>
     string(7) "Vasiliy"
-    ["age"]=>
-    int(35)
+    ["lastName"]=>
+    string(6) "Ivanov"
     ["langs"]=>
-    object(NewType)#2 (1) {
+    object(Krugozor\Cover\Tests\NewTypeArray)#5 (1) {
       ["data":protected]=>
       array(2) {
         ["backend"]=>
-        object(NewType)#3 (1) {
-          ["data":protected]=>
-          array(1) {
-            [0]=>
-            string(3) "php"
-          }
-        }
-        ["frontend"]=>
-        object(NewType)#4 (1) {
+        object(Krugozor\Cover\Tests\NewTypeArray)#6 (1) {
           ["data":protected]=>
           array(2) {
             [0]=>
-            string(2) "js"
+            string(3) "PHP"
             [1]=>
-            string(4) "html"
+            string(5) "MySql"
+          }
+        }
+        ["frontend"]=>
+        object(Krugozor\Cover\Tests\NewTypeArray)#7 (1) {
+          ["data":protected]=>
+          array(5) {
+            [0]=>
+            string(4) "HTML"
+            [1]=>
+            string(5) "CSS 1"
+            [2]=>
+            string(10) "JavaScript"
+            [3]=>
+            string(5) "CSS 2"
+            [4]=>
+            string(4) "CSS3"
           }
         }
       }
@@ -60,135 +74,146 @@ object(NewType)#1 (1) {
   }
 }
 ```
-Как видно, произошло два крайне важных события: 
-1. Все переданные в конструктор массивы многомерного массива преобразовались в объекты текущего класса (в данном случае -- `NewType`).
-2. Данные всех созданных объектов аккуратно сложились в protected-свойства `$data`, что обеспечивает инкапсуляцию данных и возможность реализации любых методов над ними.
 
-Давайте попробуем поработать с данными.
+Как видно, произошло два крайне важных события:
 
-### Методы трейта \Krugozor\Cover\Simple
+1. Все переданные в конструктор массивы многомерного массива преобразовались в объекты текущего 
+   класса (в данном случае `NewTypeArray`). 
+   Это поведение гарантирует, что любой массив, попадающий в объект наследуемый от `CoverArray`,
+   становится объектным массивом. 
+   
+2. Данные всех созданных объектов аккуратно сложились в protected-свойства `$data`, что обеспечивает инкапсуляцию данных
+   и возможность реализации любых методов над ними.
 
-Трейт `\Krugozor\Cover\Simple` является неотъемлемой частью данного решения, но *может использоваться отдельно, когда не нужен дополнительный функционал всей библиотеки*. Методы, описанные в этой части документации, реализованы исключительно в трейте `\Krugozor\Cover\Simple`. 
+## Давайте попробуем поработать с данными созданного выше объекта:
 
-#### __set __get
-
-Добавим в объект `$cover` новое свойство `address` и получим его значение:
+Пример:
 ```php
-$cover->address = 'Moscow, Russian Federation';
-var_dump($cover->address);
+$value = $data
+    ->get('langs.frontend')
+    ->filter(function ($value) {
+        return preg_match('~CSS~', $value);
+    })
+    ->implode(', ');
+
+var_dump($value);
 ```
-результат отладки: 
+Результат:
 ```
-string(26) "Moscow, Russian Federation"
+string(18) "CSS 1, CSS 2, CSS3"
 ```
 
-#### __isset __unset
-Проверим наличие свойства `address`, а затем удалим его:
+Пример:
 ```php
-if (isset($cover->address)) {
-    unset($cover->address);
-    var_dump($cover->address);
-}
-```
-результат отладки:
-```
-NULL
-```
+$value = $data
+    ->get('langs.frontend')
+    ->append('HTML 5', 'jQuey')
+    ->getDataAsArray();
 
-#### setData
-Наполним объект `$cover` некоторыми новыми свойствами:
-
-```php
-$cover->setData([
-    'gender' => 'Male', 
-    'height' => 180, 
-    'weight' => 85
-]);
-var_dump($cover);
+var_dump($value);
 ```
-результат отладки:
+Результат:
 ```
-object(NewType)#1 (1) {
-  ["data":protected]=>
-  array(6) {
-    ["name"]=>
-    string(7) "Vasiliy"
-    ["age"]=>
-    int(35)
-    ["langs"]=>
-    object(NewType)#2 (1) {
-      ["data":protected]=>
-      array(2) {
-        ["backend"]=>
-        object(NewType)#3 (1) {
-          ["data":protected]=>
-          array(1) {
-            [0]=>
-            string(3) "php"
-          }
-        }
-        ["frontend"]=>
-        object(NewType)#4 (1) {
-          ["data":protected]=>
-          array(2) {
-            [0]=>
-            string(2) "js"
-            [1]=>
-            string(4) "html"
-          }
-        }
-      }
-    }
-    ["gender"]=>
-    string(4) "Male"
-    ["height"]=>
-    int(180)
-    ["weight"]=>
-    int(85)
-  }
+array(7) {
+  [0]=>
+  string(4) "HTML"
+  [1]=>
+  string(5) "CSS 1"
+  [2]=>
+  string(10) "JavaScript"
+  [3]=>
+  string(5) "CSS 2"
+  [4]=>
+  string(4) "CSS3"
+  [5]=>
+  string(6) "HTML 5"
+  [6]=>
+  string(5) "jQuey"
 }
 ```
 
-#### item
-Получим из объекта `$cover->langs->backend` значение первого элемента, обратившись по индексу:
+
+Пример:
 ```php
-var_dump($cover->langs->backend->item(0));
+var_dump($data['langs']['backend'][0]);
+var_dump($data->langs->backend->item(0));
+var_dump($data->get('langs.backend.0'));
+var_dump($data->get('langs')->item('backend')[0]);
+var_dump($data->get('langs')['backend']->item(0));
 ```
-результат отладки:
+Результат:
 ```
-string(3) "php"
-```
-метод можно использовать и для получения свойств по строковому ключу:
-```php
-var_dump($cover->langs->frontend);
-```
-результат отладки:
-```
-object(NewType)#4 (1) {
-  ["data":protected]=>
-  array(2) {
-    [0]=>
-    string(2) "js"
-    [1]=>
-    string(4) "html"
-  }
-}
+string(3) "PHP"
+string(3) "PHP"
+string(3) "PHP"
+string(3) "PHP"
+string(3) "PHP"
 ```
 
-#### clear
 
-Метод очищает protected-свойство `$data` у вызванного объекта. Полностью очистим данные объекта `$cover->langs->frontend`: 
+Пример:
 ```php
-$cover->langs->frontend->clear();
-var_dump($cover->langs->frontend);
+var_dump($data->get('langs.backend')->getFirst());
+var_dump($data->get('langs.backend')->getLast());
 ```
-результат отладки:
+Результат:
 ```
-object(NewType)#4 (1) {
-  ["data":protected]=>
-  array(0) {
-  }
-}
+string(3) "PHP"
+string(5) "MySql"
 ```
 
-### Методы класса \Krugozor\Cover\CoverArray
+
+Пример:
+```php
+var_dump(serialize($data->get('langs.backend')));
+```
+Результат:
+```
+string(75) "O:33:"Krugozor\Cover\Tests\NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
+```
+
+
+Пример:
+```php
+```
+Результат:
+```
+
+```
+
+
+Пример:
+```php
+```
+Результат:
+```
+
+```
+
+
+Пример:
+```php
+```
+Результат:
+```
+
+```
+
+
+Пример:
+```php
+```
+Результат:
+```
+
+```
+
+
+Пример:
+```php
+```
+Результат:
+```
+
+```
+
