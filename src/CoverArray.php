@@ -198,12 +198,14 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     }
 
     /**
+     * Возвращает массив с элементами в обратном порядке
+     *
      * @return array
      * @see array_reverse
      */
-    final public function reverse(): array
+    final public function reverse(bool $preserve_keys = false): array
     {
-        return array_reverse($this->data);
+        return array_reverse($this->data, $preserve_keys);
     }
 
     /**
@@ -239,6 +241,8 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     }
 
     /**
+     * Фильтрует элементы массива с помощью callback-функции
+     *
      * @param callable|null $callback
      * @param int $mode
      * @return static
@@ -250,8 +254,11 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     }
 
     /**
+     * Объединяет элементы массива в строку
+     *
      * @param string $separator
      * @return string
+     * @see implode
      */
     final public function implode(string $separator): string
     {
@@ -277,10 +284,24 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
      *
      * @param callable $callback
      * @return static
+     * @see array_map
      */
     final public function map(callable $callback): static
     {
         return new static(array_map($callback, $this->data));
+    }
+
+    /**
+     * Проверяет, присутствует ли в массиве значение
+     *
+     * @param mixed $needle
+     * @param bool $strict
+     * @return bool
+     * @see in_array
+     */
+    final public function in(mixed $needle, bool $strict = false): bool
+    {
+        return in_array($needle, $this->data, $strict);
     }
 
     /**

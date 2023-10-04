@@ -291,7 +291,8 @@ class CoverArrayTest extends TestCase
      */
     public function testReverseMethod(): void
     {
-        $this->assertSame(['MySql', 'PHP'], $this->data->get('langs.backend')->reverse());
+        $this->assertSame([0 => 'MySql', 1 => 'PHP'], $this->data->get('langs.backend')->reverse(false));
+        $this->assertSame([1 => 'MySql', 0 => 'PHP'], $this->data->get('langs.backend')->reverse(true));
     }
 
     /**
@@ -299,9 +300,19 @@ class CoverArrayTest extends TestCase
      */
     public function testFilterMethod(): void
     {
+        // pass value as the only argument to callback instead
         $this->assertSame(['PHP'], $this->data->get('langs.backend')->filter(function ($value) {
             return preg_match('~P~', $value);
         })->getDataAsArray());
+
+        $this->assertSame(['backend' => ['PHP', 'MySql']], $this->data->get('langs')->filter(function ($key) {
+            return $key === 'backend';
+        }, ARRAY_FILTER_USE_KEY)->getDataAsArray());
+
+        // pass both value and key as arguments to callback instead of the value
+        $this->assertSame(['backend' => ['PHP', 'MySql']], $this->data->get('langs')->filter(function ($value, $key) {
+            return $key === 'backend' && $value->in('PHP');
+        }, ARRAY_FILTER_USE_BOTH)->getDataAsArray());
     }
 
     /**
@@ -326,7 +337,7 @@ class CoverArrayTest extends TestCase
     }
 
     /**
-     * @see CoverArray::mapAssociative()
+     * @see CoverArray::map()
      */
     public function testMapMethod(): void
     {
@@ -336,5 +347,19 @@ class CoverArrayTest extends TestCase
                 fn(string $value): string => "value: $value"
             )->getDataAsArray()
         );
+    }
+
+    /**
+     * @see CoverArray::in()
+     */
+    public function testInMethod(): void
+    {
+        $this->data->setData(['age' => 40]);
+
+        $this->assertTrue($this->data->in(40, true));
+        $this->assertTrue($this->data->in(40, false));
+
+        $this->assertTrue($this->data->in('40', false));
+        $this->assertFalse($this->data->in('40', true));
     }
 }
