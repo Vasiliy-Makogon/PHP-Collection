@@ -1,12 +1,17 @@
 {
     "name":"krugozor/cover",
-    "description": "Попытка реализации объектного массива",
+    "description": "PHP Array Object",
     "type":"library",
     "keywords": [
-        "array",
-        "object",
+        "cover array",
+        "php array cover",
+        "array object",
+        "php array object",
         "ArrayObject",
-        "php array object"
+        "array wrapper",
+        "php array wrapper",
+        "php collection",
+        "php array"
     ],
     "require":{
         "php": ">=8.0"
@@ -16,8 +21,7 @@
     },
     "authors": [
         {
-            "name": "Vasiliy Makogon",
-            "email": "makogon-vs@yandex.ru"
+            "name": "Vasiliy Makogon"
         }
     ],
     "autoload" : {

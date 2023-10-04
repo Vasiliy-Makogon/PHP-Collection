@@ -27,7 +27,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::getIterator()
      */
-    public function testIsIterable()
+    public function testIsIterable(): void
     {
         $this->assertIsIterable($this->data);
     }
@@ -35,7 +35,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__toString()
      */
-    public function testToStringMethod()
+    public function testToStringMethod(): void
     {
         $this->assertSame('', (string) $this->data);
     }
@@ -43,7 +43,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__get()
      */
-    public function testMagicGetMethod()
+    public function testMagicGetMethod(): void
     {
         $this->assertSame('Vasiliy', $this->data->name);
         $this->assertInstanceOf(NewTypeArray::class, $this->data->langs);
@@ -54,7 +54,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__set()
      */
-    public function testMagicSetMethod()
+    public function testMagicSetMethod(): void
     {
         $this->data->scalarValue = 1;
         $this->data->stdClassValue = new stdClass();
@@ -72,7 +72,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__isset()
      */
-    public function testMagicIssetMethod()
+    public function testMagicIssetMethod(): void
     {
         $this->assertTrue(isset($this->data->name));
         $this->assertFalse(isset($this->data->nonexistent));
@@ -81,7 +81,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__unset()
      */
-    public function testMagicUnsetMethod()
+    public function testMagicUnsetMethod(): void
     {
         unset($this->data->name);
         $this->assertFalse(isset($this->data->name));
@@ -90,7 +90,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::item()
      */
-    public function testItemMethod()
+    public function testItemMethod(): void
     {
         $this->assertSame('PHP', $this->data->get('langs.backend')->item(0));
         $this->assertSame('Vasiliy', $this->data->item('name'));
@@ -101,7 +101,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::getData()
      */
-    public function testGetDataMethod()
+    public function testGetDataMethod(): void
     {
         $this->assertIsArray($this->data->getData());
     }
@@ -109,7 +109,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::setData()
      */
-    public function testSetDataMethod()
+    public function testSetDataMethod(): void
     {
         $this->data->get('langs.backend')->setData(new CoverArray([
             2 => 'C++', 3 => 'C#'
@@ -127,7 +127,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::clear()
      */
-    public function testClearMethod()
+    public function testClearMethod(): void
     {
         $this->assertEmpty($this->data->clear());
     }
@@ -135,7 +135,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::count()
      */
-    public function testCountMethod()
+    public function testCountMethod(): void
     {
         $this->assertCount(2, $this->data);
         $this->assertCount(3, $this->data->get('langs.frontend'));
@@ -144,7 +144,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::get()
      */
-    public function testGetMethod()
+    public function testGetMethod(): void
     {
         $this->assertSame('PHP', $this->data->get('langs.backend.0'));
         $this->assertSame('Vasiliy', $this->data->get('name'));
@@ -152,7 +152,7 @@ class CoverArrayTest extends TestCase
         $this->assertNull($this->data->get('nonexistent.nonexistent.nonexistent'));
     }
 
-    public function testInstanceOfSelf()
+    public function testInstanceOfSelf(): void
     {
         $this->assertInstanceOf(NewTypeArray::class, $this->data);
         $this->assertInstanceOf(NewTypeArray::class, $this->data->get('langs'));
@@ -168,7 +168,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::prepend()
      */
-    public function testPrependMethod()
+    public function testPrependMethod(): void
     {
         $this->data->get('langs.backend')->prepend('C++');
         $this->assertSame('C++', $this->data->get('langs.backend')->getFirst());
@@ -183,7 +183,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::append()
      */
-    public function testAppendMethod()
+    public function testAppendMethod(): void
     {
         $this->data->get('langs.backend')->append('C++');
         $this->assertSame('C++', $this->data->get('langs.backend')->getLast());
@@ -198,7 +198,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::getLast()
      */
-    public function testGetLastMethod()
+    public function testGetLastMethod(): void
     {
         $this->assertSame('MySql', $this->data->get('langs.backend')->getLast());
     }
@@ -206,7 +206,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::getFirst()
      */
-    public function testGetFirstMethod()
+    public function testGetFirstMethod(): void
     {
         $this->assertSame('PHP', $this->data->get('langs.backend')->getFirst());
     }
@@ -214,7 +214,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::getDataAsArray()
      */
-    public function testGetDataAsArrayMethod()
+    public function testGetDataAsArrayMethod(): void
     {
         $this->assertIsArray($this->data->getDataAsArray());
     }
@@ -222,20 +222,22 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::offsetSet()
      */
-    public function testOffsetSetMethod()
+    public function testOffsetSetMethod(): void
     {
         $this->data['age'] = 40;
         $this->data['workplaces'] = ['Mvideo', 'Svyaznoy'];
+        $this->data['nullValue'] = null;
 
         $this->assertSame(40, $this->data->get('age'));
         $this->assertInstanceOf(NewTypeArray::class, $this->data->get('workplaces'));
         $this->assertInstanceOf(CoverArray::class, $this->data->get('workplaces'));
+        $this->assertNull($this->data->get('nullValue'));
     }
 
     /**
      * @see CoverArray::offsetGet()
      */
-    public function testOffsetGetMethod()
+    public function testOffsetGetMethod(): void
     {
         $this->assertSame('Vasiliy', $this->data['name']);
         $this->assertSame('PHP', $this->data['langs']['backend'][0]);
@@ -247,7 +249,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::offsetExists()
      */
-    public function testOffsetExistsMethod()
+    public function testOffsetExistsMethod(): void
     {
         $this->assertTrue(isset($this->data['name']));
         $this->assertFalse(isset($this->data['nonexistent']));
@@ -256,7 +258,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::offsetUnset()
      */
-    public function offsetUnset()
+    public function offsetUnset(): void
     {
         unset($this->data['name']);
         $this->assertFalse(isset($this->data['name']));
@@ -265,7 +267,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__serialize()
      */
-    public function testSerializeMethod()
+    public function testSerializeMethod(): void
     {
         $this->assertSame(
             'O:33:"Krugozor\Cover\Tests\NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}',
@@ -276,7 +278,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::__unserialize()
      */
-    public function testUnserializeMethod()
+    public function testUnserializeMethod(): void
     {
         $this->assertEquals(
             unserialize('O:33:"Krugozor\Cover\Tests\NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}'),
@@ -287,7 +289,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::reverse()
      */
-    public function testReverseMethod()
+    public function testReverseMethod(): void
     {
         $this->assertSame(['MySql', 'PHP'], $this->data->get('langs.backend')->reverse());
     }
@@ -295,7 +297,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::filter()
      */
-    public function testFilterMethod()
+    public function testFilterMethod(): void
     {
         $this->assertSame(['PHP'], $this->data->get('langs.backend')->filter(function ($value) {
             return preg_match('~P~', $value);
@@ -305,7 +307,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::implode()
      */
-    public function testImplodeMethod()
+    public function testImplodeMethod(): void
     {
         $this->assertSame('PHP, MySql', $this->data->get('langs.backend')->implode(', '));
     }
@@ -313,7 +315,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::mapAssociative()
      */
-    public function testMapAssociativeMethod()
+    public function testMapAssociativeMethod(): void
     {
         $this->assertSame(
             ['0: PHP', '1: MySql'],
@@ -326,7 +328,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::mapAssociative()
      */
-    public function testMapMethod()
+    public function testMapMethod(): void
     {
         $this->assertSame(
             ['value: PHP', 'value: MySql'],
