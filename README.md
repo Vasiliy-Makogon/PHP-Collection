@@ -182,18 +182,30 @@ string(75) "O:33:"Krugozor\Cover\Tests\NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"M
 
 Пример:
 ```php
-foreach ($data->get('langs') as $stack => $values) {
-    echo sprintf(
-        "<ul>%s (%s): %s</ul>\n",
-        $stack,
-        $values->count(),
-        $values->map(fn(string $value): string => "<li>$value</li>")->implode('')
+$value = $data->get('langs')->mapAssociative(function (string $key, CoverArray $langs) {
+    return sprintf(
+        "\n<ul>\n  %s (%s):\n%s\n</ul>",
+        $key,
+        $langs->count(),
+        $langs->map(fn(string $lang): string => "    <li>$lang</li>")->implode(PHP_EOL)
     );
-}
+})->implode('');
 ```
 Результат:
 ```
-<ul>backend (2): <li>PHP</li><li>MySql</li></ul>
-<ul>frontend (5): <li>HTML</li><li>CSS1</li><li>JavaScript</li><li>CSS2</li><li>CSS3</li></ul>
+string(190) "
+<ul>
+  backend (2):
+    <li>PHP</li>
+    <li>MySql</li>
+</ul>
+<ul>
+  frontend (5):
+    <li>HTML</li>
+    <li>CSS1</li>
+    <li>JavaScript</li>
+    <li>CSS2</li>
+    <li>CSS3</li>
+</ul>"
 ```
 
