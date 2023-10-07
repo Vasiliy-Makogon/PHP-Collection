@@ -75,7 +75,7 @@ trait Simple
     {
         if ($data) {
             foreach ($data as $key => $value) {
-                $this->$key = $value;
+                $this->data[$key] = $value;
             }
         }
 

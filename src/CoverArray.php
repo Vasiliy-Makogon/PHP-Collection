@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Krugozor\Cover;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+
 /**
  * Объектный массив.
+ *
  * @package Krugozor\Cover
  */
-class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
+class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
     use Simple;
 
@@ -38,6 +44,21 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     }
 
     /**
+     * @param iterable|null $data
+     * @return static
+     */
+    public function setData(?iterable $data): static
+    {
+        if ($data) {
+            foreach ($data as $key => $value) {
+                $this->data[$key] = $this->array2cover($value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Реализация интерфейса Countable
      *
      * @return int
@@ -50,11 +71,11 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     /**
      * Реализация интерфейса IteratorAggregate
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
-    final public function getIterator(): \ArrayIterator
+    final public function getIterator(): ArrayIterator
     {
-        return new \ArrayIterator($this->data);
+        return new ArrayIterator($this->data);
     }
 
     /**
@@ -200,6 +221,7 @@ class CoverArray implements \IteratorAggregate, \Countable, \ArrayAccess
     /**
      * Возвращает массив с элементами в обратном порядке
      *
+     * @param bool $preserve_keys
      * @return array
      * @see array_reverse
      */
