@@ -122,6 +122,18 @@ class CoverArrayTest extends TestCase
             ['PHP', 'MySql', 'C++', 'C#', 'Python', 'Ruby'],
             $this->data->get('langs.backend')->getDataAsArray()
         );
+
+        $this->assertEmpty((new NewTypeArray())->setData(null));
+        $this->assertEmpty((new NewTypeArray())->setData([]));
+    }
+
+    /**
+     * @see CoverArray::setData()
+     */
+    public function testConstructorOnEmptyValue(): void
+    {
+        $this->assertEmpty(new NewTypeArray(null));
+        $this->assertEmpty(new NewTypeArray());
     }
 
     /**
@@ -346,6 +358,26 @@ class CoverArrayTest extends TestCase
             $this->data->get('langs.backend')->map(
                 fn(string $value): string => "value: $value"
             )->getDataAsArray()
+        );
+    }
+
+    /**
+     * @see CoverArray::unique()
+     */
+    public function testUniqueMethod(): void
+    {
+        $this->data->get('langs.backend')->append('PHP');
+        $this->data->get('langs.backend')->append('PHP');
+        $this->data->get('langs.backend')->append('PHP');
+
+        $this->assertSame(
+            ['PHP', 'MySql', 'PHP', 'PHP', 'PHP'],
+            $this->data->get('langs.backend')->getDataAsArray()
+        );
+
+        $this->assertSame(
+            ['PHP', 'MySql'],
+            $this->data->get('langs.backend')->unique()->getDataAsArray()
         );
     }
 

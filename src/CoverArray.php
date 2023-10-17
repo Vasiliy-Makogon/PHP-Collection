@@ -314,6 +314,18 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Убирает повторяющиеся значения из массива
+     *
+     * @param int $flags
+     * @return $this
+     * @see array_unique
+     */
+    final public function unique(int $flags = SORT_STRING): static
+    {
+        return new static(array_unique($this->data, $flags));
+    }
+
+    /**
      * Проверяет, присутствует ли в массиве значение
      *
      * @param mixed $needle
