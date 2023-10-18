@@ -190,6 +190,8 @@ $value = $data->get('langs')->mapAssociative(function (string $key, CoverArray $
         $langs->map(fn(string $lang): string => "    <li>$lang</li>")->implode(PHP_EOL)
     );
 })->implode('');
+
+var_dump($value);
 ```
 Результат:
 ```
@@ -209,3 +211,17 @@ string(190) "
 </ul>"
 ```
 
+
+Пример:
+```php
+$value = NewTypeArray::fromExplode(',', '1,1,2,1,2,2,1,,1,,,2')
+    ->unique()
+    ->filter()
+    ->implode(',');
+
+var_dump($value);
+```
+Результат:
+```
+string(3) "1,2"
+```
