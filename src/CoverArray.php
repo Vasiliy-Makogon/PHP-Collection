@@ -339,6 +339,20 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     *  Разбивает строку с помощью разделителя и возвращает объект данных типа static
+     *
+     * @param string $separator
+     * @param string $string
+     * @param int $limit
+     * @return static
+     * @see explode
+     */
+    final public static function fromExplode(string $separator, string $string, int $limit = PHP_INT_MAX): static
+    {
+        return new static(explode($separator, $string, $limit));
+    }
+
+    /**
      * Возвращает объект текущего типа, если переданным в метод значением является массив.
      * Вложенные элементы массива так же становятся объектом текущего типа.
      *

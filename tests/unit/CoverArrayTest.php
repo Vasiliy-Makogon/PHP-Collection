@@ -382,6 +382,22 @@ class CoverArrayTest extends TestCase
     }
 
     /**
+     * @see CoverArray::fromExplode()
+     */
+    public function testFromExplodeMethod(): void
+    {
+        $o = NewTypeArray::fromExplode(',', '1,2,3');
+        $this->assertInstanceOf(NewTypeArray::class, $o);
+        $this->assertSame(['1', '2', '3'], $o->getDataAsArray());
+
+        $o = NewTypeArray::fromExplode(',', '1,2,3', 2);
+        $this->assertSame(['1', '2,3'], $o->getDataAsArray());
+
+        $this->expectException(ValueError::class);
+        NewTypeArray::fromExplode('', '1,2,3');
+    }
+
+    /**
      * @see CoverArray::in()
      */
     public function testInMethod(): void
