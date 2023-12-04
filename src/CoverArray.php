@@ -254,7 +254,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
             return $actual_data;
         }
 
-        // Попытка вызывать ключ на значении
+        // Попытка вызывать ключ на скалярном значении или на значении объекта, отличного от типа static
         if (!is_object($actual_data) || !$actual_data instanceof static) {
             return null;
         }

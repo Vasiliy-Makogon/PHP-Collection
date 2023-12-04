@@ -159,9 +159,11 @@ class CoverArrayTest extends TestCase
     public function testGetMethod(): void
     {
         $this->assertSame('PHP', $this->data->get('langs.backend.0'));
-        $this->assertSame('Vasiliy', $this->data->get('name'));
-        $this->assertNull($this->data->get('langs.backend.10'));
+        $this->assertSame('PHP', $this->data->get('langs.backend')->get('0'));
+
+        $this->assertNull($this->data->get('langs.backend.0.0'));
         $this->assertNull($this->data->get('nonexistent.nonexistent.nonexistent'));
+        $this->assertNull($this->data->get('1000.nonexistent.nonexistent.nonexistent'));
     }
 
     public function testInstanceOfSelf(): void
