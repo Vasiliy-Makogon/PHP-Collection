@@ -225,3 +225,25 @@ var_dump($value);
 ```
 string(3) "1,2"
 ```
+
+
+Пример:
+```php
+var_dump($data->get('langs.backend')->getDataAsArray());
+var_dump($data->get('langs.backend')->reverse()->getDataAsArray());
+```
+Результат:
+```
+array(2) {
+  [0]=>
+  string(3) "PHP"
+  [1]=>
+  string(5) "MySql"
+}
+array(2) {
+  [0]=>
+  string(5) "MySql"
+  [1]=>
+  string(3) "PHP"
+}
+```
