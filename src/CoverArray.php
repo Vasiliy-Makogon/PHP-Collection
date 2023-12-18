@@ -11,8 +11,6 @@ use IteratorAggregate;
 
 /**
  * Объектный массив.
- *
- * @package Krugozor\Cover
  */
 class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
@@ -222,12 +220,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Возвращает массив с элементами в обратном порядке
      *
      * @param bool $preserve_keys
-     * @return array
+     * @return static
      * @see array_reverse
      */
-    final public function reverse(bool $preserve_keys = false): array
+    final public function reverse(bool $preserve_keys = false): static
     {
-        return array_reverse($this->data, $preserve_keys);
+        return new static(array_reverse($this->data, $preserve_keys));
     }
 
     /**
@@ -245,7 +243,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
             return null;
         }
 
-        list(0 => $key, 1 => $other) = array_pad(explode('.', $path, 2), 2, null);
+        [0 => $key, 1 => $other] = array_pad(explode('.', $path, 2), 2, null);
 
         $actual_data = $this->data[$key] ?? null;
 

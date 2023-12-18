@@ -305,8 +305,8 @@ class CoverArrayTest extends TestCase
      */
     public function testReverseMethod(): void
     {
-        $this->assertSame([0 => 'MySql', 1 => 'PHP'], $this->data->get('langs.backend')->reverse(false));
-        $this->assertSame([1 => 'MySql', 0 => 'PHP'], $this->data->get('langs.backend')->reverse(true));
+        $this->assertSame([0 => 'MySql', 1 => 'PHP'], $this->data->get('langs.backend')->reverse(false)->getDataAsArray());
+        $this->assertSame([1 => 'MySql', 0 => 'PHP'], $this->data->get('langs.backend')->reverse(true)->getDataAsArray());
     }
 
     /**
