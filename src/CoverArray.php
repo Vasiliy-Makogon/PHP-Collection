@@ -286,7 +286,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Применяет callback-функцию ко всем элементам ассоциативного массива.
+     * Применяет callback-функцию ко всем элементам ассоциативного массива
+     * и возвращает новый экземпляр объекта текущего типа.
      * Пример callback: fn(string $key, string $value): string => "$key: $value"
      *
      * @param callable $callback
@@ -296,6 +297,26 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function mapAssociative(callable $callback): static
     {
         return new static(array_map($callback, array_keys($this->data), array_values($this->data)));
+    }
+
+    /**
+     *  Применяет callback-функцию ко всем элементам многомерного ассоциативного массива
+     *  и возвращает новый экземпляр объекта текущего типа.
+     *
+     * @param callable $callback callback-функция принимает два аргумента.
+     *  Первым — значение элемента массива array, а вторым — ключ или индекс элемента.
+     * @return static
+     * @see array_walk_recursive
+     */
+    final public function mapAssociativeRecursive(callable $callback): static
+    {
+        return new static((function (callable $callback, array $arr) {
+            array_walk_recursive($arr, function(&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+
+            return $arr;
+        })($callback, $this->getDataAsArray()));
     }
 
     /**

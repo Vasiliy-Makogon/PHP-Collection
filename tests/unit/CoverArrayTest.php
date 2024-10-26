@@ -37,7 +37,7 @@ class CoverArrayTest extends TestCase
      */
     public function testToStringMethod(): void
     {
-        $this->assertSame('', (string) $this->data);
+        $this->assertSame('', (string)$this->data);
     }
 
     /**
@@ -346,6 +346,19 @@ class CoverArrayTest extends TestCase
             ['0: PHP', '1: MySql'],
             $this->data->get('langs.backend')->mapAssociative(
                 fn(string $key, string $value): string => "$key: $value"
+            )->getDataAsArray()
+        );
+    }
+
+    /**
+     * @see CoverArray::mapAssociativeRecursive()
+     */
+    public function testMapAssociativeRecursiveMethod(): void
+    {
+        $this->assertSame(
+            ['backend' => ['0: PHP', '1: MySql'], 'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']],
+            $this->data->get('langs')->mapAssociativeRecursive(
+                fn(mixed $v, mixed $k): string => "$k: $v"
             )->getDataAsArray()
         );
     }
