@@ -6,6 +6,8 @@ namespace Krugozor\Cover;
 
 /**
  * @package Krugozor\Cover
+ * @author Vasiliy Makogon
+ * @link https://github.com/Vasiliy-Makogon/Cover
  */
 trait Simple
 {
@@ -48,8 +50,8 @@ trait Simple
     }
 
     /**
-     * Возвращает элемент коллекции с заданным индексом в качестве результата.
-     * Аналог __get, но предназначен для числовых индексов.
+     * Returns the collection element with the given index as the result.
+     * Similar to the __get method, but intended for numeric indices.
      *
      * @param int|string $key
      * @return mixed

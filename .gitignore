@@ -3,3 +3,4 @@
 /vendor
 /.phpunit.cache
 /html-coverage
+/src/test.php

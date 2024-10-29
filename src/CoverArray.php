@@ -8,23 +8,29 @@ use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use Traversable;
+use ValueError;
 
 /**
- * Объектный массив.
+ * @package Krugozor\Cover
+ * @author Vasiliy Makogon
+ * @link https://github.com/Vasiliy-Makogon/Cover
  */
 class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
     use Simple;
 
     /**
-     * @param array|null $data
+     * @param iterable|null $data
      */
-    public function __construct(?array $data = null)
+    public function __construct(?iterable $data = null)
     {
         $this->setData($data);
     }
 
     /**
+     * Override this method as you see fit.
+     *
      * @return string
      */
     public function __toString()
@@ -35,6 +41,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     /**
      * @param string $key
      * @param mixed $value
+     * @see Simple
      */
     public function __set(string $key, mixed $value): void
     {
@@ -57,107 +64,32 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Реализация интерфейса Countable
+     * Implementing the Countable interface.
      *
      * @return int
      */
-    final public function count(): int
+    public function count(): int
     {
         return count($this->data);
     }
 
     /**
-     * Реализация интерфейса IteratorAggregate
+     * Implementing the IteratorAggregate interface.
      *
-     * @return ArrayIterator
+     * @return Traversable
      */
-    final public function getIterator(): ArrayIterator
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->data);
     }
 
     /**
-     * Присоединяет один элемент в начало массива.
-     *
-     * @param mixed ...$args
-     * @return static
-     */
-    final public function prepend(mixed ...$args): static
-    {
-        foreach ($args as $value) {
-            array_unshift($this->data, $this->array2cover($value));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Присоединяет один или более элементов в конец массива.
-     *
-     * @param mixed ...$args
-     * @return static
-     */
-    final public function append(mixed ...$args): static
-    {
-        foreach ($args as $value) {
-            array_push($this->data, $this->array2cover($value));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Возвращает последний элемент массива.
-     *
-     * @return mixed
-     */
-    final public function getLast(): mixed
-    {
-        $last = end($this->data);
-        reset($this->data);
-
-        return $last;
-    }
-
-    /**
-     * Возвращает первый элемент массива.
-     *
-     * @return mixed
-     */
-    final public function getFirst(): mixed
-    {
-        reset($this->data);
-        $first = current($this->data);
-        reset($this->data);
-
-        return $first;
-    }
-
-    /**
-     * Возвращает данные объекта как массив.
-     *
-     * @return array
-     */
-    final public function getDataAsArray(): array
-    {
-        $data = [];
-
-        foreach ($this->getData() as $key => $value) {
-            $data[$key] = is_object($value) && $value instanceof static
-                ? $value->{__FUNCTION__}()
-                : $value;
-        }
-
-        return $data;
-    }
-
-    /**
-     * Реализация метода интерфейса ArrayAccess::offsetSet.
+     * Implementation of the ArrayAccess::offsetSet interface method.
      *
      * @param mixed $offset
      * @param mixed $value
      */
-    final public function offsetSet(mixed $offset, mixed $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if (is_null($offset)) {
             $this->data[] = $this->array2cover($value);
@@ -167,37 +99,37 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Реализация метода интерфейса ArrayAccess::offsetExists.
+     * Implementation of the ArrayAccess::offsetGet interface method.
+     *
+     * @param mixed $offset
+     * @return mixed
+     */
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->data[$offset] ?? null;
+    }
+
+    /**
+     * Implementation of the ArrayAccess::offsetExists interface method.
      *
      * @param mixed $offset
      * @return bool
      */
-    final public function offsetExists(mixed $offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->data[$offset]);
     }
 
     /**
-     * Реализация метода интерфейса ArrayAccess::offsetUnset.
+     * Implementation of the ArrayAccess::offsetUnset interface method.
      *
      * @param mixed $offset
      */
-    final public function offsetUnset(mixed $offset): void
+    public function offsetUnset(mixed $offset): void
     {
         if (isset($this->data[$offset])) {
             unset($this->data[$offset]);
         }
-    }
-
-    /**
-     * Реализация метода интерфейса ArrayAccess::offsetGet.
-     *
-     * @param mixed $offset
-     * @return mixed
-     */
-    final public function offsetGet(mixed $offset): mixed
-    {
-        return $this->data[$offset] ?? null;
     }
 
     /**
@@ -217,20 +149,24 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Возвращает массив с элементами в обратном порядке
+     * Returns the current object's data as a native PHP array.
      *
-     * @param bool $preserve_keys
-     * @return static
-     * @see array_reverse
+     * @return array
      */
-    final public function reverse(bool $preserve_keys = false): static
+    final public function getDataAsArray(): array
     {
-        return new static(array_reverse($this->data, $preserve_keys));
+        $data = [];
+
+        foreach ($this->getData() as $key => $value) {
+            $data[$key] = $value instanceof static ? $value->{__FUNCTION__}() : $value;
+        }
+
+        return $data;
     }
 
     /**
-     * Возвращает данные по ключам многомерных массивов через dot-нотацию.
-     * Пример:
+     * Returns data by keys of the current object using dot notation.
+     * Example:
      *    $cover->get('prop.prop2.prop3');
      *    $cover->get('prop.prop2.0');
      *
@@ -247,12 +183,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
         $actual_data = $this->data[$key] ?? null;
 
-        // Закончились ключи в цепочке следования
+        // The keys in the chain of succession have run out.
         if ($other === null) {
             return $actual_data;
         }
 
-        // Попытка вызывать ключ на скалярном значении или на значении объекта, отличного от типа static
+        // Attempting to invoke key on a scalar value or on an object value other than static
         if (!is_object($actual_data) || !$actual_data instanceof static) {
             return null;
         }
@@ -261,7 +197,195 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Фильтрует элементы массива с помощью callback-функции
+     * Splits a string using a separator and returns a new instance of an object of the specified (static) type.
+     *
+     * @param string $separator
+     * @param string $string
+     * @param int $limit
+     * @return static
+     * @throws ValueError
+     * @see explode
+     */
+    final public static function fromExplode(string $separator, string $string, int $limit = PHP_INT_MAX): static
+    {
+        return new static(explode($separator, $string, $limit));
+    }
+
+    /**
+     * Concatenates the elements of an object of the current type into a string.
+     *
+     * @param string $separator
+     * @return string
+     * @see implode
+     */
+    final public function implode(string $separator): string
+    {
+        return implode($separator, $this->data);
+    }
+
+    /**
+     * Analogue of the PHP function array_change_key_case
+     *
+     * @param int $case
+     * @return static
+     * @see array_change_key_case
+     */
+    final public function changeKeyCase(int $case = CASE_LOWER): static
+    {
+        return new static(array_change_key_case($this->data, $case));
+    }
+
+    /**
+     * Analogue of the PHP function chunk
+     *
+     * @param int $length
+     * @param bool $preserve_keys
+     * @return static
+     * @throws ValueError
+     * @see array_chunk
+     */
+    final public function chunk(int $length, bool $preserve_keys = false): static
+    {
+        $data = new static;
+        foreach (array_chunk($this->data, $length, $preserve_keys) as $item) {
+            $data->append($item);
+        }
+        return $data;
+    }
+
+    /**
+     * Analogue of the PHP function column
+     *
+     * @param int|string|null $column_key
+     * @param int|string|null $index_key
+     * @return static
+     * @see array_column
+     */
+    final public function column(int|string|null $column_key, int|string|null $index_key = null): static
+    {
+        return new static(array_column($this->data, $column_key, $index_key));
+    }
+
+    /**
+     * An analogue of the PHP function combine, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class
+     *
+     * @param CoverArray|array $keys
+     * @param CoverArray|array $values
+     * @return $this
+     */
+    final public static function combine(CoverArray|array $keys, CoverArray|array $values): static
+    {
+        return new static(array_combine(
+            (new static($keys))->getDataAsArray(),
+            (new static($values))->getDataAsArray()
+        ));
+    }
+
+
+
+
+
+    /**
+     * Analogue of the PHP function array_keys
+     *
+     * @param mixed $filter_value
+     * @param bool $strict
+     * @return static
+     * @see array_keys
+     */
+    final public function keys(mixed $filter_value = null, bool $strict = false): static
+    {
+        return new static(
+            $filter_value !== null && $strict
+                ? array_keys($this->data, $filter_value, $strict)
+                : array_keys($this->data)
+        );
+    }
+
+    /**
+     * Analogue of the PHP function array_values
+     *
+     * @return static
+     * @see array_values
+     */
+    final public function values(): static
+    {
+        return new static(array_values($this->data));
+    }
+
+
+    /**
+     * Appends one element to the beginning of the current object.
+     *
+     * @param mixed ...$args
+     * @return static
+     */
+    final public function prepend(mixed ...$args): static
+    {
+        foreach ($args as $value) {
+            array_unshift($this->data, $this->array2cover($value));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Appends one or more elements to the end of the current object.
+     *
+     * @param mixed ...$args
+     * @return static
+     */
+    final public function append(mixed ...$args): static
+    {
+        foreach ($args as $value) {
+            $this->data[] = $this->array2cover($value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns the last element of the current object.
+     *
+     * @return mixed
+     */
+    final public function getLast(): mixed
+    {
+        $last = end($this->data);
+        reset($this->data);
+
+        return $last;
+    }
+
+    /**
+     * Returns the first element of the current object.
+     *
+     * @return mixed
+     */
+    final public function getFirst(): mixed
+    {
+        reset($this->data);
+        $first = current($this->data);
+        reset($this->data);
+
+        return $first;
+    }
+
+    /**
+     * Creates and returns an object of the current type with its elements in reverse order.
+     *
+     * @param bool $preserve_keys
+     * @return static
+     * @see array_reverse
+     */
+    final public function reverse(bool $preserve_keys = false): static
+    {
+        return new static(array_reverse($this->data, $preserve_keys));
+    }
+
+    /**
+     * Creates and returns an object of the current type with a set of data filtered by the callback function.
      *
      * @param callable|null $callback
      * @param int $mode
@@ -274,44 +398,32 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Объединяет элементы массива в строку
-     *
-     * @param string $separator
-     * @return string
-     * @see implode
-     */
-    final public function implode(string $separator): string
-    {
-        return implode($separator, $this->data);
-    }
-
-    /**
-     * Применяет callback-функцию ко всем элементам ассоциативного массива
-     * и возвращает новый экземпляр объекта текущего типа.
-     * Пример callback: fn(string $key, string $value): string => "$key: $value"
+     * Applies a callback function to all elements of an object of the current type and
+     * returns a new instance of an object of the current type.
+     * Example of a callback function: fn(string $key, string $value): string => "$key: $value"
      *
      * @param callable $callback
      * @return static
      * @see array_map
      */
-    final public function mapAssociative(callable $callback): static
+    final public function map(callable $callback): static
     {
         return new static(array_map($callback, array_keys($this->data), array_values($this->data)));
     }
 
     /**
-     *  Применяет callback-функцию ко всем элементам многомерного ассоциативного массива
-     *  и возвращает новый экземпляр объекта текущего типа.
+     * Applies a callback function to all elements of a multidimensional object of the current type and
+     * returns a new instance of the object of the current type.
      *
-     * @param callable $callback callback-функция принимает два аргумента.
-     *  Первым — значение элемента массива array, а вторым — ключ или индекс элемента.
+     * @param callable $callback The callback function takes two arguments.
+     * The first is the value of the array element, and the second is the key or index of the element.
      * @return static
      * @see array_walk_recursive
      */
-    final public function mapAssociativeRecursive(callable $callback): static
+    final public function mapRecursive(callable $callback): static
     {
         return new static((function (callable $callback, array $arr) {
-            array_walk_recursive($arr, function(&$v, $k) use ($callback) {
+            array_walk_recursive($arr, function (&$v, $k) use ($callback) {
                 $v = $callback($v, $k);
             });
 
@@ -320,20 +432,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Применяет callback-функцию ко всем элементам массива.
-     * Пример callback: fn(string $value): string => "value: $value"
-     *
-     * @param callable $callback
-     * @return static
-     * @see array_map
-     */
-    final public function map(callable $callback): static
-    {
-        return new static(array_map($callback, $this->data));
-    }
-
-    /**
-     * Убирает повторяющиеся значения из массива
+     * Removes duplicate values from the elements of an object of the current type and
+     * returns a new instance of an object of the current type.
      *
      * @param int $flags
      * @return $this
@@ -345,7 +445,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Проверяет, присутствует ли в массиве значение
+     * Checks if the specified value is present in the object.
      *
      * @param mixed $needle
      * @param bool $strict
@@ -358,22 +458,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     *  Разбивает строку с помощью разделителя и возвращает объект данных типа static
-     *
-     * @param string $separator
-     * @param string $string
-     * @param int $limit
-     * @return static
-     * @see explode
-     */
-    final public static function fromExplode(string $separator, string $string, int $limit = PHP_INT_MAX): static
-    {
-        return new static(explode($separator, $string, $limit));
-    }
-
-    /**
-     * Возвращает объект текущего типа, если переданным в метод значением является массив.
-     * Вложенные элементы массива так же становятся объектом текущего типа.
+     * Returns a new instance of an object of the current type if the value passed to the method is an array.
+     * Nested array elements also become an object of the current type.
      *
      * @param mixed $value
      * @return mixed
