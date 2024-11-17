@@ -1,19 +1,20 @@
 # Объектный массив на PHP (PHP-коллекция)
 
-`CoverArray` - базовый класс для удобной и гибкой работы с массивами в объектно-ориентированном
+`CoverArray` - набор классов для удобной и гибкой работы с массивами в объектно-ориентированном
 представлении. Фактически, это "объектный массив", которого так не хватает в PHP.
+
+В классе реализована масса функций и сюда же постепенно добавляются **реализации ВСЕХ встроенных функций PHP по работе с массивами**!
 
 ## Как это работает?
 
 Вы можете создать класс, наследуемый от `CoverArray` или использовать `CoverArray` без наследования.
-Создадим класс нового типа, наследуемый от базового класса `CoverArray`:
+Для наглядности создадим класс нового типа, наследуемый от базового класса `CoverArray`:
 
 ```php
-class NewTypeArray extends CoverArray
-{}
+class NewTypeArray extends CoverArray {}
 ```
 
-Примечание: в данном примере, как и в тестах, используется тип данных `NewTypeArray`,
+Примечание: в данном примере, как и в unit-тестах, используется тип данных `NewTypeArray`,
 наследуемый от `CoverArray`. Это сделано для того, что бы продемонстрировать гибкость данного решения.
 Объектов, производных от `CoverArray`, в программе может быть много, они могут отличаться на концептуальном уровне.
 Например, объекты класса `CoverArray` можно использовать просто как "объектный массив"
@@ -29,10 +30,12 @@ function foo(NewTypeArray $data) {}
 получится:
 
 ```php
+class NewTypeArray extends CoverArray {}
+
 $data = new NewTypeArray([
     'firstName' => 'Vasiliy',
     'lastName' => 'Ivanov',
-    'langs' => [
+    'languages' => [
         'backend' => ['PHP', 'MySql'],
         'frontend' => ['HTML', 'CSS1', 'JavaScript', 'CSS2', 'CSS3']
     ],
@@ -44,19 +47,19 @@ var_dump($data);
 Результат:
 
 ```
-object(Krugozor\Cover\Tests\NewTypeArray)#4 (1) {
+object(NewTypeArray)#2 (1) {
   ["data":protected]=>
   array(3) {
     ["firstName"]=>
     string(7) "Vasiliy"
     ["lastName"]=>
     string(6) "Ivanov"
-    ["langs"]=>
-    object(Krugozor\Cover\Tests\NewTypeArray)#5 (1) {
+    ["languages"]=>
+    object(NewTypeArray)#4 (1) {
       ["data":protected]=>
       array(2) {
         ["backend"]=>
-        object(Krugozor\Cover\Tests\NewTypeArray)#6 (1) {
+        object(NewTypeArray)#5 (1) {
           ["data":protected]=>
           array(2) {
             [0]=>
@@ -66,17 +69,17 @@ object(Krugozor\Cover\Tests\NewTypeArray)#4 (1) {
           }
         }
         ["frontend"]=>
-        object(Krugozor\Cover\Tests\NewTypeArray)#7 (1) {
+        object(NewTypeArray)#6 (1) {
           ["data":protected]=>
           array(5) {
             [0]=>
             string(4) "HTML"
             [1]=>
-            string(5) "CSS1"
+            string(4) "CSS1"
             [2]=>
             string(10) "JavaScript"
             [3]=>
-            string(5) "CSS2"
+            string(4) "CSS2"
             [4]=>
             string(4) "CSS3"
           }
@@ -88,16 +91,16 @@ object(Krugozor\Cover\Tests\NewTypeArray)#4 (1) {
 ```
 
 Как видно, все переданные в конструктор массивы рекурсивно преобразовались в объекты типа `NewTypeArray`.
-Это поведение гарантирует, что любой массив, попадающий в хранилище, получит "обложку" (cover) в виде типа текущего класса.
+Это поведение гарантирует, что **любой массив, попадающий в хранилище, получит "обложку" в виде типа текущего класса**.
 Данные всех созданных объектов аккуратно сложились в protected-свойства `$data`, что обеспечивает инкапсуляцию данных
 и возможность реализации любых методов над ними.
 
-## Давайте попробуем поработать с данными созданного выше объекта:
+## Давайте попробуем поработать с данными созданного выше объекта (малая доля возможных примеров):
 
-### Пример:
+#### Пример:
 ```php
 $value = $data
-    ->get('langs.frontend')
+    ->get('languages.frontend')
     ->filter(function ($value) {
         return preg_match('~CSS~', $value);
     })
@@ -107,15 +110,14 @@ var_dump($value);
 ```
 Результат:
 ```
-string(18) "CSS1, CSS2, CSS3"
+string(16) "CSS1, CSS2, CSS3"
 ```
 
-## Возможности
 
-### Пример:
+#### Пример:
 ```php
 $value = $data
-    ->get('langs.frontend')
+    ->get('languages.frontend')
     ->append('HTML 5', 'jQuey')
     ->getDataAsArray();
 
@@ -127,11 +129,11 @@ array(7) {
   [0]=>
   string(4) "HTML"
   [1]=>
-  string(5) "CSS1"
+  string(4) "CSS1"
   [2]=>
   string(10) "JavaScript"
   [3]=>
-  string(5) "CSS2"
+  string(4) "CSS2"
   [4]=>
   string(4) "CSS3"
   [5]=>
@@ -142,13 +144,13 @@ array(7) {
 ```
 
 
-### Пример:
+#### Пример:
 ```php
-var_dump($data['langs']['backend'][0]);
-var_dump($data->langs->backend->item(0));
-var_dump($data->get('langs.backend.0'));
-var_dump($data->get('langs')->item('backend')[0]);
-var_dump($data->get('langs')['backend']->item(0));
+var_dump($data['languages']['backend'][0]);
+var_dump($data->languages->backend->item(0));
+var_dump($data->get('languages.backend.0'));
+var_dump($data->get('languages')->item('backend')[0]);
+var_dump($data->get('languages')['backend']->item(0));
 ```
 Результат:
 ```
@@ -160,10 +162,10 @@ string(3) "PHP"
 ```
 
 
-### Пример:
+#### Пример:
 ```php
-var_dump($data->get('langs.backend')->getFirst());
-var_dump($data->get('langs.backend')->getLast());
+var_dump($data->get('languages.backend')->getFirst());
+var_dump($data->get('languages.backend')->getLast());
 ```
 Результат:
 ```
@@ -172,49 +174,54 @@ string(5) "MySql"
 ```
 
 
-### Пример:
+#### Пример:
 ```php
-var_dump(serialize($data->get('langs.backend')));
+var_dump(serialize($data->get('languages.backend')));
 ```
 Результат:
 ```
-string(75) "O:33:"Krugozor\Cover\Tests\NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
+string(54) "O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
 ```
 
 
-### Пример:
+#### Пример:
 ```php
-$value = $data->get('langs')->mapAssociative(function (string $key, CoverArray $langs) {
+$value = $data->get('languages')->map(function (string $key, CoverArray $languages) {
     return sprintf(
-        "\n<ul>\n  %s (%s):\n%s\n</ul>",
+        "\n\t<li>%s (%s):\n\t%s\n\t</li>",
         $key,
-        $langs->count(),
-        $langs->map(fn(string $lang): string => "    <li>$lang</li>")->implode(PHP_EOL)
+        $languages->count(),
+        $languages->map(
+            fn(string $key, $value): string => "\t<li>$value</li>"
+        )->implode("\n\t")
     );
-})->implode('');
+})
+    ->prepend("\n<ul>")
+    ->append("\n</ul>")
+    ->implode('');
 
 var_dump($value);
 ```
 Результат:
 ```
-string(190) "
+string(180) "
 <ul>
-  backend (2):
-    <li>PHP</li>
-    <li>MySql</li>
-</ul>
-<ul>
-  frontend (5):
-    <li>HTML</li>
-    <li>CSS1</li>
-    <li>JavaScript</li>
-    <li>CSS2</li>
-    <li>CSS3</li>
+        <li>backend (2):
+                <li>PHP</li>
+                <li>MySql</li>
+        </li>
+        <li>frontend (5):
+                <li>HTML</li>
+                <li>CSS1</li>
+                <li>JavaScript</li>
+                <li>CSS2</li>
+                <li>CSS3</li>
+        </li>
 </ul>"
 ```
 
 
-### Пример:
+#### Пример:
 ```php
 $value = NewTypeArray::fromExplode(',', '1,1,2,1,2,2,1,,1,,,2')
     ->unique()
@@ -229,10 +236,10 @@ string(3) "1,2"
 ```
 
 
-### Пример:
+#### Пример:
 ```php
-var_dump($data->get('langs.backend')->getDataAsArray());
-var_dump($data->get('langs.backend')->reverse()->getDataAsArray());
+var_dump($data->get('languages.backend')->getDataAsArray());
+var_dump($data->get('languages.backend')->reverse()->getDataAsArray());
 ```
 Результат:
 ```
@@ -250,8 +257,68 @@ array(2) {
 }
 ```
 
-## API
+
+#### Пример:
 ```php
-CoverArrayCoverArray::__construct($array)
+var_dump($data->get('languages.backend')->in('PHP'));
 ```
-Создание объекта-обёртки
+Результат:
+```
+bool(true)
+```
+
+
+#### Пример:
+```php
+$value = $data->get('languages.frontend')->diff(
+    ['HTML'],
+    ['CSS1', 'CSS2', 'CSS3']
+);
+
+var_dump($value);
+```
+Результат:
+```
+object(NewTypeArray)#7 (1) {
+  ["data":protected]=>
+  array(1) {
+    [2]=>
+    string(10) "JavaScript"
+  }
+}
+```
+
+
+#### Пример:
+```php
+$value = $data->get('languages')->mapRecursive(
+    fn(mixed $v, mixed $k): string => "$k: $v"
+)->getDataAsArray();
+
+var_dump($value);
+```
+Результат:
+```
+array(2) {
+  ["backend"]=>
+  array(2) {
+    [0]=>
+    string(6) "0: PHP"
+    [1]=>
+    string(8) "1: MySql"
+  }
+  ["frontend"]=>
+  array(5) {
+    [0]=>
+    string(7) "0: HTML"
+    [1]=>
+    string(7) "1: CSS1"
+    [2]=>
+    string(13) "2: JavaScript"
+    [3]=>
+    string(7) "3: CSS2"
+    [4]=>
+    string(7) "4: CSS3"
+  }
+}
+```
