@@ -1,12 +1,13 @@
 {
     "name":"krugozor/cover",
-    "description": "PHP Array Object",
+    "description": "PHP Array Object (PHP collection)",
     "type":"library",
     "keywords": [
         "cover array",
         "php array cover",
         "array object",
         "php array object",
+        "php array collection",
         "ArrayObject",
         "array wrapper",
         "php array wrapper",
