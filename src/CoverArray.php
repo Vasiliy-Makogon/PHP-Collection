@@ -223,7 +223,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function array_change_key_case
+     * Changes the case of all keys in an array.
+     * Analogue of the PHP function array_change_key_case.
      *
      * @param int $case
      * @return static
@@ -235,7 +236,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function chunk
+     * Split an array into chunks.
+     * Analogue of the PHP function chunk.
      *
      * @param int $length
      * @param bool $preserve_keys
@@ -254,7 +256,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function column
+     * Return the values from a single column in the input array.
+     * Analogue of the PHP function column.
      *
      * @param int|string|null $column_key
      * @param int|string|null $index_key
@@ -267,8 +270,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Creates an array by using one array for keys and another for its values.
      * An analogue of the PHP function combine, but accepts not only arrays as arguments,
-     * but also objects derived from the CoverArray class
+     * but also objects derived from the CoverArray class.
      *
      * @param CoverArray|array $keys
      * @param CoverArray|array $values
@@ -284,8 +288,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Counts the occurrences of each distinct value in an array.
      * An analogue of the PHP function array_count_values, but accepts not only arrays as arguments,
-     * but also objects derived from the CoverArray class
+     * but also objects derived from the CoverArray class.
      *
      * @param CoverArray|array $array
      * @return static
@@ -299,8 +304,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Computes the difference of arrays.
      * An analogue of the PHP function array_diff, but accepts not only arrays as arguments,
-     * but also objects derived from the CoverArray class
+     * but also objects derived from the CoverArray class.
      *
      * @param CoverArray|array ...$arrays
      * @return static
@@ -324,7 +330,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
 
     /**
-     * Analogue of the PHP function array_keys
+     * Return all the keys or a subset of the keys of an array.
+     * Analogue of the PHP function array_keys.
      *
      * @param mixed $filter_value
      * @param bool $strict
@@ -341,7 +348,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function array_values
+     * Return all the values of an array.
+     * Analogue of the PHP function array_values.
      *
      * @return static
      * @see array_values
@@ -353,7 +361,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
 
     /**
-     * Appends one element to the beginning of the current object.
+     * Prepend one or more elements to the beginning of an array.
+     * Analogue of the PHP function array_unshift.
      *
      * @param mixed ...$args
      * @return static
@@ -368,8 +377,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Appends one element to the beginning of the current object.
-     * prepend() method alias
+     * Prepend one or more elements to the beginning of an array.
+     * prepend() method alias.
      *
      * @param mixed ...$args
      * @return static
@@ -381,7 +390,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Appends one or more elements to the end of the current object.
+     * Push one or more elements onto the end of array.
+     * Analogue of the PHP function array_push.
      *
      * @param mixed ...$args
      * @return static
@@ -396,7 +406,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Appends one or more elements to the end of the current object.
+     * Push one or more elements onto the end of array.
      * append() method alias
      *
      * @param mixed ...$args
@@ -409,7 +419,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Returns the last element of the current object.
+     * Returns the last element of the current array.
      *
      * @return mixed
      */
@@ -424,7 +434,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Returns the first element of the current object.
+     * Returns the first element of the current array.
      *
      * @return mixed
      */
@@ -438,7 +448,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function array_reverse
+     * Return an array with elements in reverse order.
+     * Analogue of the PHP function array_reverse.
      *
      * @param bool $preserve_keys
      * @return static
@@ -450,7 +461,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function array_filter
+     * Filters elements of an array using a callback function.
+     * Analogue of the PHP function array_filter.
      *
      * @param callable|null $callback
      * @param int $mode
@@ -465,7 +477,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     /**
      * Applies a callback function to all elements of an object of the current type and
      * returns a new instance of an object of the current type.
-     * Example of a callback function: fn(string $key, string $value): string => "$key: $value"
+     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
      *
      * @param callable $callback
      * @return static
@@ -473,12 +485,13 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function map(callable $callback): static
     {
-        return new static(array_map($callback, array_keys($this->data), array_values($this->data)));
+        return new static(array_map($callback, array_values($this->data), array_keys($this->data)));
     }
 
     /**
      * Applies a callback function to all elements of a multidimensional object of the current type and
      * returns a new instance of the object of the current type.
+     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
      *
      * @param callable $callback The callback function takes two arguments.
      * The first is the value of the array element, and the second is the key or index of the element.
@@ -497,7 +510,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function array_unique
+     * Removes duplicate values from an array.
+     * Analogue of the PHP function array_unique.
      *
      * @param int $flags
      * @return static
@@ -509,7 +523,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Analogue of the PHP function in_array
+     * Checks if a value exists in an array.
+     * Analogue of the PHP function in_array.
      *
      * @param mixed $needle
      * @param bool $strict

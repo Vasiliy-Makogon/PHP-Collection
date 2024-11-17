@@ -539,7 +539,7 @@ class CoverArrayTest extends TestCase
         $this->assertSame(
             ['0: PHP', '1: MySql'],
             $this->data->get('languages.backend')->map(
-                fn(string $key, string $value): string => "$key: $value"
+                fn(mixed $value, mixed $key): string => "$key: $value"
             )->getDataAsArray()
         );
     }
@@ -552,7 +552,7 @@ class CoverArrayTest extends TestCase
         $this->assertSame(
             ['backend' => ['0: PHP', '1: MySql'], 'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']],
             $this->data->get('languages')->mapRecursive(
-                fn(mixed $v, mixed $k): string => "$k: $v"
+                fn(mixed $value, mixed $key): string => "$key: $value"
             )->getDataAsArray()
         );
     }

@@ -3,6 +3,10 @@
 Набор классов для удобной и гибкой работы с массивами в объектно-ориентированном
 представлении. Фактически, это "объектный массив", которого так не хватает в PHP.
 
+## Требования
+
+PHP >= 8.0
+
 ## Установка
 
 ```
@@ -201,14 +205,12 @@ string(54) "O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
 
 #### Пример:
 ```php
-$value = $data->get('languages')->map(function (string $key, CoverArray $languages) {
+$value = $data->get('languages')->map(function (CoverArray $languages, string $key) {
     return sprintf(
         "\n\t<li>%s (%s):\n\t%s\n\t</li>",
         $key,
         $languages->count(),
-        $languages->map(
-            fn(string $key, $value): string => "\t<li>$value</li>"
-        )->implode("\n\t")
+        $languages->map(fn($value): string => "\t<li>$value</li>")->implode("\n\t")
     );
 })
     ->prepend("\n<ul>")
@@ -312,7 +314,7 @@ array(1) {
 #### Пример:
 ```php
 $value = $data->get('languages')->mapRecursive(
-    fn(mixed $v, mixed $k): string => "$k: $v"
+    fn(mixed $value, mixed $key): string => "$key: $value"
 )->getDataAsArray();
 
 var_dump($value);
