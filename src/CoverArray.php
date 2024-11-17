@@ -156,9 +156,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function getDataAsArray(): array
     {
         $data = [];
-
         foreach ($this->getData() as $key => $value) {
-            $data[$key] = $value instanceof static ? $value->{__FUNCTION__}() : $value;
+            $data[$key] = is_a($value, self::class) ? $value->{__FUNCTION__}() : $value;
         }
 
         return $data;
@@ -171,7 +170,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *    $cover->get('prop.prop2.0');
      *
      * @param string $path
-     * @return mixed
+     * @return mixed|static
      */
     final public function get(string $path): mixed
     {
@@ -198,6 +197,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
     /**
      * Splits a string using a separator and returns a new instance of an object of the specified (static) type.
+     * Analogue of the PHP function explode
      *
      * @param string $separator
      * @param string $string
@@ -250,6 +250,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         foreach (array_chunk($this->data, $length, $preserve_keys) as $item) {
             $data->append($item);
         }
+
         return $data;
     }
 
@@ -272,7 +273,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param CoverArray|array $keys
      * @param CoverArray|array $values
-     * @return $this
+     * @return static
+     * @see array_combine
      */
     final public static function combine(CoverArray|array $keys, CoverArray|array $values): static
     {
@@ -282,7 +284,44 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         ));
     }
 
+    /**
+     * An analogue of the PHP function array_count_values, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class
+     *
+     * @param CoverArray|array $array
+     * @return static
+     * @see array_count_values
+     */
+    final public static function countValues(CoverArray|array $array): static
+    {
+        return new static(array_count_values(
+            (new static($array))->getDataAsArray()
+        ));
+    }
 
+    /**
+     * An analogue of the PHP function array_diff, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff
+     */
+    final public function diff(CoverArray|array ...$arrays): static
+    {
+        return new static(array_diff(
+            $this->data,
+            ...(new static($arrays))->getDataAsArray()
+        ));
+    }
+
+
+        ////
+    ///
+    ///
+    ///
+    ///
+    ///
 
 
 
@@ -331,6 +370,19 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * Appends one element to the beginning of the current object.
+     * prepend() method alias
+     *
+     * @param mixed ...$args
+     * @return static
+     * @see static::prepend()
+     */
+    final public function unshift(mixed ...$args): static
+    {
+        return $this->prepend(...$args);
+    }
+
+    /**
      * Appends one or more elements to the end of the current object.
      *
      * @param mixed ...$args
@@ -343,6 +395,19 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         }
 
         return $this;
+    }
+
+    /**
+     * Appends one or more elements to the end of the current object.
+     * append() method alias
+     *
+     * @param mixed ...$args
+     * @return static
+     * @see static::append()
+     */
+    final public function push(mixed ...$args): static
+    {
+        return $this->append(...$args);
     }
 
     /**
@@ -462,7 +527,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Nested array elements also become an object of the current type.
      *
      * @param mixed $value
-     * @return mixed
+     * @return mixed|static
      */
     final protected function array2cover(mixed $value): mixed
     {
