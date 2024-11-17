@@ -196,7 +196,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Splits a string using a separator and returns a new instance of an object of the specified (static) type.
      * Analogue of the PHP function explode
      *
      * @param string $separator
@@ -212,7 +211,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Concatenates the elements of an object of the current type into a string.
+     * Analogue of the PHP function implode
      *
      * @param string $separator
      * @return string
@@ -316,13 +315,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
 
-        ////
+    ////
     ///
     ///
     ///
     ///
     ///
-
 
 
     /**
@@ -417,10 +415,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function getLast(): mixed
     {
-        $last = end($this->data);
-        reset($this->data);
+        if ($this->count() && ($lastElement = end($this->data)) !== null) {
+            reset($this->data);
+            return $lastElement;
+        }
 
-        return $last;
+        return null;
     }
 
     /**
@@ -430,15 +430,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function getFirst(): mixed
     {
-        reset($this->data);
-        $first = current($this->data);
-        reset($this->data);
+        if ($this->count() && ($firstElement = reset($this->data)) !== null) {
+            return $firstElement;
+        }
 
-        return $first;
+        return null;
     }
 
     /**
-     * Creates and returns an object of the current type with its elements in reverse order.
+     * Analogue of the PHP function array_reverse
      *
      * @param bool $preserve_keys
      * @return static
@@ -450,7 +450,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Creates and returns an object of the current type with a set of data filtered by the callback function.
+     * Analogue of the PHP function array_filter
      *
      * @param callable|null $callback
      * @param int $mode
@@ -497,11 +497,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Removes duplicate values from the elements of an object of the current type and
-     * returns a new instance of an object of the current type.
+     * Analogue of the PHP function array_unique
      *
      * @param int $flags
-     * @return $this
+     * @return static
      * @see array_unique
      */
     final public function unique(int $flags = SORT_STRING): static
@@ -510,7 +509,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Checks if the specified value is present in the object.
+     * Analogue of the PHP function in_array
      *
      * @param mixed $needle
      * @param bool $strict
