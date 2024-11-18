@@ -203,7 +203,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param int $limit
      * @return static
      * @throws ValueError
-     * @see explode
+     * @see explode()
      */
     final public static function fromExplode(string $separator, string $string, int $limit = PHP_INT_MAX): static
     {
@@ -215,7 +215,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param string $separator
      * @return string
-     * @see implode
+     * @see implode()
      */
     final public function implode(string $separator): string
     {
@@ -228,7 +228,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param int $case
      * @return static
-     * @see array_change_key_case
+     * @see array_change_key_case()
      */
     final public function changeKeyCase(int $case = CASE_LOWER): static
     {
@@ -243,7 +243,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param bool $preserve_keys
      * @return static
      * @throws ValueError
-     * @see array_chunk
+     * @see array_chunk()
      */
     final public function chunk(int $length, bool $preserve_keys = false): static
     {
@@ -262,7 +262,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param int|string|null $column_key
      * @param int|string|null $index_key
      * @return static
-     * @see array_column
+     * @see array_column()
      */
     final public function column(int|string|null $column_key, int|string|null $index_key = null): static
     {
@@ -277,7 +277,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param CoverArray|array $keys
      * @param CoverArray|array $values
      * @return static
-     * @see array_combine
+     * @see array_combine()
      */
     final public static function combine(CoverArray|array $keys, CoverArray|array $values): static
     {
@@ -294,7 +294,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param CoverArray|array $array
      * @return static
-     * @see array_count_values
+     * @see array_count_values()
      */
     final public static function countValues(CoverArray|array $array): static
     {
@@ -310,7 +310,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param CoverArray|array ...$arrays
      * @return static
-     * @see array_diff
+     * @see array_diff()
      */
     final public function diff(CoverArray|array ...$arrays): static
     {
@@ -336,7 +336,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param mixed $filter_value
      * @param bool $strict
      * @return static
-     * @see array_keys
+     * @see array_keys()
      */
     final public function keys(mixed $filter_value = null, bool $strict = false): static
     {
@@ -352,7 +352,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Analogue of the PHP function array_values.
      *
      * @return static
-     * @see array_values
+     * @see array_values()
      */
     final public function values(): static
     {
@@ -453,7 +453,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param bool $preserve_keys
      * @return static
-     * @see array_reverse
+     * @see array_reverse()
      */
     final public function reverse(bool $preserve_keys = false): static
     {
@@ -467,7 +467,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param callable|null $callback
      * @param int $mode
      * @return static
-     * @see array_filter
+     * @see array_filter()
      */
     final public function filter(?callable $callback = null, int $mode = 0): static
     {
@@ -481,7 +481,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param callable $callback
      * @return static
-     * @see array_map
+     * @see array_map()
      */
     final public function map(callable $callback): static
     {
@@ -496,7 +496,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param callable $callback The callback function takes two arguments.
      * The first is the value of the array element, and the second is the key or index of the element.
      * @return static
-     * @see array_walk_recursive
+     * @see array_walk_recursive()
      */
     final public function mapRecursive(callable $callback): static
     {
@@ -515,7 +515,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param int $flags
      * @return static
-     * @see array_unique
+     * @see array_unique()
      */
     final public function unique(int $flags = SORT_STRING): static
     {
@@ -529,7 +529,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param mixed $needle
      * @param bool $strict
      * @return bool
-     * @see in_array
+     * @see in_array()
      */
     final public function in(mixed $needle, bool $strict = false): bool
     {

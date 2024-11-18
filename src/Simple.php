@@ -62,7 +62,12 @@ trait Simple
     }
 
     /**
+     * Returns the current object's data, i.e. the contents of the $data property.
+     * Most likely, you don't need this method in your work,
+     * pay attention to the CoverArray::getDataAsArray method!
+     *
      * @return array
+     * @see CoverArray::getDataAsArray()
      */
     public function getData(): array
     {

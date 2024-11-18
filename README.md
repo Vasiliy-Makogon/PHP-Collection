@@ -205,12 +205,12 @@ string(54) "O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
 
 #### Пример:
 ```php
-$value = $data->get('languages')->map(function (CoverArray $languages, string $key) {
+$value = $data->get('languages')->map(function (CoverArray $lang, string $key) {
     return sprintf(
         "\n\t<li>%s (%s):\n\t%s\n\t</li>",
         $key,
-        $languages->count(),
-        $languages->map(fn($value): string => "\t<li>$value</li>")->implode("\n\t")
+        $lang->count(),
+        $lang->map(fn($value): string => "\t<li>$value</li>")->implode("\n\t")
     );
 })
     ->prepend("\n<ul>")
