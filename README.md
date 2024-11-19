@@ -37,7 +37,7 @@ class NewTypeArray extends CoverArray {}
 или попросту быть независимым типом данных для предотвращения "выстрела в ногу":
 
 ```php
-function foo(NewTypeArray $data) {}
+function foo(NewTypeArray $cover) {}
 ```
 
 ## Инициализация
@@ -45,7 +45,7 @@ function foo(NewTypeArray $data) {}
 ```php
 class NewTypeArray extends CoverArray {}
 
-$data = new NewTypeArray([
+$cover = new NewTypeArray([
     'firstName' => 'Vasiliy',
     'lastName' => 'Ivanov',
     'languages' => [
@@ -54,7 +54,7 @@ $data = new NewTypeArray([
     ],
 ]);
 
-var_dump($data);
+var_dump($cover);
 ```
 
 Результат:
@@ -107,7 +107,7 @@ object(NewTypeArray)#2 (1) {
 Это поведение гарантирует, что **любой массив, попадающий в хранилище, получит "обложку" в виде
 объекта того класса, который его аккумулирует**.
 
-Данные всех созданных объектов аккуратно сложились в protected-свойства `$data`, что обеспечивает инкапсуляцию
+Данные всех созданных объектов аккуратно сложились в protected-свойства `$cover`, что обеспечивает инкапсуляцию
 данных, а функционал базового класса `CoverArray` предоставляет безграничную возможность манипуляций над этими данными!
 
 ## Внутренний механизм реализации методов
@@ -146,7 +146,7 @@ object(NewTypeArray)#2 (1) {
 #### Пример:
 
 ```php
-$value = $data
+$value = $cover
     ->get('languages.frontend')
     ->filter(function ($value) {
         return preg_match('~CSS~', $value);
@@ -165,7 +165,7 @@ string(16) "CSS1, CSS2, CSS3"
 #### Пример:
 
 ```php
-$value = $data
+$value = $cover
     ->get('languages.frontend')
     ->append('HTML 5', 'jQuey')
     ->getDataAsArray();
@@ -197,11 +197,11 @@ array(7) {
 #### Пример:
 
 ```php
-var_dump($data['languages']['backend'][0]);
-var_dump($data->languages->backend->item(0));
-var_dump($data->get('languages.backend.0'));
-var_dump($data->get('languages')->item('backend')[0]);
-var_dump($data->get('languages')['backend']->item(0));
+var_dump($cover['languages']['backend'][0]);
+var_dump($cover->languages->backend->item(0));
+var_dump($cover->get('languages.backend.0'));
+var_dump($cover->get('languages')->item('backend')[0]);
+var_dump($cover->get('languages')['backend']->item(0));
 ```
 
 Результат:
@@ -217,8 +217,8 @@ string(3) "PHP"
 #### Пример:
 
 ```php
-var_dump($data->get('languages.backend')->getFirst());
-var_dump($data->get('languages.backend')->getLast());
+var_dump($cover->get('languages.backend')->getFirst());
+var_dump($cover->get('languages.backend')->getLast());
 ```
 
 Результат:
@@ -231,7 +231,7 @@ string(5) "MySql"
 #### Пример:
 
 ```php
-var_dump(serialize($data->get('languages.backend')));
+var_dump(serialize($cover->get('languages.backend')));
 ```
 
 Результат:
@@ -243,7 +243,7 @@ string(54) "O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
 #### Пример:
 
 ```php
-$value = $data->get('languages')->map(function (CoverArray $lang, string $key) {
+$value = $cover->get('languages')->map(function (CoverArray $lang, string $key) {
     return sprintf(
         "\n\t<li>%s (%s):\n\t%s\n\t</li>",
         $key,
@@ -297,8 +297,8 @@ string(3) "1,2"
 #### Пример:
 
 ```php
-var_dump($data->get('languages.backend')->getDataAsArray());
-var_dump($data->get('languages.backend')->reverse()->getDataAsArray());
+var_dump($cover->get('languages.backend')->getDataAsArray());
+var_dump($cover->get('languages.backend')->reverse()->getDataAsArray());
 ```
 
 Результат:
@@ -321,7 +321,7 @@ array(2) {
 #### Пример:
 
 ```php
-var_dump($data->get('languages.backend')->in('PHP'));
+var_dump($cover->get('languages.backend')->in('PHP'));
 ```
 
 Результат:
@@ -333,7 +333,7 @@ bool(true)
 #### Пример:
 
 ```php
-$value = $data->get('languages.frontend')->diff(
+$value = $cover->get('languages.frontend')->diff(
     ['HTML'],
     ['CSS1', 'CSS2', 'CSS3']
 )->getDataAsArray();
@@ -344,7 +344,7 @@ var_dump($value);
 или даже так:
 
 ```php
-$value = $data->get('languages.frontend')->diff(
+$value = $cover->get('languages.frontend')->diff(
     new NewTypeArray(['HTML']),
     new NewTypeArray(['CSS1', 'CSS2', 'CSS3'])
 )->getDataAsArray();
@@ -362,7 +362,7 @@ array(1) {
 #### Пример:
 
 ```php
-$value = $data->get('languages')->mapRecursive(
+$value = $cover->get('languages')->mapRecursive(
     fn(mixed $value, mixed $key): string => "$key: $value"
 )->getDataAsArray();
 
