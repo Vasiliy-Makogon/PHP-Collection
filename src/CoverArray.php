@@ -6,8 +6,11 @@ namespace Krugozor\Cover;
 
 use ArrayAccess;
 use ArrayIterator;
+use BadMethodCallException;
 use Countable;
 use IteratorAggregate;
+use ReflectionException;
+use ReflectionFunction;
 use Traversable;
 use ValueError;
 
@@ -15,10 +18,24 @@ use ValueError;
  * @package Krugozor\Cover
  * @author Vasiliy Makogon
  * @link https://github.com/Vasiliy-Makogon/Cover
+ *
+ * @method self changeKeyCase(int $case = CASE_LOWER)
+ * @method self chunk(int $length, bool $preserve_keys = false)
+ * @method self column(int|string|null $column_key, int|string|null $index_key = null)
+ * @method self countValues()
+ * @method self diff(array|CoverArray ...$args)
+ * @method self diffAssoc(array|CoverArray ...$args)
+ * @method self diffKey(array|CoverArray ...$arrays)
+ *
+ * @method int|float sum()
+ *
  */
 class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
     use Simple;
+
+    /** @var array */
+    private array $reflectionStore = [];
 
     /**
      * @param iterable|null $data
@@ -68,7 +85,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @return int
      */
-    public function count(): int
+    final public function count(): int
     {
         return count($this->data);
     }
@@ -78,7 +95,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @return Traversable
      */
-    public function getIterator(): Traversable
+    final public function getIterator(): Traversable
     {
         return new ArrayIterator($this->data);
     }
@@ -89,7 +106,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet(mixed $offset, mixed $value): void
+    final public function offsetSet(mixed $offset, mixed $value): void
     {
         if (is_null($offset)) {
             $this->data[] = $this->array2cover($value);
@@ -104,7 +121,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param mixed $offset
      * @return mixed
      */
-    public function offsetGet(mixed $offset): mixed
+    final public function offsetGet(mixed $offset): mixed
     {
         return $this->data[$offset] ?? null;
     }
@@ -115,7 +132,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param mixed $offset
      * @return bool
      */
-    public function offsetExists(mixed $offset): bool
+    final public function offsetExists(mixed $offset): bool
     {
         return isset($this->data[$offset]);
     }
@@ -125,7 +142,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param mixed $offset
      */
-    public function offsetUnset(mixed $offset): void
+    final public function offsetUnset(mixed $offset): void
     {
         if (isset($this->data[$offset])) {
             unset($this->data[$offset]);
@@ -135,7 +152,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     /**
      * @return array
      */
-    public function __serialize(): array
+    final public function __serialize(): array
     {
         return $this->data;
     }
@@ -143,7 +160,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     /**
      * @param array $data
      */
-    public function __unserialize(array $data): void
+    final public function __unserialize(array $data): void
     {
         $this->setData($data);
     }
@@ -223,51 +240,52 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Changes the case of all keys in an array.
-     * Analogue of the PHP function array_change_key_case.
+     * The method executes ALL functions with the `array_` prefix that return an array data type.
      *
-     * @param int $case
-     * @return static
-     * @see array_change_key_case()
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws ReflectionException
+     * @throws BadMethodCallException
      */
-    final public function changeKeyCase(int $case = CASE_LOWER): static
+    final public function __call(string $name, array $arguments): mixed
     {
-        return new static(array_change_key_case($this->data, $case));
-    }
+        $nativeFunctionName = 'array_' . static::camelCaseToProperty($name);
 
-    /**
-     * Split an array into chunks.
-     * Analogue of the PHP function chunk.
-     *
-     * @param int $length
-     * @param bool $preserve_keys
-     * @return static
-     * @throws ValueError
-     * @see array_chunk()
-     */
-    final public function chunk(int $length, bool $preserve_keys = false): static
-    {
-        $data = new static;
-        foreach (array_chunk($this->data, $length, $preserve_keys) as $item) {
-            $data->append($item);
+        if (!is_callable($nativeFunctionName)) {
+            throw new BadMethodCallException(sprintf(
+                '%s: `%s` is not callable', __METHOD__, $nativeFunctionName
+            ));
         }
 
-        return $data;
+        /*if (!(isset($this->reflectionStore[$nativeFunctionName]) &&
+            $this->reflectionStore[$nativeFunctionName] === 'array')
+        ) {
+            $reflectionFunction = new ReflectionFunction($nativeFunctionName);
+            $nativeFunctionReturnType = (string) $reflectionFunction->getReturnType();
+
+            if (($nativeFunctionReturnType !== 'array')) {
+                throw new BadMethodCallException(sprintf(
+                    '%s: `%s` has not `array` return type', __METHOD__, $nativeFunctionName
+                ));
+            }
+
+            $this->reflectionStore[$nativeFunctionName] = $nativeFunctionReturnType;
+        }*/
+
+        $result = call_user_func_array(
+            $nativeFunctionName,
+            array_merge(
+                [$this->getDataAsArray()],
+                ((new static($arguments))->getDataAsArray())
+            )
+        );
+
+        return is_array($result) ? new static($result) : $result;
     }
 
-    /**
-     * Return the values from a single column in the input array.
-     * Analogue of the PHP function column.
-     *
-     * @param int|string|null $column_key
-     * @param int|string|null $index_key
-     * @return static
-     * @see array_column()
-     */
-    final public function column(int|string|null $column_key, int|string|null $index_key = null): static
-    {
-        return new static(array_column($this->data, $column_key, $index_key));
-    }
+    // Start implementing aliases for functions for working with arrays that cannot be called
+    // via the __call magic method:
 
     /**
      * Creates an array by using one array for keys and another for its values.
@@ -287,77 +305,14 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         ));
     }
 
-    /**
-     * Counts the occurrences of each distinct value in an array.
-     * An analogue of the PHP function array_count_values, but accepts not only arrays as arguments,
-     * but also objects derived from the CoverArray class.
-     *
-     * @param CoverArray|array $array
-     * @return static
-     * @see array_count_values()
-     */
-    final public static function countValues(CoverArray|array $array): static
-    {
-        return new static(array_count_values(
-            (new static($array))->getDataAsArray()
-        ));
-    }
-
-    /**
-     * Computes the difference of arrays.
-     * An analogue of the PHP function array_diff, but accepts not only arrays as arguments,
-     * but also objects derived from the CoverArray class.
-     *
-     * @param CoverArray|array ...$arrays
-     * @return static
-     * @see array_diff()
-     */
-    final public function diff(CoverArray|array ...$arrays): static
-    {
-        return new static(array_diff(
-            $this->data,
-            ...(new static($arrays))->getDataAsArray()
-        ));
-    }
 
 
-    ////
-    ///
-    ///
-    ///
-    ///
-    ///
 
 
-    /**
-     * Return all the keys or a subset of the keys of an array.
-     * Analogue of the PHP function array_keys.
-     *
-     * @param mixed $filter_value
-     * @param bool $strict
-     * @return static
-     * @see array_keys()
-     */
-    final public function keys(mixed $filter_value = null, bool $strict = false): static
-    {
-        return new static(
-            $filter_value !== null && $strict
-                ? array_keys($this->data, $filter_value, $strict)
-                : array_keys($this->data)
-        );
-    }
 
-    /**
-     * Return all the values of an array.
-     * Analogue of the PHP function array_values.
-     *
-     * @return static
-     * @see array_values()
-     */
-    final public function values(): static
-    {
-        return new static(array_values($this->data));
-    }
+
+
+
 
 
     /**
@@ -419,21 +374,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Returns the last element of the current array.
-     *
-     * @return mixed
-     */
-    final public function getLast(): mixed
-    {
-        if ($this->count() && ($lastElement = end($this->data)) !== null) {
-            reset($this->data);
-            return $lastElement;
-        }
-
-        return null;
-    }
-
-    /**
      * Returns the first element of the current array.
      *
      * @return mixed
@@ -448,16 +388,18 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Return an array with elements in reverse order.
-     * Analogue of the PHP function array_reverse.
+     * Returns the last element of the current array.
      *
-     * @param bool $preserve_keys
-     * @return static
-     * @see array_reverse()
+     * @return mixed
      */
-    final public function reverse(bool $preserve_keys = false): static
+    final public function getLast(): mixed
     {
-        return new static(array_reverse($this->data, $preserve_keys));
+        if ($this->count() && ($lastElement = end($this->data)) !== null) {
+            reset($this->data);
+            return $lastElement;
+        }
+
+        return null;
     }
 
     /**
@@ -509,18 +451,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         })($callback, $this->getDataAsArray()));
     }
 
-    /**
-     * Removes duplicate values from an array.
-     * Analogue of the PHP function array_unique.
-     *
-     * @param int $flags
-     * @return static
-     * @see array_unique()
-     */
-    final public function unique(int $flags = SORT_STRING): static
-    {
-        return new static(array_unique($this->data, $flags));
-    }
 
     /**
      * Checks if a value exists in an array.
@@ -546,5 +476,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final protected function array2cover(mixed $value): mixed
     {
         return is_array($value) ? new static($value) : $value;
+    }
+
+    /**
+     * @param string $method_name
+     * @return string
+     */
+    final protected static function camelCaseToProperty(string $method_name): string
+    {
+        $args = preg_split('/(?<=\w)(?=[A-Z])/', $method_name);
+
+        return strtolower(implode('_', $args));
     }
 }
