@@ -268,7 +268,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
                 ));
             }
 
-            if ($parameters[0]->getName() != 'array') {
+            if ($parameters[0]->getType() != 'array') {
                 throw new BadMethodCallException(sprintf(
                     '%s: first parameter of the function `%s` must be declared as `array`',
                     __METHOD__,
