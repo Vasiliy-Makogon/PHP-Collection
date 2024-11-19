@@ -258,20 +258,26 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
             ));
         }
 
-        /*if (!(isset($this->reflectionStore[$nativeFunctionName]) &&
-            $this->reflectionStore[$nativeFunctionName] === 'array')
-        ) {
+        if (!in_array($nativeFunctionName, $this->reflectionStore)) {
             $reflectionFunction = new ReflectionFunction($nativeFunctionName);
-            $nativeFunctionReturnType = (string) $reflectionFunction->getReturnType();
-
-            if (($nativeFunctionReturnType !== 'array')) {
+            if (!$parameters = $reflectionFunction->getParameters()) {
                 throw new BadMethodCallException(sprintf(
-                    '%s: `%s` has not `array` return type', __METHOD__, $nativeFunctionName
+                    '%s: `%s` has not parameters',
+                    __METHOD__,
+                    $nativeFunctionName
                 ));
             }
 
-            $this->reflectionStore[$nativeFunctionName] = $nativeFunctionReturnType;
-        }*/
+            if ($parameters[0]->getName() != 'array') {
+                throw new BadMethodCallException(sprintf(
+                    '%s: first parameter of the function `%s` must be declared as `array`',
+                    __METHOD__,
+                    $nativeFunctionName
+                ));
+            }
+
+            $this->reflectionStore[] = [$nativeFunctionName];
+        }
 
         $result = call_user_func_array(
             $nativeFunctionName,
