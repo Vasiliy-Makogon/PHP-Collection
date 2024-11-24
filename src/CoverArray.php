@@ -6,11 +6,8 @@ namespace Krugozor\Cover;
 
 use ArrayAccess;
 use ArrayIterator;
-use BadMethodCallException;
 use Countable;
 use IteratorAggregate;
-use ReflectionException;
-use ReflectionFunction;
 use Traversable;
 use ValueError;
 
@@ -18,24 +15,13 @@ use ValueError;
  * @package Krugozor\Cover
  * @author Vasiliy Makogon
  * @link https://github.com/Vasiliy-Makogon/Cover
- *
- * @method self changeKeyCase(int $case = CASE_LOWER)
- * @method self chunk(int $length, bool $preserve_keys = false)
- * @method self column(int|string|null $column_key, int|string|null $index_key = null)
- * @method self countValues()
- * @method self diff(array|CoverArray ...$args)
- * @method self diffAssoc(array|CoverArray ...$args)
- * @method self diffKey(array|CoverArray ...$arrays)
- *
- * @method int|float sum()
- *
  */
 class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
     use Simple;
 
     /** @var array */
-    private array $reflectionStore = [];
+    private static array $reflectionStore = [];
 
     /**
      * @param iterable|null $data
@@ -239,59 +225,53 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return implode($separator, $this->data);
     }
 
+    // Start implementing aliases for PHP functions
+
     /**
-     * The method executes ALL functions with the `array_` prefix that return an array data type.
+     * Changes the case of all keys in an array.
+     * Analogue of the PHP function array_change_key_case.
      *
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     * @throws ReflectionException
-     * @throws BadMethodCallException
+     * @param int $case
+     * @return static
+     * @see array_change_key_case()
      */
-    final public function __call(string $name, array $arguments): mixed
+    final public function changeKeyCase(int $case = CASE_LOWER): static
     {
-        $nativeFunctionName = 'array_' . static::camelCaseToProperty($name);
-
-        if (!is_callable($nativeFunctionName)) {
-            throw new BadMethodCallException(sprintf(
-                '%s: `%s` is not callable', __METHOD__, $nativeFunctionName
-            ));
-        }
-
-        if (!in_array($nativeFunctionName, $this->reflectionStore)) {
-            $reflectionFunction = new ReflectionFunction($nativeFunctionName);
-            if (!$parameters = $reflectionFunction->getParameters()) {
-                throw new BadMethodCallException(sprintf(
-                    '%s: `%s` has not parameters',
-                    __METHOD__,
-                    $nativeFunctionName
-                ));
-            }
-
-            if ($parameters[0]->getType() != 'array') {
-                throw new BadMethodCallException(sprintf(
-                    '%s: first parameter of the function `%s` must be declared as `array`',
-                    __METHOD__,
-                    $nativeFunctionName
-                ));
-            }
-
-            $this->reflectionStore[] = [$nativeFunctionName];
-        }
-
-        $result = call_user_func_array(
-            $nativeFunctionName,
-            array_merge(
-                [$this->getDataAsArray()],
-                ((new static($arguments))->getDataAsArray())
-            )
-        );
-
-        return is_array($result) ? new static($result) : $result;
+        return new static(array_change_key_case($this->data, $case));
     }
 
-    // Start implementing aliases for functions for working with arrays that cannot be called
-    // via the __call magic method:
+    /**
+     * Split an array into chunks.
+     * Analogue of the PHP function chunk.
+     *
+     * @param int $length
+     * @param bool $preserve_keys
+     * @return static
+     * @throws ValueError
+     * @see array_chunk()
+     */
+    final public function chunk(int $length, bool $preserve_keys = false): static
+    {
+        return new static(
+            array_chunk($this->data, $length, $preserve_keys)
+        );
+    }
+
+    /**
+     * Return the values from a single column in the input array.
+     * Analogue of the PHP function column.
+     *
+     * @param int|string|null $column_key
+     * @param int|string|null $index_key
+     * @return static
+     * @see array_column()
+     */
+    final public function column(int|string|null $column_key, int|string|null $index_key = null): static
+    {
+        return new static(
+            array_column($this->data, $column_key, $index_key)
+        );
+    }
 
     /**
      * Creates an array by using one array for keys and another for its values.
@@ -311,15 +291,286 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         ));
     }
 
+    /**
+     * Counts the occurrences of each distinct value in an array.
+     * Analogue of the PHP function array_count_values.
+     *
+     * @return static
+     * @see array_count_values()
+     */
+    final public function countValues(): static
+    {
+        return new static(array_count_values($this->getDataAsArray()));
+    }
+
+    /**
+     * Computes the difference of arrays.
+     * An analogue of the PHP function array_diff, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff()
+     */
+    final public function diff(CoverArray|array ...$arrays): static
+    {
+        return new static(array_diff(
+            $this->data,
+            ...(new static($arrays))->getDataAsArray()
+        ));
+    }
+
+    /**
+     * Computes the difference of arrays with additional index check.
+     * An analogue of the PHP function array_diff_assoc, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff_assoc()
+     */
+    final public function diffAssoc(CoverArray|array ...$arrays): static
+    {
+        return new static(array_diff_assoc(
+            $this->data,
+            ...(new static($arrays))->getDataAsArray()
+        ));
+    }
+
+    /**
+     * Computes the difference of arrays using keys for comparison.
+     * An analogue of the PHP function array_diff_assoc, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff_key()
+     */
+    final public function diffKey(CoverArray|array ...$arrays): static
+    {
+        return new static(array_diff_key(
+            $this->data,
+            ...(new static($arrays))->getDataAsArray()
+        ));
+    }
+
+    /**
+     * Computes the difference of arrays with additional index check which
+     * is performed by a user supplied callback function.
+     * An analogue of the PHP function array_diff_uassoc, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param callable $key_compare_func
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff_uassoc()
+     */
+    final public function diffUassoc(callable $key_compare_func, CoverArray|array ...$arrays): static
+    {
+        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args[] = $key_compare_func;
+
+        return new static(
+            call_user_func_array('array_diff_uassoc', $args)
+        );
+    }
+
+    /**
+     * Computes the difference of arrays using a callback function on the keys for comparison
+     * An analogue of the PHP function array_diff_ukey, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param callable $key_compare_func
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_diff_ukey()
+     */
+    final public function diffUkey(callable $key_compare_func, CoverArray|array ...$arrays): static
+    {
+        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args[] = $key_compare_func;
+
+        return new static(
+            call_user_func_array('array_diff_ukey', $args)
+        );
+    }
+
+    /**
+     * Fill an array with values.
+     * Analogue of the PHP function array_fill.
+     *
+     * @param int $start_index
+     * @param int $count
+     * @param mixed $value
+     * @return static
+     * @see array_fill()
+     */
+    final public static function fill(int $start_index, int $count, mixed $value): static
+    {
+        return new static(
+            array_fill($start_index, $count, $value)
+        );
+    }
+
+    /**
+     * Fill an array with values, specifying keys.
+     * Analogue of the PHP function array_fill_keys.
+     *
+     * @param array $keys
+     * @param mixed $value
+     * @return static
+     * @see array_fill_keys
+     */
+    final public static function fillKeys(array $keys, mixed $value): static
+    {
+        return new static(
+            array_fill_keys($keys, $value)
+        );
+    }
+
+    /**
+     * Filters elements of an array using a callback function.
+     * Analogue of the PHP function array_filter.
+     *
+     * @param callable|null $callback
+     * @param int $mode
+     * @return static
+     * @see array_filter()
+     */
+    final public function filter(?callable $callback = null, int $mode = 0): static
+    {
+        return new static(array_filter($this->data, $callback, $mode));
+    }
+
+    /**
+     * Returns the first element satisfying a callback function.
+     * Analogue of the PHP function array_find.
+     *
+     * @param callable $callback callback(mixed $value, mixed $key): bool
+     * @return mixed
+     * @see array_find()
+     */
+    final public function find(callable $callback): mixed
+    {
+        return array_find($this->data, $callback);
+    }
+
+    /**
+     * Returns the key of the first element satisfying a callback function.
+     * Analogue of the PHP function array_find_key.
+     *
+     * @param callable $callback
+     * @return mixed
+     * @see array_find_key()
+     */
+    final public function findKey(callable $callback): mixed
+    {
+        return array_find_key($this->data, $callback);
+    }
+
+    /**
+     * Exchanges all keys with their associated values in an array.
+     * Analogue of the PHP function array_flip.
+     *
+     * @return static
+     * @see array_flip()
+     */
+    final public function flip(): static
+    {
+        return new static(array_flip($this->data));
+    }
+
+    /**
+     * Computes the intersection of arrays.
+     * An analogue of the PHP function array_intersect, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_intersect()
+     */
+    final public function intersect(CoverArray|array ...$arrays): static
+    {
+        return new static(array_intersect($this->data, ...(new static($arrays))->getDataAsArray()));
+    }
+
+    /**
+     * Computes the intersection of arrays with additional index check.
+     * An analogue of the PHP function array_intersect_assoc, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_intersect_assoc()
+     */
+    final public function intersectAssoc(CoverArray|array ...$arrays): static
+    {
+        return new static(array_intersect_assoc($this->data, ...(new static($arrays))->getDataAsArray()));
+    }
 
 
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
 
+    /**
+     * Return an array with elements in reverse order.
+     * Analogue of the PHP function array_reverse.
+     *
+     * @param bool $preserve_keys
+     * @return static
+     * @see array_reverse()
+     */
+    final public function reverse(bool $preserve_keys = false): static
+    {
+        return new static(array_reverse($this->data, $preserve_keys));
+    }
 
+    /**
+     * Return all the values of an array.
+     * Analogue of the PHP function array_values.
+     *
+     * @return static
+     * @see array_values()
+     */
+    final public function values(): static
+    {
+        return new static(array_values($this->data));
+    }
 
+    /**
+     * Removes duplicate values from an array.
+     * Analogue of the PHP function array_unique.
+     *
+     * @param int $flags
+     * @return static
+     * @see array_unique()
+     */
+    final public function unique(int $flags = SORT_STRING): static
+    {
+        return new static(array_unique($this->data, $flags));
+    }
 
-
-
-
+    /**
+     * Return all the keys or a subset of the keys of an array.
+     * Analogue of the PHP function array_keys.
+     *
+     * @param mixed $filter_value
+     * @param bool $strict
+     * @return static
+     * @see array_keys()
+     */
+    final public function keys(mixed $filter_value = null, bool $strict = false): static
+    {
+        return new static(
+            $filter_value !== null && $strict
+                ? array_keys($this->data, $filter_value, $strict)
+                : array_keys($this->data)
+        );
+    }
 
     /**
      * Prepend one or more elements to the beginning of an array.
@@ -408,19 +659,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return null;
     }
 
-    /**
-     * Filters elements of an array using a callback function.
-     * Analogue of the PHP function array_filter.
-     *
-     * @param callable|null $callback
-     * @param int $mode
-     * @return static
-     * @see array_filter()
-     */
-    final public function filter(?callable $callback = null, int $mode = 0): static
-    {
-        return new static(array_filter($this->data, $callback, $mode));
-    }
 
     /**
      * Applies a callback function to all elements of an object of the current type and
