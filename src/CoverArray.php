@@ -416,15 +416,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Fill an array with values, specifying keys.
      * Analogue of the PHP function array_fill_keys.
      *
-     * @param array $keys
+     * @param CoverArray|array $keys
      * @param mixed $value
      * @return static
      * @see array_fill_keys
      */
-    final public static function fillKeys(array $keys, mixed $value): static
+    final public static function fillKeys(CoverArray|array $keys, mixed $value): static
     {
         return new static(
-            array_fill_keys($keys, $value)
+            array_fill_keys((new static($keys))->getDataAsArray(), $value)
         );
     }
 
@@ -720,16 +720,5 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final protected function array2cover(mixed $value): mixed
     {
         return is_array($value) ? new static($value) : $value;
-    }
-
-    /**
-     * @param string $method_name
-     * @return string
-     */
-    final protected static function camelCaseToProperty(string $method_name): string
-    {
-        $args = preg_split('/(?<=\w)(?=[A-Z])/', $method_name);
-
-        return strtolower(implode('_', $args));
     }
 }

@@ -300,19 +300,40 @@ class CoverArrayTest extends TestCase
 
     // Start testing native php functions for arrays
 
+    // @todo array_all (PHP 8.4)
+
+    // @todo array_any (PHP 8.4)
+
     /**
      * @see CoverArray::changeKeyCase()
      */
     public function testChangeKeyCaseMethod(): void
     {
+        $data = $this->data->get('address');
+        $expected = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+
+        // original function
         $this->assertSame(
-            ['PHP', 'MySql'],
-            $this->data->get('languages.backend')->changeKeyCase()->getDataAsArray()
+            $expected,
+            array_change_key_case($data->getDataAsArray())
         );
 
         $this->assertSame(
-            ['COUNTRY' => 'Russia', 'REGION' => 'Moscow region', 'CITY' => 'Podolsk', 'STREET' => 'Kirov st.'],
-            $this->data->get('address')->changeKeyCase(CASE_UPPER)->getDataAsArray()
+            $expected,
+            $data->changeKeyCase()->getDataAsArray()
+        );
+
+        $expected = ['COUNTRY' => 'Russia', 'REGION' => 'Moscow region', 'CITY' => 'Podolsk', 'STREET' => 'Kirov st.'];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_change_key_case($data->getDataAsArray(), CASE_UPPER)
+        );
+
+        $this->assertSame(
+            $expected,
+            $data->changeKeyCase(CASE_UPPER)->getDataAsArray()
         );
     }
 
@@ -321,34 +342,43 @@ class CoverArrayTest extends TestCase
      */
     public function testChunkMethod()
     {
+        $data = $this->data->get('address');
+        $expected = [
+            0 => [0 => 'Russia', 1 => 'Moscow region'],
+            1 => [0 => 'Podolsk', 1 => 'Kirov st.']
+        ];
+
+        // original function
         $this->assertSame(
-            [
-                0 => [0 => 'Russia', 1 => 'Moscow region'],
-                1 => [0 => 'Podolsk', 1 => 'Kirov st.']
-            ],
-            $this->data->get('address')->chunk(2)->getDataAsArray()
+            $expected,
+            array_chunk($data->getDataAsArray(), 2)
         );
 
         $this->assertSame(
-            [
-                0 => ['country' => 'Russia', 'region' => 'Moscow region'],
-                1 => ['city' => 'Podolsk', 'street' => 'Kirov st.']
-            ],
-            $this->data->get('address')->chunk(2, true)->getDataAsArray()
+            $expected,
+            $data->chunk(2)->getDataAsArray()
+        );
+
+        $expected = [
+            0 => ['country' => 'Russia', 'region' => 'Moscow region'],
+            1 => ['city' => 'Podolsk', 'street' => 'Kirov st.']
+        ];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_chunk($data->getDataAsArray(), 2, true)
+        );
+
+        $this->assertSame(
+            $expected,
+            $data->chunk(2, true)->getDataAsArray()
         );
 
         $this->expectException(ValueError::class);
         $this->assertSame(
-            [
-                0 => ['country' => 'Russia', 'region' => 'Moscow region'],
-                1 => ['city' => 'Podolsk', 'street' => 'Kirov st.']
-            ],
+            $expected,
             $this->data->get('address')->chunk(0, true)->getDataAsArray()
-        );
-
-        $this->assertInstanceOf(
-            NewTypeArray::class,
-            $this->data->get('address')->chunk(2)
         );
     }
 
@@ -363,20 +393,30 @@ class CoverArrayTest extends TestCase
             ['id' => 5342, 'first_name' => 'Jane', 'last_name' => 'Jones'],
             ['id' => 5623, 'first_name' => 'Peter', 'last_name' => 'Doe']
         ]);
+        $expected = ['John', 'Sally', 'Jane', 'Peter'];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_column($data->getDataAsArray(), 'first_name')
+        );
 
         $this->assertSame(
-            ['John', 'Sally', 'Jane', 'Peter'],
+            $expected,
             $data->column('first_name')->getDataAsArray()
         );
 
+        $expected = [2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'];
+
+        // original function
         $this->assertSame(
-            [2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'],
-            $data->column('first_name', 'id')->getDataAsArray()
+            $expected,
+            array_column($data->getDataAsArray(), 'first_name', 'id')
         );
 
-        $this->assertInstanceOf(
-            NewTypeArray::class,
-            $data->column('first_name')
+        $this->assertSame(
+            $expected,
+            $data->column('first_name', 'id')->getDataAsArray()
         );
     }
 
@@ -385,22 +425,33 @@ class CoverArrayTest extends TestCase
      */
     public function testCombineMethod(): void
     {
+        $valuesData = $this->data->get('address')->values();
+        $keysData = $this->data->get('address')->keys();
+
+        $expected = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_combine(
+                $keysData->getDataAsArray(),
+                $valuesData->getDataAsArray()
+            )
+        );
+
         // arguments as array
         $this->assertEquals(
-            ['Russia' => 'country', 'Moscow region' => 'region', 'Podolsk' => 'city', 'Kirov st.' => 'street'],
+            $expected,
             NewTypeArray::combine(
-                $this->data->get('address')->values()->getDataAsArray(),
-                $this->data->get('address')->keys()->getDataAsArray(),
+                $keysData->getDataAsArray(),
+                $valuesData->getDataAsArray()
             )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
-            ['Russia' => 'country', 'Moscow region' => 'region', 'Podolsk' => 'city', 'Kirov st.' => 'street'],
-            NewTypeArray::combine(
-                $this->data->get('address')->values(),
-                $this->data->get('address')->keys(),
-            )->getDataAsArray()
+            $expected,
+            NewTypeArray::combine($keysData, $valuesData)->getDataAsArray()
         );
     }
 
@@ -412,7 +463,7 @@ class CoverArrayTest extends TestCase
         $data = $this->data->get('languages.backend');
         $expected = ['PHP' => 1, 'MySql' => 1];
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_count_values($data->getDataAsArray())
@@ -433,27 +484,34 @@ class CoverArrayTest extends TestCase
         $expected = [];
 
         $additionalData1 = new NewTypeArray(['HTML']);
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
-
         $additionalData2 = new NewTypeArray(['CSS', 'JavaScript']);
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_diff($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray)
+            array_diff(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
         );
 
         // arguments as array
         $this->assertEquals(
             $expected,
-            $data->diff($additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->diff(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
             $expected,
-            $data->diff($additionalData1, $additionalData2)->getDataAsArray()
+            $data->diff(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -471,29 +529,36 @@ class CoverArrayTest extends TestCase
             'city' => 'Podolsk',
             'street' => 'Kirov st.'
         ]);
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
-
         $additionalData2 = new NewTypeArray([
             'another' => 'another',
         ]);
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_diff_assoc($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray)
+            array_diff_assoc(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
         );
 
         // arguments as array
         $this->assertEquals(
             $expected,
-            $data->diffAssoc($additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->diffAssoc(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
             $expected,
-            $data->diffAssoc($additionalData1, $additionalData2)->getDataAsArray()
+            $data->diffAssoc(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -509,29 +574,36 @@ class CoverArrayTest extends TestCase
             'country' => 'Russia',
             'region' => 'Moscow region',
         ]);
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
-
         $additionalData2 = new NewTypeArray([
             'street' => 'Kirov st.'
         ]);
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_diff_key($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray)
+            array_diff_key(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
         );
 
         // arguments as array
         $this->assertEquals(
             $expected,
-            $data->diffKey($additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->diffKey(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
             $expected,
-            $data->diffKey($additionalData1, $additionalData2)->getDataAsArray()
+            $data->diffKey(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -547,12 +619,9 @@ class CoverArrayTest extends TestCase
             'country' => 'Russia',
             'region' => 'Moscow region',
         ]);
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
-
         $additionalData2 = new NewTypeArray([
             'street' => 'Kirov st.'
         ]);
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
         $callback = function ($a, $b) {
             if ($a === $b) {
@@ -561,22 +630,35 @@ class CoverArrayTest extends TestCase
             return $a <=> $b;
         };
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_diff_uassoc($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray, $callback)
+            array_diff_uassoc(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray(),
+                $callback
+            )
         );
 
         // arguments as array
         $this->assertEquals(
             $expected,
-            $data->diffUassoc($callback, $additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->diffUassoc(
+                $callback,
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
             $expected,
-            $data->diffUassoc($callback, $additionalData1, $additionalData2)->getDataAsArray()
+            $data->diffUassoc(
+                $callback,
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -592,12 +674,9 @@ class CoverArrayTest extends TestCase
             'country' => 'Russia',
             'region' => 'Moscow region',
         ]);
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
-
         $additionalData2 = new NewTypeArray([
             'street' => 'Kirov st.'
         ]);
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
         $callback = function ($a, $b) {
             if ($a === $b) {
@@ -606,22 +685,35 @@ class CoverArrayTest extends TestCase
             return $a <=> $b;
         };
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_diff_ukey($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray, $callback)
+            array_diff_ukey(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray(),
+                $callback
+            )
         );
 
         // arguments as array
         $this->assertEquals(
             $expected,
-            $data->diffUkey($callback, $additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->diffUkey(
+                $callback,
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertEquals(
             $expected,
-            $data->diffUkey($callback, $additionalData1, $additionalData2)->getDataAsArray()
+            $data->diffUkey(
+                $callback,
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -635,7 +727,7 @@ class CoverArrayTest extends TestCase
         $count = 2;
         $value = 'foo';
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_fill($start_index, $count, $value)
@@ -652,19 +744,32 @@ class CoverArrayTest extends TestCase
      */
     public function testFillKeysMethod(): void
     {
-        $keys = ['foo', 5, 10, 'bar'];
+        $keysData = new NewTypeArray(['foo', 5, 10, 'bar']);
         $value = 'banana';
         $expected = ['foo' => 'banana', 5 => 'banana', 10 => 'banana', 'bar' => 'banana'];
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
-            array_fill_keys($keys, $value)
+            array_fill_keys($keysData->getDataAsArray(), $value)
         );
 
+        // arguments as array
         $this->assertSame(
             $expected,
-            NewTypeArray::fillKeys($keys, $value)->getDataAsArray()
+            NewTypeArray::fillKeys(
+                $keysData->getDataAsArray(),
+                $value
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        $this->assertSame(
+            $expected,
+            NewTypeArray::fillKeys(
+                $keysData,
+                $value
+            )->getDataAsArray()
         );
     }
 
@@ -681,7 +786,7 @@ class CoverArrayTest extends TestCase
             return preg_match('~P~', $value);
         };
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_filter($data->getDataAsArray(), $callback)
@@ -700,7 +805,7 @@ class CoverArrayTest extends TestCase
             return $key === 'backend';
         };
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_filter($data->getDataAsArray(), $callback, ARRAY_FILTER_USE_KEY)
@@ -719,7 +824,7 @@ class CoverArrayTest extends TestCase
             return $key === 'backend' && is_iterable($value) && $value[0] === 'PHP';
         };
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_filter($data->getDataAsArray(), $callback, ARRAY_FILTER_USE_BOTH)
@@ -736,7 +841,7 @@ class CoverArrayTest extends TestCase
             ->append(null);
         $expected = [];
 
-        // original
+        // original function
         $this->assertSame(
             $expected,
             array_filter($data->getDataAsArray())
@@ -748,8 +853,9 @@ class CoverArrayTest extends TestCase
         );
     }
 
-    // @todo find
-    // @todo findKey
+    // @todo find (PHP 8.4)
+
+    // @todo findKey (PHP 8.4)
 
     /**
      * @see CoverArray::flip()
@@ -759,7 +865,7 @@ class CoverArrayTest extends TestCase
         $data = $this->data->get('address');
         $expected = ['Russia' => 'country', 'Moscow region' => 'region', 'Podolsk' => 'city', 'Kirov st.' => 'street'];
 
-        // original
+        // original function
         $this->assertEquals(
             $expected,
             array_flip($data->getDataAsArray())
@@ -780,30 +886,38 @@ class CoverArrayTest extends TestCase
 
         $additionalData1 = $this->data->get('languages.frontend');
         $additionalData1->offsetUnset(0); // remove 'HTML' by index
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
 
         $additionalData2 = $this->data->get('languages.frontend');
         $additionalData2->offsetUnset(1); // remove 'CSS' by index
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
         $expected = [2 => 'JavaScript'];
 
-        // original
+        // original function
         $this->assertEquals(
             $expected,
-            array_intersect($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray)
+            array_intersect(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
         );
 
         // arguments as array
         $this->assertSame(
             $expected,
-            $data->intersect($additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->intersect(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertSame(
             $expected,
-            $data->intersect($additionalData1, $additionalData2)->getDataAsArray()
+            $data->intersect(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
@@ -817,31 +931,39 @@ class CoverArrayTest extends TestCase
         $additionalData1 = clone $this->data->get('languages.frontend');
         $additionalData1->offsetUnset(0); // remove 'HTML' by index
         $additionalData1->append('HTML');
-        $additionalData1AsArray = $additionalData1->getDataAsArray();
 
         $additionalData2 = clone $this->data->get('languages.frontend');
         $additionalData2->offsetUnset(1); // remove 'CSS' by index
         $additionalData2->append('CSS');
-        $additionalData2AsArray = $additionalData2->getDataAsArray();
 
         $expected = [2 => 'JavaScript'];
 
-        // original
+        // original function
         $this->assertEquals(
             $expected,
-            array_intersect_assoc($data->getDataAsArray(), $additionalData1AsArray, $additionalData2AsArray)
+            array_intersect_assoc(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
         );
 
         // arguments as array
         $this->assertSame(
             $expected,
-            $data->intersectAssoc($additionalData1AsArray, $additionalData2AsArray)->getDataAsArray()
+            $data->intersectAssoc(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
         );
 
         // arguments as CoverArray
         $this->assertSame(
             $expected,
-            $data->intersectAssoc($additionalData1, $additionalData2)->getDataAsArray()
+            $data->intersectAssoc(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
         );
     }
 
