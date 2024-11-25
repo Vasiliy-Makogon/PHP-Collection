@@ -884,10 +884,10 @@ class CoverArrayTest extends TestCase
     {
         $data = $this->data->get('languages.frontend');
 
-        $additionalData1 = $this->data->get('languages.frontend');
+        $additionalData1 = clone $data;
         $additionalData1->offsetUnset(0); // remove 'HTML' by index
 
-        $additionalData2 = $this->data->get('languages.frontend');
+        $additionalData2 = clone $data;
         $additionalData2->offsetUnset(1); // remove 'CSS' by index
 
         $expected = [2 => 'JavaScript'];
@@ -928,11 +928,11 @@ class CoverArrayTest extends TestCase
     {
         $data = $this->data->get('languages.frontend');
 
-        $additionalData1 = clone $this->data->get('languages.frontend');
+        $additionalData1 = clone $data;
         $additionalData1->offsetUnset(0); // remove 'HTML' by index
         $additionalData1->append('HTML');
 
-        $additionalData2 = clone $this->data->get('languages.frontend');
+        $additionalData2 = clone $data;
         $additionalData2->offsetUnset(1); // remove 'CSS' by index
         $additionalData2->append('CSS');
 
@@ -967,6 +967,97 @@ class CoverArrayTest extends TestCase
         );
     }
 
+    /**
+     * @see CoverArray::intersectKey()
+     */
+    public function testIntersectKeyMethod(): void
+    {
+        $data = $this->data->get('address');
+
+        $additionalData1 = clone $data;
+        $additionalData1->offsetUnset('region');
+
+        $additionalData2 = clone $data;
+        $additionalData2->offsetUnset('city');
+
+        $expected = ['country' => 'Russia', 'street' => 'Kirov st.'];
+
+        // original function
+        $this->assertEquals(
+            $expected,
+            array_intersect_key(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )
+        );
+
+        // arguments as array
+        $this->assertSame(
+            $expected,
+            $data->intersectKey(
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        $this->assertSame(
+            $expected,
+            $data->intersectKey(
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
+        );
+    }
+
+    /**
+     * @see CoverArray::intersectUassoc()
+     */
+    public function testIntersectUassocMethod(): void
+    {
+        $data = $this->data->get('address');
+        $expected = ['country' => 'Russia', 'street' => 'Kirov st.'];
+
+        $additionalData1 = clone $data;
+        $additionalData1->offsetUnset('region');
+        $additionalData1->offsetSet('REGION', 'Moscow region');
+
+        $additionalData2 = clone $data;
+        $additionalData2->offsetUnset('city');
+        $additionalData2->offsetSet('city', 'PODOLSK');
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_intersect_uassoc(
+                $data->getDataAsArray(),
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray(),
+                'strcmp'
+            )
+        );
+
+        // arguments as array
+        $this->assertEquals(
+            $expected,
+            $data->intersectUassoc(
+                'strcmp',
+                $additionalData1->getDataAsArray(),
+                $additionalData2->getDataAsArray()
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        $this->assertEquals(
+            $expected,
+            $data->intersectUassoc(
+                'strcmp',
+                $additionalData1,
+                $additionalData2
+            )->getDataAsArray()
+        );
+    }
 
     ///
     ///

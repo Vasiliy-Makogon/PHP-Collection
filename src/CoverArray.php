@@ -508,6 +508,41 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(array_intersect_assoc($this->data, ...(new static($arrays))->getDataAsArray()));
     }
 
+    /**
+     * Computes the intersection of arrays using keys for comparison.
+     * An analogue of the PHP function array_intersect_key, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_intersect_key()
+     */
+    final public function intersectKey(CoverArray|array ...$arrays): static
+    {
+        return new static(array_intersect_key($this->data, ...(new static($arrays))->getDataAsArray()));
+    }
+
+    /**
+     * Computes the intersection of arrays with additional index check, compares indexes by a callback function.
+     * An analogue of the PHP function array_intersect_uassoc, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param callable $key_compare_func
+     * @param CoverArray|array ...$arrays
+     * @return static
+     * @see array_intersect_uassoc()
+     */
+    final public function intersectUassoc(callable $key_compare_func, CoverArray|array ...$arrays): static
+    {
+        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args[] = $key_compare_func;
+
+        return new static(
+            call_user_func_array('array_intersect_uassoc', $args)
+        );
+    }
+
+
 
     ///
     ///
