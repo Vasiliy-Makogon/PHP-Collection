@@ -53,10 +53,10 @@ trait Simple
      * Returns the collection element with the given index as the result.
      * Similar to the __get method, but intended for numeric indices.
      *
-     * @param int|string $key
+     * @param mixed $key
      * @return mixed
      */
-    public function item(int|string $key): mixed
+    public function item(mixed $key): mixed
     {
         return $this->data[$key] ?? null;
     }

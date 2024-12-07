@@ -20,9 +20,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 {
     use Simple;
 
-    /** @var array */
-    private static array $reflectionStore = [];
-
     /**
      * @param iterable|null $data
      */
@@ -226,6 +223,60 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     // Start implementing aliases for PHP functions
+
+    /**
+     * Checks if all array elements satisfy a callback function.
+     * Analogue of the PHP function array_all.
+     *
+     * @param callable $callback The callback function to call to check each element, which must be
+     * callback(mixed $value, mixed $key): bool
+     * @return bool The function returns true, if callback returns true for all elements.
+     * Otherwise the function returns false.
+     * @author Joshua Rüsweg, josh@php.net
+     * @see https://wiki.php.net/rfc/array_find#array_all
+     * @see array_all()
+     */
+    final public function all(callable $callback): bool
+    {
+        if (!function_exists('array_all')) {
+            foreach ($this->data as $key => $value) {
+                if (!$callback($value, $key)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return array_all($this->data, $callback);
+    }
+
+    /**
+     * Checks if at least one array element satisfies a callback function.
+     * Analogue of the PHP function array_any.
+     *
+     * @param callable $callback The callback function to call to check each element, which must be
+     * callback(mixed $value, mixed $key): bool
+     * @return bool The function returns true, if there is at least one element for which callback returns true.
+     * Otherwise the function returns false.
+     * @author Joshua Rüsweg, josh@php.net
+     * @see https://wiki.php.net/rfc/array_find#array_any
+     * @see array_any()
+     */
+    final public function any(callable $callback): bool
+    {
+        if (!function_exists('array_any')) {
+            foreach ($this->data as $key => $value) {
+                if ($callback($value, $key)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return array_any($this->data, $callback);
+    }
 
     /**
      * Changes the case of all keys in an array.
@@ -446,12 +497,26 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Returns the first element satisfying a callback function.
      * Analogue of the PHP function array_find.
      *
-     * @param callable $callback callback(mixed $value, mixed $key): bool
-     * @return mixed
+     * @param callable $callback The callback function to call to check each element, which must be
+     * callback(mixed $value, mixed $key): bool
+     * @return bool The function returns the value of the first element for which the callback returns true.
+     * If no matching element is found the function returns null.
+     * @author Joshua Rüsweg, josh@php.net
+     * @see https://wiki.php.net/rfc/array_find#array_find
      * @see array_find()
      */
     final public function find(callable $callback): mixed
     {
+        if (!function_exists('array_find')) {
+            foreach ($this->data as $key => $value) {
+                if ($callback($value, $key)) {
+                    return $value;
+                }
+            }
+
+            return null;
+        }
+
         return array_find($this->data, $callback);
     }
 
@@ -459,12 +524,26 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Returns the key of the first element satisfying a callback function.
      * Analogue of the PHP function array_find_key.
      *
-     * @param callable $callback
-     * @return mixed
+     * @param callable $callback The callback function to call to check each element, which must be
+     * callback(mixed $value, mixed $key): bool
+     * @return mixed The function returns the key of the first element for which the callback returns true.
+     * If no matching element is found the function returns null.
+     * @author Joshua Rüsweg, josh@php.net
+     * @see https://wiki.php.net/rfc/array_find#array_find_key
      * @see array_find_key()
      */
     final public function findKey(callable $callback): mixed
     {
+        if (!function_exists('array_find_key')) {
+            foreach ($this->data as $key => $value) {
+                if ($callback($value, $key)) {
+                    return $key;
+                }
+            }
+
+            return null;
+        }
+
         return array_find_key($this->data, $callback);
     }
 
@@ -542,14 +621,142 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         );
     }
 
+    /**
+     * Computes the intersection of arrays using a callback function on the keys for comparison.
+     * An analogue of the PHP function array_intersect_ukey, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param callable $key_compare_func
+     * @param CoverArray|array ...$arrays
+     * @return $this
+     */
+    final public function intersectUkey(callable $key_compare_func, CoverArray|array ...$arrays): static
+    {
+        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args[] = $key_compare_func;
+
+        return new static(
+            call_user_func_array('array_intersect_ukey', $args)
+        );
+    }
+
+    /**
+     * Checks whether a given array is a list.
+     * Analogue of the PHP function array_flip.
+     *
+     * @return bool
+     * @author Mark Amery
+     * @see https://stackoverflow.com/a/173479/24207350
+     * @see array_is_list()
+     */
+    final public function isList(): bool
+    {
+        if (!function_exists('array_is_list')) {
+            if ($this->data === []) {
+                return true;
+            }
+
+            return array_keys($this->data) === range(0, count($this->data) - 1);
+        }
+
+        return array_is_list($this->data);
+    }
+
+    /**
+     * Checks if the given key or index exists in the array.
+     * Analogue of the PHP function array_key_exists.
+     *
+     * @param mixed $key
+     * @return bool
+     * @see array_key_exists()
+     */
+    final public function keyExists(mixed $key): bool
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
+     * Gets the first key of an array.
+     * Analogue of the PHP function array_key_first.
+     *
+     * @return int|string|null
+     * @see array_key_first()
+     */
+    final public function keyFirst(): int|string|null
+    {
+        return array_key_first($this->data);
+    }
+
+    /**
+     * Gets the last key of an array.
+     * Analogue of the PHP function array_key_last.
+     *
+     * @return int|string|null
+     * @see array_key_last()
+     */
+    final public function keyLast(): int|string|null
+    {
+        return array_key_last($this->data);
+    }
+
+    /**
+     * Return all the keys or a subset of the keys of an array.
+     * Analogue of the PHP function array_keys.
+     *
+     * @param mixed $filter_value
+     * @param bool $strict
+     * @return static
+     * @see array_keys()
+     */
+    final public function keys(mixed $filter_value = null, bool $strict = false): static
+    {
+        return new static(
+            $filter_value !== null && $strict
+                ? array_keys($this->data, $filter_value, $strict)
+                : array_keys($this->data)
+        );
+    }
+
+    /**
+     * Applies the callback to the elements of the given arrays.
+     * Analogue of the PHP function array_map.
+     *
+     * @param callable $callback callback(mixed $value, mixed $key)
+     * @return static
+     * @see array_map()
+     */
+    final public function map(callable $callback): static
+    {
+        return new static(
+            array_map(
+                $callback,
+                array_values($this->data),
+                array_keys($this->data)
+            )
+        );
+    }
+
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
 
 
-    ///
-    ///
-    ///
-    ///
-    ///
-    ///
+    /**
+     * Checks if a value exists in an array.
+     * Analogue of the PHP function in_array.
+     *
+     * @param mixed $needle
+     * @param bool $strict
+     * @return bool
+     * @see in_array()
+     */
+    final public function in(mixed $needle, bool $strict = false): bool
+    {
+        return in_array($needle, $this->data, $strict);
+    }
 
     /**
      * Return an array with elements in reverse order.
@@ -589,23 +796,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(array_unique($this->data, $flags));
     }
 
-    /**
-     * Return all the keys or a subset of the keys of an array.
-     * Analogue of the PHP function array_keys.
-     *
-     * @param mixed $filter_value
-     * @param bool $strict
-     * @return static
-     * @see array_keys()
-     */
-    final public function keys(mixed $filter_value = null, bool $strict = false): static
-    {
-        return new static(
-            $filter_value !== null && $strict
-                ? array_keys($this->data, $filter_value, $strict)
-                : array_keys($this->data)
-        );
-    }
+
 
     /**
      * Prepend one or more elements to the beginning of an array.
@@ -695,19 +886,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
 
-    /**
-     * Applies a callback function to all elements of an object of the current type and
-     * returns a new instance of an object of the current type.
-     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
-     *
-     * @param callable $callback
-     * @return static
-     * @see array_map()
-     */
-    final public function map(callable $callback): static
-    {
-        return new static(array_map($callback, array_values($this->data), array_keys($this->data)));
-    }
+
 
     /**
      * Applies a callback function to all elements of a multidimensional object of the current type and
@@ -730,20 +909,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         })($callback, $this->getDataAsArray()));
     }
 
-
-    /**
-     * Checks if a value exists in an array.
-     * Analogue of the PHP function in_array.
-     *
-     * @param mixed $needle
-     * @param bool $strict
-     * @return bool
-     * @see in_array()
-     */
-    final public function in(mixed $needle, bool $strict = false): bool
-    {
-        return in_array($needle, $this->data, $strict);
-    }
 
     /**
      * Returns a new instance of an object of the current type if the value passed to the method is an array.
