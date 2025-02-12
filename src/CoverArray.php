@@ -743,9 +743,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Analogue of the PHP function array_map.
      *
      * @param callable $callback
-     *      callback(mixed $value)
-     *      callback(mixed $value, mixed $key)
-     *      callback(mixed $value, mixed $key, ...$arrays)
      * @param CoverArray|array ...$arrays
      * @return static
      * @see array_map()
@@ -757,25 +754,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_map($callback, ...$args)
         );
-    }
-
-    /**
-     * Applies a callback function to all elements of a multidimensional object of the current type and
-     * returns a new instance of the object of the current type.
-     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
-     *
-     * @param callable $callback callback(mixed $value, mixed $key)
-     * @return static
-     */
-    final public function mapRecursive(callable $callback): static
-    {
-        return new static((function (callable $callback, array $arr) {
-            array_walk_recursive($arr, function (&$v, $k) use ($callback) {
-                $v = $callback($v, $k);
-            });
-
-            return $arr;
-        })($callback, $this->getDataAsArray()));
     }
 
     /**
@@ -821,6 +799,35 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     ///
     ///
 
+    /**
+     * Applies the callback to the elements of the given arrays.
+     *
+     * @param callable $callback callback(mixed $value, mixed $key)
+     * @return static
+     */
+    final public function each(callable $callback): static
+    {
+        return $this->map($callback, $this->keys());
+    }
+
+    /**
+     * Applies a callback function to all elements of a multidimensional object of the current type and
+     * returns a new instance of the object of the current type.
+     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
+     *
+     * @param callable $callback callback(mixed $value, mixed $key)
+     * @return static
+     */
+    final public function eachRecursive(callable $callback): static
+    {
+        return new static((function (callable $callback, array $arr) {
+            array_walk_recursive($arr, function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+
+            return $arr;
+        })($callback, $this->getDataAsArray()));
+    }
 
     /**
      * Checks if a value exists in an array.

@@ -1366,25 +1366,6 @@ class CoverArrayTest extends TestCase
     }
 
     /**
-     * @see CoverArray::mapRecursive()
-     */
-    public function testMapRecursiveMethod(): void
-    {
-        $data = $this->data->get('languages');
-        $expected = [
-            'backend' => ['0: PHP', '1: MySql'],
-            'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']
-        ];
-
-        $this->assertSame(
-            $expected,
-            $data->mapRecursive(
-                fn(mixed $value, mixed $key): string => "$key: $value"
-            )->getDataAsArray()
-        );
-    }
-
-    /**
      * @see CoverArray::merge()
      */
     public function testMergeMethod(): void
@@ -1466,6 +1447,25 @@ class CoverArrayTest extends TestCase
     ///
     ///
 
+
+    /**
+     * @see CoverArray::eachRecursive()
+     */
+    public function testEachRecursiveMethod(): void
+    {
+        $data = $this->data->get('languages');
+        $expected = [
+            'backend' => ['0: PHP', '1: MySql'],
+            'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']
+        ];
+
+        $this->assertSame(
+            $expected,
+            $data->eachRecursive(
+                fn(mixed $value, mixed $key): string => "$key: $value"
+            )->getDataAsArray()
+        );
+    }
 
     /**
      * @see CoverArray::prepend()
