@@ -212,6 +212,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
+     * @param array $array
+     * @return $this
+     */
+    final public function fromArray(array $array): static
+    {
+        return new static($array);
+    }
+
+    /**
      * Analogue of the PHP function implode
      *
      * @param string $separator
