@@ -671,7 +671,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
     /**
      * Checks whether a given array is a list.
-     * Analogue of the PHP function array_flip.
+     * Analogue of the PHP function array_is_list.
      *
      * @return bool
      * @author Mark Amery
@@ -680,6 +680,14 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function isList(): bool
     {
+        if (!function_exists('array_is_list')) {
+            if ($this->data === []) {
+                return true;
+            }
+
+            return array_keys($this->data) === range(0, $this->count() - 1);
+        }
+
         return array_is_list($this->data);
     }
 
@@ -746,6 +754,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * @param CoverArray|array ...$arrays
      * @return static
      * @see array_map()
+     * @see static::each()
      */
     final public function map(callable $callback, CoverArray|array ...$arrays): static
     {
@@ -804,6 +813,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param callable $callback callback(mixed $value, mixed $key)
      * @return static
+     * @see static::map()
      */
     final public function each(callable $callback): static
     {
