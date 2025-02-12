@@ -187,8 +187,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
             return $actual_data;
         }
 
-        // Attempting to invoke key on a scalar value or on an object value other than static
-        if (!is_object($actual_data) || !$actual_data instanceof static) {
+        if (!($actual_data instanceof self) || !method_exists($actual_data, 'get')) {
             return null;
         }
 
@@ -342,8 +341,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(
             array_combine(
-                (new static($keys))->getDataAsArray(),
-                (new static($values))->getDataAsArray()
+                is_a($keys, self::class) ? $keys->getDataAsArray() : $keys,
+                is_a($values, self::class) ? $values->getDataAsArray() : $values
             )
         );
     }
@@ -733,7 +732,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function keys(mixed $filter_value = null, bool $strict = false): static
     {
         return new static(
-            $filter_value !== null && $strict
+            $filter_value !== null
                 ? array_keys($this->data, $filter_value, $strict)
                 : array_keys($this->data)
         );
@@ -743,18 +742,20 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Applies the callback to the elements of the given arrays.
      * Analogue of the PHP function array_map.
      *
-     * @param callable $callback callback(mixed $value, mixed $key)
+     * @param callable $callback
+     *      callback(mixed $value)
+     *      callback(mixed $value, mixed $key)
+     *      callback(mixed $value, mixed $key, ...$arrays)
+     * @param CoverArray|array ...$arrays
      * @return static
      * @see array_map()
      */
-    final public function map(callable $callback): static
+    final public function map(callable $callback, CoverArray|array ...$arrays): static
     {
+        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+
         return new static(
-            array_map(
-                $callback,
-                array_values($this->data),
-                array_keys($this->data)
-            )
+            array_map($callback, ...$args)
         );
     }
 

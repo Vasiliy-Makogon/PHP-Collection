@@ -1312,15 +1312,46 @@ class CoverArrayTest extends TestCase
      */
     public function testMapMethod(): void
     {
-        $data = $this->data->get('languages.backend');
-        $expected = ['0: PHP', '1: MySql'];
+        $data = $this->data->get('address');
+
+        // The returned array will preserve the keys of the array argument if and only if exactly one array is passed.
+        $expected = [
+            'country' => '--Russia',
+            'region' => '--Moscow region',
+            'city' => '--Podolsk',
+            'street' => '--Kirov st.'
+        ];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_map(
+                fn(mixed $value): string => "--$value",
+                $data->getDataAsArray()
+            )
+        );
+
+        $this->assertSame(
+            $expected,
+            $data->map(
+                fn(mixed $value): string => "--$value"
+            )->getDataAsArray()
+        );
+
+        // If more than one array is passed, the returned array will have sequential integer keys.
+        $expected = [
+            0 => 'country: Russia',
+            1 => 'region: Moscow region',
+            2 => 'city: Podolsk',
+            3 => 'street: Kirov st.'
+        ];
 
         // original function
         $this->assertSame(
             $expected,
             array_map(
                 fn(mixed $value, mixed $key): string => "$key: $value",
-                $data->values()->getDataAsArray(),
+                $data->getDataAsArray(),
                 $data->keys()->getDataAsArray()
             )
         );
@@ -1328,7 +1359,8 @@ class CoverArrayTest extends TestCase
         $this->assertSame(
             $expected,
             $data->map(
-                fn(mixed $value, mixed $key): string => "$key: $value"
+                fn(mixed $value, mixed $key): string => "$key: $value",
+                $data->keys()->getDataAsArray()
             )->getDataAsArray()
         );
     }
