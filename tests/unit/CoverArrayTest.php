@@ -282,7 +282,10 @@ class CoverArrayTest extends TestCase
      */
     public function testImplodeMethod(): void
     {
-        $this->assertSame('PHP, MySql', $this->data->get('languages.backend')->implode(', '));
+        $this->assertSame(
+            'PHP, MySql',
+            $this->data->get('languages.backend')->implode(', ')
+        );
     }
 
     public function testInstanceOfSelf(): void
@@ -305,8 +308,8 @@ class CoverArrayTest extends TestCase
      */
     public function testAllMethod(): void
     {
-        $this->assertTrue($this->data->get('birthday')->all(function ($value) {
-            return is_int($value);
+        $this->assertTrue($this->data->get('languages')->all(function ($value) {
+            return is_iterable($value);
         }));
 
         $this->assertFalse($this->data->get('languages.backend')->all(function ($value) {
@@ -319,16 +322,12 @@ class CoverArrayTest extends TestCase
      */
     public function testAnyMethod(): void
     {
-        $this->assertTrue($this->data->get('birthday')->any(function ($value) {
-            return is_int($value);
-        }));
-
         $this->assertTrue($this->data->get('languages.backend')->any(function ($value, $key) {
             return $value == 'PHP' && $key == 0;
         }));
 
-        $this->assertTrue($this->data->get('languages')->any(function ($value, $key) {
-            return $value instanceof NewTypeArray;
+        $this->assertFalse($this->data->get('languages')->any(function ($value, $key) {
+            return $key == 'undefined';
         }));
     }
 
@@ -338,7 +337,12 @@ class CoverArrayTest extends TestCase
     public function testChangeKeyCaseMethod(): void
     {
         $data = $this->data->get('address');
-        $expected = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+        $expected = [
+            'country' => 'Russia',
+            'region' => 'Moscow region',
+            'city' => 'Podolsk',
+            'street' => 'Kirov st.'
+        ];
 
         // original function
         $this->assertSame(
@@ -351,7 +355,12 @@ class CoverArrayTest extends TestCase
             $data->changeKeyCase()->getDataAsArray()
         );
 
-        $expected = ['COUNTRY' => 'Russia', 'REGION' => 'Moscow region', 'CITY' => 'Podolsk', 'STREET' => 'Kirov st.'];
+        $expected = [
+            'COUNTRY' => 'Russia',
+            'REGION' => 'Moscow region',
+            'CITY' => 'Podolsk',
+            'STREET' => 'Kirov st.'
+        ];
 
         // original function
         $this->assertSame(
@@ -406,7 +415,7 @@ class CoverArrayTest extends TestCase
         $this->expectException(ValueError::class);
         $this->assertSame(
             $expected,
-            $this->data->get('address')->chunk(0, true)->getDataAsArray()
+            $data->chunk(0, true)->getDataAsArray()
         );
     }
 
@@ -415,7 +424,7 @@ class CoverArrayTest extends TestCase
      */
     public function testColumnMethod(): void
     {
-        $data = (new NewTypeArray())->setData([
+        $data = new NewTypeArray([
             ['id' => 2135, 'first_name' => 'John', 'last_name' => 'Doe'],
             ['id' => 3245, 'first_name' => 'Sally', 'last_name' => 'Smith'],
             ['id' => 5342, 'first_name' => 'Jane', 'last_name' => 'Jones'],
@@ -434,7 +443,12 @@ class CoverArrayTest extends TestCase
             $data->column('first_name')->getDataAsArray()
         );
 
-        $expected = [2135 => 'John', 3245 => 'Sally', 5342 => 'Jane', 5623 => 'Peter'];
+        $expected = [
+            2135 => 'John',
+            3245 => 'Sally',
+            5342 => 'Jane',
+            5623 => 'Peter'
+        ];
 
         // original function
         $this->assertSame(
@@ -456,7 +470,12 @@ class CoverArrayTest extends TestCase
         $valuesData = $this->data->get('address')->values();
         $keysData = $this->data->get('address')->keys();
 
-        $expected = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+        $expected = [
+            'country' => 'Russia',
+            'region' => 'Moscow region',
+            'city' => 'Podolsk',
+            'street' => 'Kirov st.'
+        ];
 
         // original function
         $this->assertSame(
@@ -479,7 +498,10 @@ class CoverArrayTest extends TestCase
         // arguments as CoverArray
         $this->assertSame(
             $expected,
-            NewTypeArray::combine($keysData, $valuesData)->getDataAsArray()
+            NewTypeArray::combine(
+                $keysData,
+                $valuesData
+            )->getDataAsArray()
         );
     }
 
@@ -763,7 +785,11 @@ class CoverArrayTest extends TestCase
 
         $this->assertSame(
             $expected,
-            NewTypeArray::fill($start_index, $count, $value)->getDataAsArray()
+            NewTypeArray::fill(
+                $start_index,
+                $count,
+                $value
+            )->getDataAsArray()
         );
     }
 
@@ -817,7 +843,10 @@ class CoverArrayTest extends TestCase
         // original function
         $this->assertSame(
             $expected,
-            array_filter($data->getDataAsArray(), $callback)
+            array_filter(
+                $data->getDataAsArray(),
+                $callback
+            )
         );
 
         $this->assertSame(
@@ -836,12 +865,19 @@ class CoverArrayTest extends TestCase
         // original function
         $this->assertSame(
             $expected,
-            array_filter($data->getDataAsArray(), $callback, ARRAY_FILTER_USE_KEY)
+            array_filter(
+                $data->getDataAsArray(),
+                $callback,
+                ARRAY_FILTER_USE_KEY
+            )
         );
 
         $this->assertSame(
             $expected,
-            $data->filter($callback, ARRAY_FILTER_USE_KEY)->getDataAsArray()
+            $data->filter(
+                $callback,
+                ARRAY_FILTER_USE_KEY
+            )->getDataAsArray()
         );
 
         // pass both value and key as arguments to callback
@@ -855,12 +891,19 @@ class CoverArrayTest extends TestCase
         // original function
         $this->assertSame(
             $expected,
-            array_filter($data->getDataAsArray(), $callback, ARRAY_FILTER_USE_BOTH)
+            array_filter(
+                $data->getDataAsArray(),
+                $callback,
+                ARRAY_FILTER_USE_BOTH
+            )
         );
 
         $this->assertSame(
             $expected,
-            $data->filter($callback, ARRAY_FILTER_USE_BOTH)->getDataAsArray()
+            $data->filter(
+                $callback,
+                ARRAY_FILTER_USE_BOTH
+            )->getDataAsArray()
         );
 
         // without callback
@@ -890,8 +933,8 @@ class CoverArrayTest extends TestCase
             return $value > 1000;
         }));
 
-        $this->assertSame($this->data->get('languages.backend'), $this->data->get('languages')->find(function ($value) {
-            return $value instanceof NewTypeArray;
+        $this->assertNull($this->data->find(function ($value) {
+            return false;
         }));
     }
 
@@ -903,6 +946,10 @@ class CoverArrayTest extends TestCase
         $this->assertSame(2, $this->data->get('birthday')->findKey(function ($value) {
             return $value == 1982;
         }));
+
+        $this->assertNull($this->data->findKey(function ($value) {
+            return false;
+        }));
     }
 
     /**
@@ -911,7 +958,12 @@ class CoverArrayTest extends TestCase
     public function testFlipMethod(): void
     {
         $data = $this->data->get('address');
-        $expected = ['Russia' => 'country', 'Moscow region' => 'region', 'Podolsk' => 'city', 'Kirov st.' => 'street'];
+        $expected = [
+            'Russia' => 'country',
+            'Moscow region' => 'region',
+            'Podolsk' => 'city',
+            'Kirov st.' => 'street'
+        ];
 
         // original function
         $this->assertSame(
@@ -1173,6 +1225,7 @@ class CoverArrayTest extends TestCase
     public function testIsListMethod(): void
     {
         $this->assertTrue($this->data->get('birthday')->isList());
+        $this->assertTrue((new NewTypeArray())->isList());
         $this->assertFalse($this->data->isList());
     }
 
@@ -1280,6 +1333,96 @@ class CoverArrayTest extends TestCase
         );
     }
 
+    /**
+     * @see CoverArray::mapRecursive()
+     */
+    public function testMapRecursiveMethod(): void
+    {
+        $data = $this->data->get('languages');
+        $expected = [
+            'backend' => ['0: PHP', '1: MySql'],
+            'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']
+        ];
+
+        $this->assertSame(
+            $expected,
+            $data->mapRecursive(
+                fn(mixed $value, mixed $key): string => "$key: $value"
+            )->getDataAsArray()
+        );
+    }
+
+    /**
+     * @see CoverArray::merge()
+     */
+    public function testMergeMethod(): void
+    {
+        $data = $this->data->get('languages.backend');
+        $merge = $this->data->get('languages.frontend');
+        $expected = ['PHP', 'MySql', 'HTML', 'CSS', 'JavaScript'];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_merge(
+                $data->getDataAsArray(),
+                $merge->getDataAsArray(),
+            )
+        );
+
+        // arguments as array
+        $this->assertSame(
+            $expected,
+            $data->merge(
+                $merge->getDataAsArray()
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        $this->assertSame(
+            $expected,
+            $data->merge($merge)->getDataAsArray()
+        );
+    }
+
+    /**
+     * @see CoverArray::mergeRecursive()
+     */
+    public function testMergeRecursiveMethod(): void
+    {
+        $data1 = new NewTypeArray(['color' => ['favorite' => 'red'], 5]);
+        $data2 = new NewTypeArray([10, 'color' => ['favorite' => 'green', 'blue']]);
+        $expected = [
+            'color' => [
+                'favorite' => [
+                    0 => 'red',
+                    1 => 'green',
+                ],
+                0 => 'blue',
+            ],
+            0 => 5,
+            1 => 10,
+        ];
+
+        // original function
+        $this->assertSame(
+            $expected,
+            array_merge_recursive(
+                $data1->getDataAsArray(),
+                $data2->getDataAsArray(),
+            )
+        );
+
+        // arguments as array
+        $this->assertSame(
+            $expected,
+            $data1->mergeRecursive(
+                $data2->getDataAsArray()
+            )->getDataAsArray()
+        );
+    }
+
+
     ///
     ///
     ///
@@ -1358,19 +1501,6 @@ class CoverArrayTest extends TestCase
         );
     }
 
-
-    /**
-     * @see CoverArray::mapRecursive()
-     */
-    public function testMapRecursiveMethod(): void
-    {
-        $this->assertSame(
-            ['backend' => ['0: PHP', '1: MySql'], 'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']],
-            $this->data->get('languages')->mapRecursive(
-                fn(mixed $value, mixed $key): string => "$key: $value"
-            )->getDataAsArray()
-        );
-    }
 
     /**
      * @see CoverArray::unique()

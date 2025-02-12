@@ -207,7 +207,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public static function fromExplode(string $separator, string $string, int $limit = PHP_INT_MAX): static
     {
-        return new static(explode($separator, $string, $limit));
+        return new static(
+            explode($separator, $string, $limit)
+        );
     }
 
     /**
@@ -288,7 +290,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function changeKeyCase(int $case = CASE_LOWER): static
     {
-        return new static(array_change_key_case($this->data, $case));
+        return new static(
+            array_change_key_case($this->data, $case)
+        );
     }
 
     /**
@@ -336,10 +340,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public static function combine(CoverArray|array $keys, CoverArray|array $values): static
     {
-        return new static(array_combine(
-            (new static($keys))->getDataAsArray(),
-            (new static($values))->getDataAsArray()
-        ));
+        return new static(
+            array_combine(
+                (new static($keys))->getDataAsArray(),
+                (new static($values))->getDataAsArray()
+            )
+        );
     }
 
     /**
@@ -351,7 +357,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function countValues(): static
     {
-        return new static(array_count_values($this->getDataAsArray()));
+        return new static(
+            array_count_values($this->data)
+        );
     }
 
     /**
@@ -366,7 +374,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function diff(CoverArray|array ...$arrays): static
     {
         return new static(array_diff(
-            $this->data,
+            $this->getDataAsArray(),
             ...(new static($arrays))->getDataAsArray()
         ));
     }
@@ -383,7 +391,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function diffAssoc(CoverArray|array ...$arrays): static
     {
         return new static(array_diff_assoc(
-            $this->data,
+            $this->getDataAsArray(),
             ...(new static($arrays))->getDataAsArray()
         ));
     }
@@ -400,7 +408,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function diffKey(CoverArray|array ...$arrays): static
     {
         return new static(array_diff_key(
-            $this->data,
+            $this->getDataAsArray(),
             ...(new static($arrays))->getDataAsArray()
         ));
     }
@@ -418,7 +426,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function diffUassoc(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args = array_merge([$this->getDataAsArray()], [...(new static($arrays))->getDataAsArray()]);
         $args[] = $key_compare_func;
 
         return new static(
@@ -438,7 +446,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function diffUkey(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
+        $args = array_merge([$this->getDataAsArray()], [...(new static($arrays))->getDataAsArray()]);
         $args[] = $key_compare_func;
 
         return new static(
@@ -475,7 +483,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public static function fillKeys(CoverArray|array $keys, mixed $value): static
     {
         return new static(
-            array_fill_keys((new static($keys))->getDataAsArray(), $value)
+            array_fill_keys(
+                (new static($keys))->getDataAsArray(),
+                $value
+            )
         );
     }
 
@@ -490,7 +501,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function filter(?callable $callback = null, int $mode = 0): static
     {
-        return new static(array_filter($this->data, $callback, $mode));
+        return new static(
+            array_filter($this->data, $callback, $mode)
+        );
     }
 
     /**
@@ -556,7 +569,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function flip(): static
     {
-        return new static(array_flip($this->data));
+        return new static(
+            array_flip($this->data)
+        );
     }
 
     /**
@@ -570,7 +585,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function intersect(CoverArray|array ...$arrays): static
     {
-        return new static(array_intersect($this->data, ...(new static($arrays))->getDataAsArray()));
+        return new static(
+            array_intersect(
+                $this->data,
+                ...(new static($arrays))->getDataAsArray()
+            )
+        );
     }
 
     /**
@@ -584,7 +604,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function intersectAssoc(CoverArray|array ...$arrays): static
     {
-        return new static(array_intersect_assoc($this->data, ...(new static($arrays))->getDataAsArray()));
+        return new static(
+            array_intersect_assoc(
+                $this->data,
+                ...(new static($arrays))->getDataAsArray()
+            )
+        );
     }
 
     /**
@@ -598,7 +623,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function intersectKey(CoverArray|array ...$arrays): static
     {
-        return new static(array_intersect_key($this->data, ...(new static($arrays))->getDataAsArray()));
+        return new static(
+            array_intersect_key(
+                $this->data,
+                ...(new static($arrays))->getDataAsArray()
+            )
+        );
     }
 
     /**
@@ -651,14 +681,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function isList(): bool
     {
-        if (!function_exists('array_is_list')) {
-            if ($this->data === []) {
-                return true;
-            }
-
-            return array_keys($this->data) === range(0, count($this->data) - 1);
-        }
-
         return array_is_list($this->data);
     }
 
@@ -736,6 +758,61 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         );
     }
 
+    /**
+     * Applies a callback function to all elements of a multidimensional object of the current type and
+     * returns a new instance of the object of the current type.
+     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
+     *
+     * @param callable $callback callback(mixed $value, mixed $key)
+     * @return static
+     */
+    final public function mapRecursive(callable $callback): static
+    {
+        return new static((function (callable $callback, array $arr) {
+            array_walk_recursive($arr, function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+
+            return $arr;
+        })($callback, $this->getDataAsArray()));
+    }
+
+    /**
+     * Merge one or more arrays.
+     * An analogue of the PHP function array_merge, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     */
+    final public function merge(CoverArray|array ...$arrays): static
+    {
+        return new static(
+            array_merge(
+                $this->getDataAsArray(),
+                ...(new static($arrays))->getDataAsArray()
+            )
+        );
+    }
+
+    /**
+     * Merge one or more arrays recursively.
+     * An analogue of the PHP function array_merge_recursive, but accepts not only arrays as arguments,
+     * but also objects derived from the CoverArray class.
+     *
+     * @param CoverArray|array ...$arrays
+     * @return static
+     */
+    final public function mergeRecursive(CoverArray|array ...$arrays): static
+    {
+        return new static(
+            array_merge_recursive(
+                $this->getDataAsArray(),
+                ...(new static($arrays))->getDataAsArray()
+            )
+        );
+    }
+
     ///
     ///
     ///
@@ -768,7 +845,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function reverse(bool $preserve_keys = false): static
     {
-        return new static(array_reverse($this->data, $preserve_keys));
+        return new static(
+            array_reverse($this->data, $preserve_keys)
+        );
     }
 
     /**
@@ -780,7 +859,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function values(): static
     {
-        return new static(array_values($this->data));
+        return new static(
+            array_values($this->data)
+        );
     }
 
     /**
@@ -793,10 +874,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function unique(int $flags = SORT_STRING): static
     {
-        return new static(array_unique($this->data, $flags));
+        return new static(
+            array_unique($this->data, $flags)
+        );
     }
-
-
 
     /**
      * Prepend one or more elements to the beginning of an array.
@@ -883,30 +964,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         }
 
         return null;
-    }
-
-
-
-
-    /**
-     * Applies a callback function to all elements of a multidimensional object of the current type and
-     * returns a new instance of the object of the current type.
-     * Example of a callback function: fn(mixed $value, mixed $key): string => "$key: $value"
-     *
-     * @param callable $callback The callback function takes two arguments.
-     * The first is the value of the array element, and the second is the key or index of the element.
-     * @return static
-     * @see array_walk_recursive()
-     */
-    final public function mapRecursive(callable $callback): static
-    {
-        return new static((function (callable $callback, array $arr) {
-            array_walk_recursive($arr, function (&$v, $k) use ($callback) {
-                $v = $callback($v, $k);
-            });
-
-            return $arr;
-        })($callback, $this->getDataAsArray()));
     }
 
 
