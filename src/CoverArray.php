@@ -213,9 +213,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
 
     /**
      * @param array $array
-     * @return $this
+     * @return static
      */
-    final public function fromArray(array $array): static
+    final public static function fromArray(array $array): static
     {
         return new static($array);
     }
