@@ -759,13 +759,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Applies the callback to the elements of the given arrays.
      * Analogue of the PHP function array_map.
      *
-     * @param callable $callback
+     * Don't use this function for associative arrays, it's just a wrapper around a standard library function.
+     * For associative arrays use @see static::each()
+     *
+     * @param callable|null $callback
      * @param CoverArray|array ...$arrays
      * @return static
      * @see array_map()
-     * @see static::each()
      */
-    final public function map(callable $callback, CoverArray|array ...$arrays): static
+    final public function map(null|callable $callback, CoverArray|array ...$arrays): static
     {
         $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
 
