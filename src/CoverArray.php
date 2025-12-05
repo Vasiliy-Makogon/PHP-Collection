@@ -225,7 +225,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function __serialize(): array
     {
-        return $this->getDataAsArray();
+        return $this->getData();
     }
 
     /**
