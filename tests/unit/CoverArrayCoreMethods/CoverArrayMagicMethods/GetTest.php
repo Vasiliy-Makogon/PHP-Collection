@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicGetTest extends TestCase
+class GetTest extends TestCase
 {
     /**
      * Tests the __get() magic method for accessing existing properties.

@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicSetTest extends TestCase
+class SetTest extends TestCase
 {
     /**
      * Tests the __set() magic method for scalar values.

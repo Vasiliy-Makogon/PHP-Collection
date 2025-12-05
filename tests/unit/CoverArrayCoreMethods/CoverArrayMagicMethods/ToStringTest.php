@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicToStringTest extends TestCase
+class ToStringTest extends TestCase
 {
     /**
      * Tests default __toString() returns empty string.

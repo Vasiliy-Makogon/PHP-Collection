@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicCloneTest extends TestCase
+class CloneTest extends TestCase
 {
     /**
      * Tests that cloning creates a separate instance with copied data.

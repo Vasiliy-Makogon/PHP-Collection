@@ -14,17 +14,19 @@ use RuntimeException;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class Array2coverMethodTest extends TestCase
+class Array2coverTest extends TestCase
 {
-    private ReflectionClass $reflector;
+    /** @var ReflectionMethod */
     private ReflectionMethod $method;
+
+    /** @var NewTypeArray */
     private NewTypeArray $instance;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->reflector = new ReflectionClass(NewTypeArray::class);
-        $this->method = $this->reflector->getMethod('array2cover');
+        $reflector = new ReflectionClass(NewTypeArray::class);
+        $this->method = $reflector->getMethod('array2cover');
         $this->method->setAccessible(true);
         $this->instance = new NewTypeArray([]);
     }

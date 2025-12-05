@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicIssetTest extends TestCase
+class IssetTest extends TestCase
 {
     /**
      * Tests isset() with existing scalar values.

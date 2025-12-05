@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicSerializeUnserializeTest extends TestCase
+class SerializeUnserializeTest extends TestCase
 {
     /**
      * Tests complete serialization/deserialization cycle with scalar values.

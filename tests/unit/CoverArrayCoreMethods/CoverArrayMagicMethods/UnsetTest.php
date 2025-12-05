@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class CoverArrayMagicUnsetTest extends TestCase
+class UnsetTest extends TestCase
 {
     /**
      * Tests unset() with various value types.

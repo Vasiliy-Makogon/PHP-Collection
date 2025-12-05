@@ -1173,7 +1173,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @return mixed|static
      * @throws RuntimeException if maximum depth exceeded
      */
-    final protected function array2cover(mixed $value, int $depth = 0, int $maxDepth = 512): mixed
+    final protected function array2cover(mixed $value, int $depth = 0, int $maxDepth = 5): mixed
     {
         if ($depth > $maxDepth) {
             throw new RuntimeException('Maximum recursion depth exceeded');
