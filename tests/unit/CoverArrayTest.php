@@ -211,7 +211,7 @@ class CoverArrayTest extends TestCase
     /**
      * @see CoverArray::offsetUnset()
      */
-    public function offsetUnset(): void
+    public function testOffsetUnsetMethod(): void
     {
         unset($this->data['name']);
         $this->assertFalse(isset($this->data['name']));
@@ -258,6 +258,8 @@ class CoverArrayTest extends TestCase
         $this->assertNull($this->data->get('languages.backend.0.0'));
         $this->assertNull($this->data->get('nonexistent.nonexistent.nonexistent'));
         $this->assertNull($this->data->get('1000.nonexistent.nonexistent.nonexistent'));
+
+        $this->expectException(InvalidArgumentException::class);
         $this->assertNull($this->data->get(''));
     }
 

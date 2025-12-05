@@ -7,16 +7,20 @@ namespace Krugozor\Cover;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
+use InvalidArgumentException;
 use IteratorAggregate;
+use JsonSerializable;
+use RuntimeException;
 use Traversable;
 use ValueError;
+use JsonException;
 
 /**
  * @package Krugozor\Cover
  * @author Vasiliy Makogon
  * @link https://github.com/Vasiliy-Makogon/Cover
  */
-class CoverArray implements IteratorAggregate, Countable, ArrayAccess
+class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
     use Simple;
 
@@ -25,7 +29,17 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     public function __construct(?iterable $data = null)
     {
-        $this->setData($data);
+        if ($data !== null) {
+            $this->setData($data);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    final public function isEmpty(): bool
+    {
+        return empty($this->data);
     }
 
     /**
@@ -61,6 +75,80 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         }
 
         return $this;
+    }
+
+    /**
+     * Creates a shallow copy of the object with deep cloning of immediate object properties.
+     *
+     * This magic method is automatically called when using the `clone` keyword on an instance.
+     * It performs a deep copy only on the first level of object elements in the data array,
+     * cloning all object values while leaving scalar values and arrays as references.
+     * This prevents unintended shared object state between cloned instances while
+     * maintaining reasonable performance.
+     *
+     *
+     * Создает поверхностную копию объекта с глубоким клонированием непосредственных свойств-объектов.
+     *
+     * Этот магический метод автоматически вызывается при использовании ключевого слова `clone` для экземпляра.
+     * Он выполняет глубокое копирование только на первом уровне элементов-объектов в массиве данных,
+     * клонируя все объектные значения, в то время как скалярные значения и массивы остаются ссылками.
+     * Это предотвращает непреднамеренное совместное использование состояния объектов между клонированными
+     * экземплярами при сохранении разумной производительности.
+     *
+     * @return void
+     *
+     * @note This implementation does not handle deep cloning of nested objects within objects.
+     *       Use serialization/deserialization for complete deep copies if needed.
+     *
+     * @note Эта реализация не обрабатывает глубокое клонирование вложенных объектов внутри объектов.
+     *       Используйте сериализацию/десериализацию для полных глубоких копий при необходимости.
+     *
+     * @see https://www.php.net/manual/en/language.oop5.cloning.php
+     * @see CoverArray::copy()
+     */
+    public function __clone()
+    {
+        $this->data = array_map(function ($item) {
+            return is_object($item) ? clone $item : $item;
+        }, $this->data);
+    }
+
+    /**
+     * Creates and returns a copy of the current object instance.
+     *
+     * This method provides a convenient public interface for object copying,
+     * internally utilizing the `__clone()` magic method. It returns a new instance
+     * where all immediate object properties are cloned, ensuring independent
+     * state management between the original and copied objects.
+     *
+     * The method is marked as final to maintain consistent copying behavior
+     * across all subclasses, preventing potential issues with inheritance chains.
+     *
+     *
+     * Создает и возвращает копию текущего экземпляра объекта.
+     *
+     * Этот метод предоставляет удобный публичный интерфейс для копирования объектов,
+     * внутренне используя магический метод `__clone()`. Он возвращает новый экземпляр,
+     * в котором все непосредственные свойства-объекты клонируются, обеспечивая
+     * независимое управление состоянием между исходным и скопированным объектами.
+     *
+     * Метод помечен как final для поддержания согласованного поведения копирования
+     * во всех подклассах, предотвращая потенциальные проблемы с цепочками наследования.
+     *
+     * @return static A new instance of the current class with cloned object properties.
+     *                Возвращает новый экземпляр текущего класса с клонированными свойствами-объектами.
+     *
+     * @example
+     * $original = new CoverArray(['obj' => new stdClass()]);
+     * $copy = $original->copy();
+     * $copy['obj']->property = 'changed'; // Does not affect $original
+     *
+     * @see CoverArray::__clone()
+     * @see https://www.php.net/manual/en/language.oop5.cloning.php
+     */
+    final public function copy(): static
+    {
+        return clone $this;
     }
 
     /**
@@ -157,7 +245,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         $data = [];
         foreach ($this->getData() as $key => $value) {
-            $data[$key] = is_a($value, self::class) ? $value->{__FUNCTION__}() : $value;
+            $data[$key] = $value instanceof self ? $value->{__FUNCTION__}() : $value;
         }
 
         return $data;
@@ -175,7 +263,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     final public function get(string $path): mixed
     {
         if ($path === '') {
-            return null;
+            throw new InvalidArgumentException('Path cannot be empty');
         }
 
         [0 => $key, 1 => $other] = array_pad(explode('.', $path, 2), 2, null);
@@ -192,6 +280,44 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         }
 
         return $this->data[$key]->get($other);
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     */
+    final public function jsonSerialize(): array
+    {
+        return $this->getDataAsArray();
+    }
+
+    /**
+     * Create CoverArray from JSON string
+     *
+     * @param string $json
+     * @param int $depth
+     * @param int $flags
+     * @return static
+     * @throws JsonException
+     */
+    final public static function fromJson(
+        string $json,
+        int $depth = 512,
+        int $flags = JSON_THROW_ON_ERROR
+    ): static {
+        return new static(json_decode($json, true, $depth, $flags));
+    }
+
+    /**
+     * Convert to JSON string
+     *
+     * @param int $flags
+     * @param int $depth
+     * @return string
+     * @throws JsonException
+     */
+    final public function toJson(int $flags = JSON_THROW_ON_ERROR, int $depth = 512): string
+    {
+        return json_encode($this->getDataAsArray(), $flags, $depth);
     }
 
     /**
@@ -350,8 +476,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(
             array_combine(
-                is_a($keys, self::class) ? $keys->getDataAsArray() : $keys,
-                is_a($values, self::class) ? $values->getDataAsArray() : $values
+                self::convertToPlainArray($keys),
+                self::convertToPlainArray($values)
             )
         );
     }
@@ -383,7 +509,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(array_diff(
             $this->getDataAsArray(),
-            ...(new static($arrays))->getDataAsArray()
+            ...array_map(
+                [self::class, 'convertToPlainArray'],
+                $arrays
+            )
         ));
     }
 
@@ -400,13 +529,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(array_diff_assoc(
             $this->getDataAsArray(),
-            ...(new static($arrays))->getDataAsArray()
+            ...array_map(
+                [self::class, 'convertToPlainArray'],
+                $arrays
+            )
         ));
     }
 
     /**
      * Computes the difference of arrays using keys for comparison.
-     * An analogue of the PHP function array_diff_assoc, but accepts not only arrays as arguments,
+     * An analogue of the PHP function array_diff_key, but accepts not only arrays as arguments,
      * but also objects derived from the CoverArray class.
      *
      * @param CoverArray|array ...$arrays
@@ -417,7 +549,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(array_diff_key(
             $this->getDataAsArray(),
-            ...(new static($arrays))->getDataAsArray()
+            ...array_map(
+                [self::class, 'convertToPlainArray'],
+                $arrays
+            )
         ));
     }
 
@@ -434,11 +569,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function diffUassoc(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->getDataAsArray()], [...(new static($arrays))->getDataAsArray()]);
-        $args[] = $key_compare_func;
-
         return new static(
-            call_user_func_array('array_diff_uassoc', $args)
+            call_user_func_array('array_diff_uassoc', array_merge(
+                [$this->getDataAsArray()],
+                array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                ),
+                [$key_compare_func]
+            ))
         );
     }
 
@@ -454,11 +593,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function diffUkey(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->getDataAsArray()], [...(new static($arrays))->getDataAsArray()]);
-        $args[] = $key_compare_func;
-
         return new static(
-            call_user_func_array('array_diff_ukey', $args)
+            call_user_func_array('array_diff_ukey', array_merge(
+                [$this->getDataAsArray()],
+                array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                ),
+                [$key_compare_func]
+            ))
         );
     }
 
@@ -492,7 +635,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     {
         return new static(
             array_fill_keys(
-                (new static($keys))->getDataAsArray(),
+                self::convertToPlainArray($keys),
                 $value
             )
         );
@@ -520,7 +663,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param callable $callback The callback function to call to check each element, which must be
      * callback(mixed $value, mixed $key): bool
-     * @return bool The function returns the value of the first element for which the callback returns true.
+     * @return mixed The function returns the value of the first element for which the callback returns true.
      * If no matching element is found the function returns null.
      * @author Joshua Rüsweg, josh@php.net
      * @see https://wiki.php.net/rfc/array_find#array_find
@@ -596,7 +739,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_intersect(
                 $this->data,
-                ...(new static($arrays))->getDataAsArray()
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                )
             )
         );
     }
@@ -615,7 +761,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_intersect_assoc(
                 $this->data,
-                ...(new static($arrays))->getDataAsArray()
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                )
             )
         );
     }
@@ -634,7 +783,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_intersect_key(
                 $this->data,
-                ...(new static($arrays))->getDataAsArray()
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                )
             )
         );
     }
@@ -651,11 +803,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function intersectUassoc(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
-        $args[] = $key_compare_func;
-
         return new static(
-            call_user_func_array('array_intersect_uassoc', $args)
+            call_user_func_array('array_intersect_uassoc', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                ),
+                [$key_compare_func]
+            ))
         );
     }
 
@@ -666,15 +822,19 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      *
      * @param callable $key_compare_func
      * @param CoverArray|array ...$arrays
-     * @return $this
+     * @return static
      */
     final public function intersectUkey(callable $key_compare_func, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
-        $args[] = $key_compare_func;
-
         return new static(
-            call_user_func_array('array_intersect_ukey', $args)
+            call_user_func_array('array_intersect_ukey', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                ),
+                [$key_compare_func]
+            ))
         );
     }
 
@@ -760,19 +920,24 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Analogue of the PHP function array_map.
      *
      * Don't use this function for associative arrays, it's just a wrapper around a standard library function.
-     * For associative arrays use @see static::each()
-     *
-     * @param callable|null $callback
+     * For associative arrays use @param callable|null $callback
      * @param CoverArray|array ...$arrays
      * @return static
+     *
      * @see array_map()
      */
     final public function map(null|callable $callback, CoverArray|array ...$arrays): static
     {
-        $args = array_merge([$this->data], [...(new static($arrays))->getDataAsArray()]);
-
         return new static(
-            array_map($callback, ...$args)
+            array_map(
+                $callback,
+                ...array_merge([$this->data],
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    )
+                )
+            )
         );
     }
 
@@ -789,7 +954,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_merge(
                 $this->getDataAsArray(),
-                ...(new static($arrays))->getDataAsArray()
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                )
             )
         );
     }
@@ -807,7 +975,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
         return new static(
             array_merge_recursive(
                 $this->getDataAsArray(),
-                ...(new static($arrays))->getDataAsArray()
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $arrays
+                )
             )
         );
     }
@@ -828,7 +999,12 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function each(callable $callback): static
     {
-        return $this->map($callback, $this->keys());
+        $result = [];
+        foreach ($this->data as $key => $value) {
+            $result[$key] = $callback($value, $key);
+        }
+
+        return new static($result);
     }
 
     /**
@@ -967,17 +1143,13 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
     }
 
     /**
-     * Returns the first element of the current array.
+     * Returns the first element of the array.
      *
      * @return mixed
      */
     final public function getFirst(): mixed
     {
-        if ($this->count() && ($firstElement = reset($this->data)) !== null) {
-            return $firstElement;
-        }
-
-        return null;
+        return $this->count() > 0 ? $this->data[array_key_first($this->data)] : null;
     }
 
     /**
@@ -987,12 +1159,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      */
     final public function getLast(): mixed
     {
-        if ($this->count() && ($lastElement = end($this->data)) !== null) {
-            reset($this->data);
-            return $lastElement;
-        }
-
-        return null;
+        return $this->count() > 0 ? $this->data[array_key_last($this->data)] : null;
     }
 
 
@@ -1001,10 +1168,46 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess
      * Nested array elements also become an object of the current type.
      *
      * @param mixed $value
+     * @param int $depth current recursion depth
+     * @param int $maxDepth maximum allowed depth
      * @return mixed|static
+     * @throws RuntimeException if maximum depth exceeded
      */
-    final protected function array2cover(mixed $value): mixed
+    final protected function array2cover(mixed $value, int $depth = 0, int $maxDepth = 512): mixed
     {
-        return is_array($value) ? new static($value) : $value;
+        if ($depth > $maxDepth) {
+            throw new RuntimeException('Maximum recursion depth exceeded');
+        }
+
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        if (!is_array($value)) {
+            return $value;
+        }
+
+        // Do not convert callable-arrays
+        if (is_callable($value)) {
+            return $value;
+        }
+
+        $result = new static();
+        foreach ($value as $k => $v) {
+            $result[$k] = $this->array2cover($v, $depth + 1, $maxDepth);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Convert CoverArray or array to plain PHP array
+     *
+     * @param CoverArray|array $data
+     * @return array
+     */
+    private static function convertToPlainArray(CoverArray|array $data): array
+    {
+        return $data instanceof self ? $data->getDataAsArray() : $data;
     }
 }
