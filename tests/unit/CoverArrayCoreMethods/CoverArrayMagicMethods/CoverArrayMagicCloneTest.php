@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CoverArrayPrivateMethods;
+namespace CoverArrayCoreMethods\CoverArrayMagicMethods;
 
 use Krugozor\Cover\CoverArray;
 use Krugozor\Cover\Tests\NewTypeArray;

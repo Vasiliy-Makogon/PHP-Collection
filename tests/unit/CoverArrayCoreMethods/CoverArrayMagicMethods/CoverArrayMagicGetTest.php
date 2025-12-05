@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+namespace CoverArrayCoreMethods\CoverArrayMagicMethods;
+
 use Krugozor\Cover\CoverArray;
 use Krugozor\Cover\Tests\NewTypeArray;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 #[CoversClass(CoverArray::class)]
 class CoverArrayMagicGetTest extends TestCase
