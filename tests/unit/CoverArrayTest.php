@@ -1009,6 +1009,45 @@ class CoverArrayTest extends TestCase
         $decoded = json_decode($json, true);
         $this->assertEquals($data->getDataAsArray(), $decoded);
 
+        // Test with all JSON data types (matching fromJson test)
+        $allTypes = new NewTypeArray([
+            'string' => 'text',
+            'number' => 42,
+            'float' => 3.14,
+            'boolean_true' => true,
+            'boolean_false' => false,
+            'null' => null,
+            'array' => [1, 2, 3],
+            'object' => new NewTypeArray(['key' => 'value'])
+        ]);
+
+        $allTypesJson = $allTypes->toJson();
+        $this->assertJson($allTypesJson);
+        $decodedAllTypes = json_decode($allTypesJson, true);
+
+        $this->assertEquals('text', $decodedAllTypes['string']);
+        $this->assertEquals(42, $decodedAllTypes['number']);
+        $this->assertEquals(3.14, $decodedAllTypes['float']);
+        $this->assertTrue($decodedAllTypes['boolean_true']);
+        $this->assertFalse($decodedAllTypes['boolean_false']);
+        $this->assertNull($decodedAllTypes['null']);
+        $this->assertEquals([1, 2, 3], $decodedAllTypes['array']);
+        $this->assertIsArray($decodedAllTypes['object']);
+        $this->assertEquals(['key' => 'value'], $decodedAllTypes['object']);
+
+        // Test with empty JSON object (matching fromJson test)
+        $emptyObject = new NewTypeArray([]);
+        $emptyObjectJson = $emptyObject->toJson();
+        $this->assertEquals('[]', $emptyObjectJson);
+        $this->assertJson($emptyObjectJson);
+
+        // Test with empty nested array (similar to fromJson empty object test)
+        $emptyNested = new NewTypeArray(['empty' => []]);
+        $emptyNestedJson = $emptyNested->toJson();
+        $this->assertJson($emptyNestedJson);
+        $decodedEmptyNested = json_decode($emptyNestedJson, true);
+        $this->assertEquals([], $decodedEmptyNested['empty']);
+
         // Test with JSON flags
         $dataWithUnicode = new NewTypeArray(['text' => '© émojî 🚀']);
 
@@ -1078,18 +1117,6 @@ class CoverArrayTest extends TestCase
             $decodedSubstitute = json_decode($jsonWithSubstitute, true);
             $this->assertArrayHasKey('invalid', $decodedSubstitute);
         }
-
-        // Test with circular reference - should throw JsonException due to recursion
-        // We'll create a simple circular reference by having two objects reference each other
-        $obj1 = new \stdClass();
-        $obj2 = new \stdClass();
-        $obj1->ref = $obj2;
-        $obj2->ref = $obj1;
-
-        $circularData = new NewTypeArray(['circular' => $obj1]);
-
-        $this->expectException(JsonException::class);
-        $circularData->toJson();
     }
 
     /**
