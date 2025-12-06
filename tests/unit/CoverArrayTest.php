@@ -805,7 +805,292 @@ class CoverArrayTest extends TestCase
         $this->assertEquals($fromConstructor['test'], $fromMethod['test']);
     }
 
+    /**
+     * Tests the fromJson() static factory method.
+     *
+     * This test verifies that the fromJson() method correctly creates
+     * a new CoverArray instance from a JSON string, parsing the JSON
+     * and converting it to a CoverArray structure with proper nested
+     * object conversion. It also tests error handling for invalid JSON
+     * through JsonException throwing.
+     *
+     *
+     * Тестирование статического фабричного метода fromJson().
+     *
+     * Этот тест проверяет, что метод fromJson() корректно создает
+     * новый экземпляр CoverArray из строки JSON, парсит JSON
+     * и преобразует его в структуру CoverArray с правильным
+     * преобразованием вложенных объектов. Также тестируется обработка
+     * ошибок для невалидного JSON через выбрасывание JsonException.
+     *
+     * @see CoverArray::fromJson()
+     * @see CoverArray::array2cover()
+     * @see JsonException
+     */
+    public function testFromJsonMethod(): void
+    {
+        // Test basic JSON parsing
+        $jsonString = '{"name": "John", "age": 30, "city": "New York"}';
+        $cover = NewTypeArray::fromJson($jsonString);
 
+        $this->assertInstanceOf(NewTypeArray::class, $cover);
+        $this->assertEquals('John', $cover['name']);
+        $this->assertEquals(30, $cover['age']);
+        $this->assertEquals('New York', $cover['city']);
+        $this->assertEquals(3, $cover->count());
+
+        // Test with nested JSON objects
+        $nestedJson = '{
+            "user": {
+                "name": "Alice",
+                "details": {
+                    "age": 25,
+                    "email": "alice@example.com"
+                }
+            },
+            "active": true
+        }';
+
+        $nestedCover = NewTypeArray::fromJson($nestedJson);
+
+        $this->assertInstanceOf(NewTypeArray::class, $nestedCover);
+        $this->assertInstanceOf(NewTypeArray::class, $nestedCover['user']);
+        $this->assertInstanceOf(NewTypeArray::class, $nestedCover['user']['details']);
+        $this->assertEquals('Alice', $nestedCover['user']['name']);
+        $this->assertEquals(25, $nestedCover['user']['details']['age']);
+        $this->assertEquals('alice@example.com', $nestedCover['user']['details']['email']);
+        $this->assertTrue($nestedCover['active']);
+
+        // Test with JSON arrays
+        $arrayJson = '["apple", "banana", "cherry"]';
+        $arrayCover = NewTypeArray::fromJson($arrayJson);
+
+        $this->assertInstanceOf(NewTypeArray::class, $arrayCover);
+        $this->assertTrue($arrayCover->isList());
+        $this->assertEquals(3, $arrayCover->count());
+        $this->assertEquals('apple', $arrayCover[0]);
+        $this->assertEquals('banana', $arrayCover[1]);
+        $this->assertEquals('cherry', $arrayCover[2]);
+
+        // Test with mixed nested arrays and objects
+        $mixedJson = '{
+            "users": [
+                {"id": 1, "name": "John"},
+                {"id": 2, "name": "Jane"}
+            ],
+            "settings": {
+                "theme": "dark",
+                "notifications": true
+            }
+        }';
+
+        $mixedCover = NewTypeArray::fromJson($mixedJson);
+
+        $this->assertInstanceOf(NewTypeArray::class, $mixedCover);
+        $this->assertInstanceOf(NewTypeArray::class, $mixedCover['users']);
+        $this->assertInstanceOf(NewTypeArray::class, $mixedCover['settings']);
+
+        $this->assertEquals(2, $mixedCover['users']->count());
+        $this->assertInstanceOf(NewTypeArray::class, $mixedCover['users'][0]);
+        $this->assertInstanceOf(NewTypeArray::class, $mixedCover['users'][1]);
+        $this->assertEquals(1, $mixedCover['users'][0]['id']);
+        $this->assertEquals('John', $mixedCover['users'][0]['name']);
+        $this->assertEquals(2, $mixedCover['users'][1]['id']);
+        $this->assertEquals('Jane', $mixedCover['users'][1]['name']);
+
+        $this->assertEquals('dark', $mixedCover['settings']['theme']);
+        $this->assertTrue($mixedCover['settings']['notifications']);
+
+        // Test with empty JSON object
+        $emptyObjectJson = '{}';
+        $emptyObjectCover = NewTypeArray::fromJson($emptyObjectJson);
+
+        $this->assertInstanceOf(NewTypeArray::class, $emptyObjectCover);
+        $this->assertTrue($emptyObjectCover->isEmpty());
+        $this->assertEquals(0, $emptyObjectCover->count());
+
+        // Test with empty JSON array
+        $emptyArrayJson = '[]';
+        $emptyArrayCover = NewTypeArray::fromJson($emptyArrayJson);
+
+        $this->assertInstanceOf(NewTypeArray::class, $emptyArrayCover);
+        $this->assertTrue($emptyArrayCover->isEmpty());
+        $this->assertEquals(0, $emptyArrayCover->count());
+
+        // Test with all JSON data types
+        $allTypesJson = '{
+            "string": "text",
+            "number": 42,
+            "float": 3.14,
+            "boolean_true": true,
+            "boolean_false": false,
+            "null": null,
+            "array": [1, 2, 3],
+            "object": {"key": "value"}
+        }';
+
+        $allTypesCover = NewTypeArray::fromJson($allTypesJson);
+
+        $this->assertEquals('text', $allTypesCover['string']);
+        $this->assertEquals(42, $allTypesCover['number']);
+        $this->assertEquals(3.14, $allTypesCover['float']);
+        $this->assertTrue($allTypesCover['boolean_true']);
+        $this->assertFalse($allTypesCover['boolean_false']);
+        $this->assertNull($allTypesCover['null']);
+        $this->assertInstanceOf(NewTypeArray::class, $allTypesCover['array']);
+        $this->assertEquals([1, 2, 3], $allTypesCover['array']->getDataAsArray());
+        $this->assertInstanceOf(NewTypeArray::class, $allTypesCover['object']);
+        $this->assertEquals('value', $allTypesCover['object']['key']);
+
+        // Test depth parameter - JSON with 3 levels of nesting, depth 4 should work
+        $deepJson = '{"a": {"b": {"c": "value"}}}'; // 3 levels: a->b->c
+        $deepCover = NewTypeArray::fromJson($deepJson, 4); // Need depth 4 for 3 levels
+
+        $this->assertEquals('value', $deepCover['a']['b']['c']);
+
+        // Test that fromJson and toJson are inverses (round-trip)
+        $originalData = new NewTypeArray([
+            'name' => 'Test',
+            'nested' => ['a' => 1, 'b' => 2]
+        ]);
+
+        $json = $originalData->toJson();
+        $reconstructed = NewTypeArray::fromJson($json);
+
+        $this->assertEquals($originalData->getDataAsArray(), $reconstructed->getDataAsArray());
+        $this->assertEquals($originalData['name'], $reconstructed['name']);
+        $this->assertEquals($originalData['nested']['a'], $reconstructed['nested']['a']);
+        $this->assertEquals($originalData['nested']['b'], $reconstructed['nested']['b']);
+
+        // Test error handling - invalid JSON should throw JsonException
+        $this->expectException(JsonException::class);
+        NewTypeArray::fromJson('{invalid json}');
+
+        // Test with insufficient depth (should throw JsonException)
+        $deepJson = '{"a": {"b": {"c": "value"}}}'; // 3 levels
+        $this->expectException(JsonException::class);
+        NewTypeArray::fromJson($deepJson, 2); // Depth 2 is insufficient for 3 levels
+
+        // Test with malformed UTF-8 in JSON
+        $malformedJson = '{"test": "' . "\x80" . '"}'; // Invalid UTF-8 sequence
+        $this->expectException(JsonException::class);
+        NewTypeArray::fromJson($malformedJson);
+    }
+
+    /**
+     * Tests the toJson() method.
+     *
+     * This test verifies that the toJson() method correctly converts
+     * the CoverArray to a JSON string representation, with optional
+     * JSON encoding flags and depth control. It tests error handling
+     * through JsonException throwing for various error conditions.
+     *
+     *
+     * Тестирование метода toJson().
+     *
+     * Этот тест проверяет, что метод toJson() корректно преобразует
+     * CoverArray в строковое представление JSON, с опциональными
+     * флагами кодирования JSON и контролем глубины. Тестируется
+     * обработка ошибок через выбрасывание JsonException при различных
+     * условиях ошибок.
+     *
+     * @see CoverArray::toJson()
+     * @see JsonException
+     */
+    public function testToJsonMethod(): void
+    {
+        // Test basic JSON encoding
+        $data = $this->data->get('address');
+        $json = $data->toJson();
+
+        $this->assertIsString($json);
+        $this->assertJson($json);
+
+        $decoded = json_decode($json, true);
+        $this->assertEquals($data->getDataAsArray(), $decoded);
+
+        // Test with JSON flags
+        $dataWithUnicode = new NewTypeArray(['text' => '© émojî 🚀']);
+
+        // Default encoding (escaped unicode)
+        $defaultJson = $dataWithUnicode->toJson();
+        $this->assertStringContainsString('\u00a9', $defaultJson); // ©
+        $this->assertStringContainsString('\ud83d\ude80', $defaultJson); // 🚀
+
+        // With JSON_UNESCAPED_UNICODE flag
+        $unicodeJson = $dataWithUnicode->toJson(JSON_UNESCAPED_UNICODE);
+        $decodedUnicode = json_decode($unicodeJson, true);
+        $this->assertEquals('© émojî 🚀', $decodedUnicode['text']);
+
+        // Test with JSON_PRETTY_PRINT flag
+        $prettyJson = $data->toJson(JSON_PRETTY_PRINT);
+        $this->assertStringContainsString("\n", $prettyJson);
+        $this->assertJson($prettyJson);
+
+        // Test depth parameter
+        $deepData = new NewTypeArray(['a' => ['b' => ['c' => 'value']]]);
+        $deepJson = $deepData->toJson(JSON_THROW_ON_ERROR, 3);
+        $this->assertJson($deepJson);
+        $decodedDeep = json_decode($deepJson, true);
+        $this->assertEquals('value', $decodedDeep['a']['b']['c']);
+
+        // Test with insufficient depth - should throw JsonException
+        $this->expectException(JsonException::class);
+        $deepData->toJson(JSON_THROW_ON_ERROR, 1);
+
+        // Test with invalid UTF-8 sequence (if we can create one)
+        // Note: Creating invalid UTF-8 in PHP string is tricky, but we can test with mb_convert_encoding
+        if (function_exists('mb_convert_encoding')) {
+            // Create a string with invalid UTF-8 sequence by converting to UTF-16 and then to UTF-8 incorrectly
+            $invalidUtf8 = mb_convert_encoding('invalid: ' . "\x80\x81", 'UTF-8', 'ISO-8859-1');
+            $invalidData = new NewTypeArray(['invalid' => $invalidUtf8]);
+
+            $this->expectException(JsonException::class);
+            $invalidData->toJson();
+        }
+
+        // Test with resource type (should throw JsonException)
+        $resource = fopen('php://memory', 'r');
+        $resourceData = new NewTypeArray(['resource' => $resource]);
+
+        $this->expectException(JsonException::class);
+        $resourceData->toJson();
+
+        fclose($resource);
+
+        // Test with INF and NAN (non-finite numbers) - should throw JsonException
+        $infData = new NewTypeArray(['inf' => INF]);
+        $this->expectException(JsonException::class);
+        $infData->toJson();
+
+        $nanData = new NewTypeArray(['nan' => NAN]);
+        $this->expectException(JsonException::class);
+        $nanData->toJson();
+
+        // Test with JSON_INVALID_UTF8_SUBSTITUTE flag - should substitute invalid UTF-8
+        if (function_exists('mb_convert_encoding') && defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
+            $invalidUtf8 = mb_convert_encoding('test with invalid: ' . "\x80\x81", 'UTF-8', 'ISO-8859-1');
+            $invalidData = new NewTypeArray(['invalid' => $invalidUtf8]);
+
+            // With JSON_INVALID_UTF8_SUBSTITUTE, should not throw
+            $jsonWithSubstitute = $invalidData->toJson(JSON_INVALID_UTF8_SUBSTITUTE);
+            $this->assertJson($jsonWithSubstitute);
+            $decodedSubstitute = json_decode($jsonWithSubstitute, true);
+            $this->assertArrayHasKey('invalid', $decodedSubstitute);
+        }
+
+        // Test with circular reference - should throw JsonException due to recursion
+        // We'll create a simple circular reference by having two objects reference each other
+        $obj1 = new \stdClass();
+        $obj2 = new \stdClass();
+        $obj1->ref = $obj2;
+        $obj2->ref = $obj1;
+
+        $circularData = new NewTypeArray(['circular' => $obj1]);
+
+        $this->expectException(JsonException::class);
+        $circularData->toJson();
+    }
 
     /**
      * Tests the implode() method.
