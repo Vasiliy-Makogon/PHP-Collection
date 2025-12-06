@@ -537,56 +537,114 @@ class SetDataTest extends TestCase
     }
 
     /**
-     * Тестирует, что setData выбрасывает RuntimeException при превышении максимальной глубины вложенности.
+     * Tests setData() throws exception when maximum recursion depth is exceeded.
+     *
+     * This test verifies that setData() correctly throws a RuntimeException
+     * when processing nested arrays that exceed the maximum allowed depth
+     * of 512 levels in the array2cover conversion method.
+     *
+     * The test creates an array with 513 levels of nesting, which triggers
+     * depth=513 in array2cover's recursion, exceeding the maxDepth of 512.
+     * This ensures proper handling of deeply nested structures to prevent
+     * stack overflow or infinite recursion scenarios.
+     *
+     *
+     * Тестирование выбрасывания исключения setData() при превышении максимальной глубины рекурсии.
+     *
+     * Этот тест проверяет, что setData() корректно выбрасывает RuntimeException
+     * при обработке вложенных массивов, превышающих максимально допустимую глубину
+     * в 512 уровней в методе преобразования array2cover.
+     *
+     * Тест создает массив с 513 уровнями вложенности, что вызывает depth=513
+     * в рекурсии array2cover, превышая maxDepth=512. Это обеспечивает правильную
+     * обработку глубоко вложенных структур для предотвращения переполнения стека
+     * или сценариев бесконечной рекурсии.
+     *
+     * @see CoverArray::setData()
+     * @see CoverArray::array2cover()
+     * @see RuntimeException
      */
-    public function testSetDataThrowsExceptionOnMaxDepthExceeded(): void
+    public function testSetDataThrowsExceptionWhenDepthExceedsMax(): void
     {
-        $coverArray = new CoverArray();
-
-        // Создаем массив с вложенностью больше 512 уровней
+        // Arrange: Create an array with 513 nesting levels
         $deepArray = [];
-        $currentRef = &$deepArray;
-        for ($i = 0; $i <= 513; $i++) { // 513 уровня, что превышает лимит 512
-            $currentRef['level'] = [];
-            $currentRef = &$currentRef['level'];
+        $current = &$deepArray;
+        for ($i = 0; $i <= 513; $i++) {
+            $current['level'] = [];
+            $current = &$current['level'];
         }
 
+        $cover = new CoverArray();
+
+        // Assert: Expect RuntimeException with specific message
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Maximum recursion depth exceeded');
 
-        $coverArray->setData($deepArray);
+        // Act: Attempt to set data with excessive nesting
+        $cover->setData($deepArray);
     }
 
     /**
-     * Тестирует, что setData корректно обрабатывает массив с глубиной вложенности 512.
+     * Tests setData() correctly handles maximum allowed nesting depth.
+     *
+     * This test verifies that setData() successfully processes arrays
+     * with exactly 512 levels of nesting, which is the maximum allowed
+     * depth in the array2cover conversion method.
+     *
+     * The test creates an array with 512 nesting levels and a final value,
+     * ensuring that the conversion completes without exceptions and all
+     * nested levels are properly converted to CoverArray objects while
+     * preserving the structure and values.
+     *
+     *
+     * Тестирование корректной обработки setData() максимально допустимой глубины вложенности.
+     *
+     * Этот тест проверяет, что setData() успешно обрабатывает массивы
+     * ровно с 512 уровнями вложенности, что является максимально допустимой
+     * глубиной в методе преобразования array2cover.
+     *
+     * Тест создает массив с 512 уровнями вложенности и конечным значением,
+     * гарантируя, что преобразование завершается без исключений и все
+     * вложенные уровни корректно преобразуются в объекты CoverArray
+     * с сохранением структуры и значений.
+     *
+     * @see CoverArray::setData()
+     * @see CoverArray::array2cover()
+     * @see CoverArray::isEmpty()
      */
     public function testSetDataHandlesMaxDepthCorrectly(): void
     {
-        $coverArray = new CoverArray();
-
-        // Создаем массив с вложенностью ровно 512 уровней
+        // Arrange: Create an array with exactly 512 nesting levels
         $deepArray = [];
-        $currentRef = &$deepArray;
-        for ($i = 0; $i < 512; $i++) { // 512 уровней, что равно лимиту 512
-            $currentRef['level'] = [];
-            $currentRef = &$currentRef['level'];
+        $current = &$deepArray;
+        for ($i = 0; $i < 512; $i++) {
+            $current['level'] = [];
+            $current = &$current['level'];
         }
-        $currentRef['final_value'] = 'success';
+        $current['final_value'] = 'success';
 
-        // Ожидается, что setData выполнится без исключения
-        $coverArray->setData($deepArray);
+        $cover = new CoverArray();
 
-        // Проверяем, что данные были установлены и трансформированы
-        $this->assertFalse($coverArray->isEmpty());
+        // Act: Set data with maximum allowed nesting
+        $cover->setData($deepArray);
 
-        // Проверяем, что самый глубокий элемент доступен и является объектом CoverArray
-        $currentElement = $coverArray['level'];
-        for ($i = 0; $i < 511; $i++) { // Проходим 511 уровень, чтобы добраться до предпоследнего
-            $this->assertInstanceOf(CoverArray::class, $currentElement);
+        // Assert: Verify data was processed without exceptions
+        $this->assertFalse($cover->isEmpty(), 'CoverArray should not be empty after setData()');
+
+        // Assert: Verify structure and type conversions
+        $currentElement = $cover['level'];
+        for ($i = 0; $i < 511; $i++) {
+            $this->assertInstanceOf(
+                CoverArray::class,
+                $currentElement,
+                sprintf('Element at depth %d should be CoverArray instance', $i + 1)
+            );
             $currentElement = $currentElement['level'];
         }
-        // На последнем уровне проверяем значение
+
+        // Assert: Verify final value preservation
         $this->assertInstanceOf(CoverArray::class, $currentElement);
-        $this->assertEquals('success', $currentElement['final_value']);
+        $this->assertEquals('success', $currentElement['final_value'],
+            'Final value should be preserved after deep conversion');
     }
 }

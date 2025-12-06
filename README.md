@@ -9,6 +9,9 @@
 
 PHP >= 8.0
 
+## Tests
+[![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/main/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
+
 ## Установка
 
 ```

@@ -34,7 +34,10 @@
               ignoreDeprecatedCodeUnits="false"
               disableCodeCoverageIgnore="false">
         <report>
+            <!-- HTML отчет для локального просмотра -->
             <html outputDirectory="html-coverage" lowUpperBound="50" highLowerBound="90"/>
+            <!-- Clover отчет для Codecov -->
+            <clover outputFile="coverage.xml"/>
         </report>
     </coverage>
 </phpunit>
