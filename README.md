@@ -1,59 +1,39 @@
 ![Cover Array](logo.jpg)
 
+<h1>Object-Oriented Array for PHP (PHP Collection)</h1>
+
 [![PHP 8.0+](https://img.shields.io/badge/php-8.0%2B-blue.svg)](https://php.net/releases/8.0/)
 [![Tests](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/master/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
 
-[![Latest Stable Version](https://poser.pugx.org/krugozor/cover/v)](https://packagist.org/packages/krugozor/cover)
-[![Total Downloads](https://poser.pugx.org/krugozor/cover/downloads)](https://packagist.org/packages/krugozor/cover)
-[![License](https://poser.pugx.org/krugozor/cover/license)](https://packagist.org/packages/krugozor/cover)
+<h2>Introduction</h2>
 
-# Объектный массив на PHP (PHP-коллекция)
+<p>A PHP class for convenient and flexible array manipulation in object-oriented programming. Essentially, it's the "object array" that PHP has been missing.</p>
 
-Класс на языке PHP для удобной и гибкой работы с массивами в объектно-ориентированном
-представлении. Фактически, это "объектный массив", которого так не хватает в PHP.
+<h2>Requirements</h2>
+<p>PHP >= 8.0</p>
 
-## Требования
+<h2>Installation</h2>
+<pre><code>composer require krugozor/cover</code></pre>
 
-PHP >= 8.0
+<h2>Documentation</h2>
 
-## Установка
+<h3>Introduction</h3>
+<p>The base class is called <code>CoverArray</code>. You can create a class that extends <code>CoverArray</code> or use <code>CoverArray</code> directly without inheritance.</p>
 
-```
-composer require krugozor/cover
-```
+<p>In this documentation (and in unit tests), we use the <code>NewTypeArray</code> type which extends <code>CoverArray</code>:</p>
 
-# Документация
+<pre><code>class NewTypeArray extends CoverArray {}</code></pre>
 
-## Введение
+<p>This demonstrates the flexibility of this solution. Your program can have many objects derived from <code>CoverArray</code>, they can differ conceptually and contain different data manipulation logic.</p>
 
-Базовый класс называется `CoverArray`.
-Вы можете создать класс, наследуемый от `CoverArray` или использовать `CoverArray` без наследования.
+<p>For example, <code>CoverArray</code> objects can be used simply as an "object array" to replace the standard <code>array</code> in daily work, while any other type derived from <code>CoverArray</code> can serve as a DTO-like structure or simply be an independent data type to prevent "shooting yourself in the foot":</p>
 
-В данной документации, как и в unit-тестах, используется тип данных `NewTypeArray`,
-наследуемый от `CoverArray`:
+<pre><code>function foo(NewTypeArray $cover) {}</code></pre>
 
-```php
-class NewTypeArray extends CoverArray {}
-```
+<h3>Initialization</h3>
 
-Это сделано для того, что бы продемонстрировать гибкость данного решения.
-Объектов, производных от `CoverArray`, в вашей программе может быть много, они могут отличаться
-на концептуальном уровне и содержать в себе разную логику работы с данными.
-
-Например, объекты класса `CoverArray` можно использовать просто как "объектный массив"
-для замещения стандартного `array` в повседневной работе,
-в свою очередь любой другой тип, производный от `CoverArray`, может служить, например, неким подобием DTO
-или попросту быть независимым типом данных для предотвращения "выстрела в ногу":
-
-```php
-function foo(NewTypeArray $cover) {}
-```
-
-## Инициализация
-
-```php
-class NewTypeArray extends CoverArray {}
+<pre><code>class NewTypeArray extends CoverArray {}
 
 $cover = new NewTypeArray([
     'firstName' => 'Vasiliy',
@@ -64,13 +44,10 @@ $cover = new NewTypeArray([
     ],
 ]);
 
-var_dump($cover);
-```
+var_dump($cover);</code></pre>
 
-Результат:
-
-```
-object(NewTypeArray)#2 (1) {
+<p>Output:</p>
+<pre><code>object(NewTypeArray)#2 (1) {
   ["data":protected]=>
   array(3) {
     ["firstName"]=>
@@ -110,275 +87,424 @@ object(NewTypeArray)#2 (1) {
       }
     }
   }
-}
-```
+}</code></pre>
 
-Как видно, все переданные в конструктор массивы рекурсивно преобразовались в объекты типа `NewTypeArray`.
-Это поведение гарантирует, что **любой массив, попадающий в хранилище, получит "обложку" в виде
-объекта того класса, который его аккумулирует**.
+<p>As you can see, all arrays passed to the constructor are recursively converted to <code>NewTypeArray</code> objects. This behavior guarantees that <strong>any array entering the storage will receive a "cover" as an object of the class that accumulates it</strong>.</p>
 
-Данные всех созданных объектов аккуратно сложились в protected-свойство `CoverArray::$data`, что обеспечивает
-инкапсуляцию
-данных, а функционал базового класса предоставляет безграничную возможность манипуляций над этими данными!
+<p>All created object data is neatly stored in the protected property <code>CoverArray::$data</code>, ensuring data encapsulation, while the base class functionality provides unlimited possibilities for manipulating this data!</p>
 
-## Доступные методы
+<h2>Commonly Used Methods with Examples</h2>
 
-Класс реализует ВСЕ аналоги функций PHP для работы с массивами, включая аналоги функций, добавленных в PHP 8.4 и даже более того!
+<h3>Basic Access Methods</h3>
 
-## Примеры
+<h4>get() - Access elements using dot notation</h4>
+<pre><code>$languages = $cover->get('languages');
+$frontend = $cover->get('languages.frontend');
+$firstLanguage = $cover->get('languages.backend.0');
 
-Тут представлена лишь малая доля возможных примеров работы с объектным массивом `CoverArray`.
-Изучите API класса для более углублённого понимания.
+var_dump($frontend->getDataAsArray());</code></pre>
 
-#### Пример:
+<p>Output:</p>
+<pre><code>array(5) {
+  [0]=> string(4) "HTML"
+  [1]=> string(4) "CSS1"
+  [2]=> string(10) "JavaScript"
+  [3]=> string(4) "CSS2"
+  [4]=> string(4) "CSS3"
+}</code></pre>
 
-```php
-$value = $cover
-    ->get('languages.frontend')
+<h4>ArrayAccess Interface (Array Syntax)</h4>
+<pre><code>// Access using array syntax
+$backend = $cover['languages']['backend'];
+$firstName = $cover['firstName'];
+
+// Set using array syntax
+$cover['age'] = 30;
+$cover['languages']['mobile'] = ['Swift', 'Kotlin'];</code></pre>
+
+<h4>Magic Properties Access</h4>
+<pre><code>// Access using object property syntax
+$lastName = $cover->lastName;
+$backend = $cover->languages->backend;
+
+// Set using magic setter
+$cover->country = 'Russia';
+$cover->languages->database = ['PostgreSQL', 'Redis'];</code></pre>
+
+<h3>Array Manipulation Methods</h3>
+
+<h4>filter() - Filter array elements</h4>
+<pre><code>// Filter CSS languages
+$cssLanguages = $cover->get('languages.frontend')
     ->filter(function ($value) {
-        return preg_match('~CSS~', $value);
+        return str_contains($value, 'CSS');
     })
-    ->implode(', ');
-
-var_dump($value);
-```
-
-Результат:
-
-```
-string(16) "CSS1, CSS2, CSS3"
-```
-
-#### Пример:
-
-```php
-$value = $cover
-    ->get('languages.frontend')
-    ->append('HTML 5', 'jQuey')
     ->getDataAsArray();
 
-var_dump($value);
-```
+var_dump($cssLanguages);</code></pre>
 
-Результат:
+<p>Output:</p>
+<pre><code>array(3) {
+  [1]=> string(4) "CSS1"
+  [3]=> string(4) "CSS2"
+  [4]=> string(4) "CSS3"
+}</code></pre>
 
-```
-array(7) {
-  [0]=>
-  string(4) "HTML"
-  [1]=>
-  string(4) "CSS1"
-  [2]=>
-  string(10) "JavaScript"
-  [3]=>
-  string(4) "CSS2"
-  [4]=>
-  string(4) "CSS3"
-  [5]=>
-  string(6) "HTML 5"
-  [6]=>
-  string(5) "jQuey"
-}
-```
+<h4>map() / each() - Transform array elements</h4>
+<pre><code>// Transform each language to uppercase
+$uppercase = $cover->get('languages.backend')
+    ->map(fn($lang) => strtoupper($lang))
+    ->getDataAsArray();
 
-#### Пример:
+var_dump($uppercase);</code></pre>
 
-```php
-var_dump($cover['languages']['backend'][0]);
-var_dump($cover->languages->backend->item(0));
-var_dump($cover->get('languages.backend.0'));
-var_dump($cover->get('languages')->item('backend')[0]);
-var_dump($cover->get('languages')['backend']->item(0));
-```
+<p>Output:</p>
+<pre><code>array(2) {
+  [0]=> string(3) "PHP"
+  [1]=> string(5) "MYSQL"
+}</code></pre>
 
-Результат:
+<pre><code>// Using each() for associative arrays
+$formatted = $cover->each(function ($value, $key) {
+    return "$key: $value";
+})->getDataAsArray();
 
-```
-string(3) "PHP"
-string(3) "PHP"
-string(3) "PHP"
-string(3) "PHP"
-string(3) "PHP"
-```
+print_r($formatted);</code></pre>
 
-#### Пример:
+<p>Output:</p>
+<pre><code>Array
+(
+    [firstName] => firstName: Vasiliy
+    [lastName] => lastName: Ivanov
+    [languages] => languages: NewTypeArray Object
+        (
+            [data:protected] => Array
+                (
+                    [backend] => NewTypeArray Object
+                        (
+                            [data:protected] => Array
+                                (
+                                    [0] => PHP
+                                    [1] => MySql
+                                )
+                        )
+                    [frontend] => NewTypeArray Object
+                        (
+                            [data:protected] => Array
+                                (
+                                    [0] => HTML
+                                    [1] => CSS1
+                                    [2] => JavaScript
+                                    [3] => CSS2
+                                    [4] => CSS3
+                                )
+                        )
+                )
+        )
+)</code></pre>
 
-```php
-var_dump($cover->get('languages.backend')->getFirst());
-var_dump($cover->get('languages.backend')->getLast());
-```
+<h4>append() / push() - Add elements to the end</h4>
+<pre><code>$numbers = new NewTypeArray([1, 2, 3]);
+$numbers->append(4, 5, 6);
+// Or using push() alias
+$numbers->push(7, 8);
 
-Результат:
+var_dump($numbers->getDataAsArray());</code></pre>
 
-```
-string(3) "PHP"
-string(5) "MySql"
-```
+<p>Output:</p>
+<pre><code>array(8) {
+  [0]=> int(1)
+  [1]=> int(2)
+  [2]=> int(3)
+  [3]=> int(4)
+  [4]=> int(5)
+  [5]=> int(6)
+  [6]=> int(7)
+  [7]=> int(8)
+}</code></pre>
 
-#### Пример:
+<h4>prepend() / unshift() - Add elements to the beginning</h4>
+<pre><code>$numbers = new NewTypeArray([4, 5, 6]);
+$numbers->prepend(1, 2, 3);
+// Or using unshift() alias
+$numbers->unshift(0);
 
-```php
-var_dump(serialize($cover->get('languages.backend')));
-```
+var_dump($numbers->getDataAsArray());</code></pre>
 
-Результат:
+<p>Output:</p>
+<pre><code>array(7) {
+  [0]=> int(0)
+  [1]=> int(1)
+  [2]=> int(2)
+  [3]=> int(3)
+  [4]=> int(4)
+  [5]=> int(5)
+  [6]=> int(6)
+}</code></pre>
 
-```
-string(54) "O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}"
-```
+<h4>implode() - Join array elements with a string</h4>
+<pre><code>$backend = $cover->get('languages.backend');
+$string = $backend->implode(', ');
 
-#### Пример:
+echo $string;</code></pre>
 
-```php
-$value = $cover->get('languages')->map(function (CoverArray $lang, string $key) {
-    return sprintf(
-        "\n\t<li>%s (%s):\n\t%s\n\t</li>",
-        $key,
-        $lang->count(),
-        $lang->map(fn($value): string => "\t<li>$value</li>")->implode("\n\t")
-    );
-})
-    ->prepend("\n<ul>")
-    ->append("\n</ul>")
-    ->implode('');
+<p>Output:</p>
+<pre>PHP, MySql</pre>
 
-var_dump($value);
-```
+<h3>Search and Check Methods</h3>
 
-Результат:
+<h4>in() - Check if value exists in array</h4>
+<pre><code>$hasPHP = $cover->get('languages.backend')->in('PHP');
+$hasJava = $cover->get('languages.backend')->in('Java');
 
-```
-string(180) "
+var_dump($hasPHP);
+var_dump($hasJava);</code></pre>
+
+<p>Output:</p>
+<pre><code>bool(true)
+bool(false)</code></pre>
+
+<h4>keyExists() - Check if key exists</h4>
+<pre><code>$hasFirstName = $cover->keyExists('firstName');
+$hasMiddleName = $cover->keyExists('middleName');
+
+var_dump($hasFirstName);
+var_dump($hasMiddleName);</code></pre>
+
+<p>Output:</p>
+<pre><code>bool(true)
+bool(false)</code></pre>
+
+<h4>find() - Find first element matching callback</h4>
+<pre><code>$firstCSS = $cover->get('languages.frontend')
+    ->find(fn($lang) => str_starts_with($lang, 'CSS'));
+
+echo $firstCSS;</code></pre>
+
+<p>Output:</p>
+<pre>CSS1</pre>
+
+<h3>Utility Methods</h3>
+
+<h4>getFirst() / getLast() - Get first/last element</h4>
+<pre><code>$first = $cover->get('languages.backend')->getFirst();
+$last = $cover->get('languages.backend')->getLast();
+
+echo $first;
+echo $last;</code></pre>
+
+<p>Output:</p>
+<pre>PHP
+MySql</pre>
+
+<h4>keys() / values() - Get array keys or values</h4>
+<pre><code>$keys = $cover->keys()->getDataAsArray();
+$values = $cover->values()->getDataAsArray();
+
+print_r($keys);</code></pre>
+
+<p>Output:</p>
+<pre><code>Array
+(
+    [0] => firstName
+    [1] => lastName
+    [2] => languages
+)</code></pre>
+
+<h4>unique() - Remove duplicate values</h4>
+<pre><code>$duplicates = new NewTypeArray([1, 2, 2, 3, 1, 4]);
+$unique = $duplicates->unique()->getDataAsArray();
+
+print_r($unique);</code></pre>
+
+<p>Output:</p>
+<pre><code>Array
+(
+    [0] => 1
+    [1] => 2
+    [3] => 3
+    [5] => 4
+)</code></pre>
+
+<h4>reverse() - Reverse array order</h4>
+<pre><code>$original = new NewTypeArray([1, 2, 3, 4, 5]);
+$reversed = $original->reverse()->getDataAsArray();
+
+print_r($reversed);</code></pre>
+
+<p>Output:</p>
+<pre><code>Array
+(
+    [0] => 5
+    [1] => 4
+    [2] => 3
+    [3] => 2
+    [4] => 1
+)</code></pre>
+
+<h3>Data Conversion Methods</h3>
+
+<h4>getDataAsArray() - Convert to plain PHP array</h4>
+<pre><code>$array = $cover->getDataAsArray();
+print_r($array);</code></pre>
+
+<p>Output:</p>
+<pre><code>Array
+(
+    [firstName] => Vasiliy
+    [lastName] => Ivanov
+    [languages] => Array
+        (
+            [backend] => Array
+                (
+                    [0] => PHP
+                    [1] => MySql
+                )
+            [frontend] => Array
+                (
+                    [0] => HTML
+                    [1] => CSS1
+                    [2] => JavaScript
+                    [3] => CSS2
+                    [4] => CSS3
+                )
+        )
+)</code></pre>
+
+<h4>toJson() / fromJson() - JSON serialization</h4>
+<pre><code>// Convert to JSON
+$json = $cover->toJson();
+echo $json;</code></pre>
+
+<p>Output:</p>
+<pre><code>{"firstName":"Vasiliy","lastName":"Ivanov","languages":{"backend":["PHP","MySql"],"frontend":["HTML","CSS1","JavaScript","CSS2","CSS3"]}}</code></pre>
+
+<pre><code>// Create from JSON
+$newCover = NewTypeArray::fromJson('{"name":"John","age":25}');
+echo $newCover->name;</code></pre>
+
+<p>Output:</p>
+<pre>John</pre>
+
+<h4>fromExplode() - Create from delimited string</h4>
+<pre><code>$csv = NewTypeArray::fromExplode(',', 'apple,banana,cherry,date');
+echo $csv->implode(' | ');</code></pre>
+
+<p>Output:</p>
+<pre>apple | banana | cherry | date</pre>
+
+<h3>Chaining Examples</h3>
+
+<h4>Method Chaining</h4>
+<pre><code>$result = $cover->get('languages.frontend')
+    ->filter(fn($lang) => $lang !== 'JavaScript')
+    ->map(fn($lang) => strtoupper($lang))
+    ->implode(' - ');
+
+echo $result;</code></pre>
+
+<p>Output:</p>
+<pre>HTML - CSS1 - CSS2 - CSS3</pre>
+
+<h4>Complex Transformation</h4>
+<pre><code>$htmlList = $cover->get('languages')
+    ->each(function ($langs, $category) {
+        return sprintf(
+            "&lt;li&gt;%s: %s&lt;/li&gt;",
+            ucfirst($category),
+            $langs->implode(', ')
+        );
+    })
+    ->prepend('&lt;ul&gt;')
+    ->append('&lt;/ul&gt;')
+    ->implode("\n");
+
+echo $htmlList;</code></pre>
+
+<p>Output:</p>
+<pre><code>&lt;ul&gt;
+&lt;li&gt;Backend: PHP, MySql&lt;/li&gt;
+&lt;li&gt;Frontend: HTML, CSS1, JavaScript, CSS2, CSS3&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+<h3>Serialization and Cloning</h3>
+
+<h4>Serialization</h4>
+<pre><code>// Serialize
+$serialized = serialize($cover->get('languages.backend'));
+echo $serialized;</code></pre>
+
+<p>Output:</p>
+<pre><code>O:12:"NewTypeArray":2:{i:0;s:3:"PHP";i:1;s:5:"MySql";}</code></pre>
+
+<pre><code>// Deserialize
+$unserialized = unserialize($serialized);
+echo $unserialized->implode(', ');</code></pre>
+
+<p>Output:</p>
+<pre>PHP, MySql</pre>
+
+<h4>Cloning</h4>
+<pre><code>$original = new NewTypeArray(['name' => 'John', 'skills' => ['PHP', 'MySQL']]);
+$clone = $original->copy();
+
+$clone['name'] = 'Jane';
+$clone['skills'][] = 'JavaScript';
+
+echo $original['name'];
+echo " | ";
+echo $original->get('skills')->implode(', ');</code></pre>
+
+<p>Output:</p>
+<pre>John | PHP, MySQL</pre>
+
+<h2>Available Methods</h2>
+<p>The class implements ALL analogues of PHP functions for working with arrays, including analogues of functions added in PHP 8.4 and even more!</p>
+
+<h3>Complete Method List</h3>
 <ul>
-        <li>backend (2):
-                <li>PHP</li>
-                <li>MySql</li>
-        </li>
-        <li>frontend (5):
-                <li>HTML</li>
-                <li>CSS1</li>
-                <li>JavaScript</li>
-                <li>CSS2</li>
-                <li>CSS3</li>
-        </li>
-</ul>"
-```
-
-#### Пример:
-
-```php
-$value = NewTypeArray::fromExplode(',', '1,1,2,1,2,2,1,,1,,,2')
-    ->unique()
-    ->filter()
-    ->implode(',');
-
-var_dump($value);
-```
-
-Результат:
-
-```
-string(3) "1,2"
-```
-
-#### Пример:
-
-```php
-var_dump($cover->get('languages.backend')->getDataAsArray());
-var_dump($cover->get('languages.backend')->reverse()->getDataAsArray());
-```
-
-Результат:
-
-```
-array(2) {
-  [0]=>
-  string(3) "PHP"
-  [1]=>
-  string(5) "MySql"
-}
-array(2) {
-  [0]=>
-  string(5) "MySql"
-  [1]=>
-  string(3) "PHP"
-}
-```
-
-#### Пример:
-
-```php
-var_dump($cover->get('languages.backend')->in('PHP'));
-```
-
-Результат:
-
-```
-bool(true)
-```
-
-#### Пример:
-
-```php
-$value = $cover->get('languages.frontend')->diff(
-    ['HTML'],
-    ['CSS1', 'CSS2', 'CSS3']
-)->getDataAsArray();
-
-var_dump($value);
-```
-
-или даже так:
-
-```php
-$value = $cover->get('languages.frontend')->diff(
-    new NewTypeArray(['HTML']),
-    new NewTypeArray(['CSS1', 'CSS2', 'CSS3'])
-)->getDataAsArray();
-```
-
-Результат:
-
-```
-array(1) {
-  [2]=>
-  string(10) "JavaScript"
-}
-```
-
-#### Пример:
-
-```php
-$value = $cover->get('languages')->mapRecursive(
-    fn(mixed $value, mixed $key): string => "$key: $value"
-)->getDataAsArray();
-
-var_dump($value);
-```
-
-Результат:
-
-```
-array(2) {
-  ["backend"]=>
-  array(2) {
-    [0]=>
-    string(6) "0: PHP"
-    [1]=>
-    string(8) "1: MySql"
-  }
-  ["frontend"]=>
-  array(5) {
-    [0]=>
-    string(7) "0: HTML"
-    [1]=>
-    string(7) "1: CSS1"
-    [2]=>
-    string(13) "2: JavaScript"
-    [3]=>
-    string(7) "3: CSS2"
-    [4]=>
-    string(7) "4: CSS3"
-  }
-}
-```
+  <li><code>all()</code> - Checks if all array elements satisfy a callback function</li>
+  <li><code>any()</code> - Checks if at least one array element satisfies a callback function</li>
+  <li><code>append()</code> - Push elements onto the end of array (alias: <code>push()</code>)</li>
+  <li><code>changeKeyCase()</code> - Changes the case of all keys in an array</li>
+  <li><code>chunk()</code> - Split an array into chunks</li>
+  <li><code>clear()</code> - Clears all data from the array</li>
+  <li><code>column()</code> - Return values from a single column</li>
+  <li><code>combine()</code> - Creates array using one array for keys and another for values</li>
+  <li><code>copy()</code> - Creates a copy of the object</li>
+  <li><code>count()</code> - Counts elements</li>
+  <li><code>countValues()</code> - Counts occurrences of each distinct value</li>
+  <li><code>each()</code> - Applies callback to elements (for associative arrays)</li>
+  <li><code>eachRecursive()</code> - Applies callback recursively to all elements</li>
+  <li><code>fill()</code> - Fill an array with values</li>
+  <li><code>fillKeys()</code> - Fill an array with values, specifying keys</li>
+  <li><code>filter()</code> - Filters elements using a callback function</li>
+  <li><code>find()</code> - Returns first element satisfying a callback</li>
+  <li><code>findKey()</code> - Returns key of first element satisfying a callback</li>
+  <li><code>flip()</code> - Exchanges keys with their associated values</li>
+  <li><code>fromArray()</code> - Creates instance from array</li>
+  <li><code>fromExplode()</code> - Creates instance from exploded string</li>
+  <li><code>fromJson()</code> - Creates instance from JSON string</li>
+  <li><code>get()</code> - Returns data by keys using dot notation</li>
+  <li><code>getData()</code> - Returns raw data</li>
+  <li><code>getDataAsArray()</code> - Returns data as native PHP array</li>
+  <li><code>getFirst()</code> - Returns first element</li>
+  <li><code>getLast()</code> - Returns last element</li>
+  <li><code>implode()</code> - Join array elements with a string</li>
+  <li><code>in()</code> - Checks if value exists in array</li>
+  <li><code>isEmpty()</code> - Checks if array is empty</li>
+  <li><code>isList()</code> - Checks if array is a list</li>
+  <li><code>item()</code> - Returns element by key</li>
+  <li><code>jsonSerialize()</code> - Serializes for JSON</li>
+  <li><code>keyExists()</code> - Checks if key exists</li>
+  <li><code>keyFirst()</code> - Gets first key</li>
+  <li><code>keyLast()</code> - Gets last key</li>
+  <li><code>keys()</code> - Return all keys or subset of keys</li>
+  <li><code>map()</code> - Applies callback to elements</li>
+  <li><code>prepend()</code> - Prepend elements to beginning (alias: <code>unshift()</code>)</li>
+  <li><code>reverse()</code> - Return array with elements in reverse order</li>
+  <li><code>setData()</code> - Sets data from iterable</li>
+  <li><code>toJson()</code> - Converts to JSON string</li>
+  <li><code>unique()</code> - Removes duplicate values</li>
+  <li><code>values()</code> - Return all values of array</li>
+</ul>
