@@ -1,32 +1,63 @@
-name: PHP Tests
+name: PHP Tests with Coverage
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.0'
-                  coverage: pcov
-
-            - name: Install dependencies
-              run: composer install --no-progress
-
-            - name: Run tests with coverage
-                # Все настройки coverage передаем через командную строку
-              run: |
-                  vendor/bin/phpunit \
-                    --coverage-clover=coverage.xml \
-                    --coverage-html=html-coverage \
-                    --whitelist=src
-
-            - name: Upload coverage to Codecov
-              uses: codecov/codecov-action@v3
-              with:
-                  file: ./coverage.xml
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup PHP with Xdebug
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+        coverage: xdebug
+        tools: composer
+        ini-values: xdebug.mode=coverage
+    
+    - name: Validate composer.json
+      run: composer validate --strict
+    
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-8.0-${{ hashFiles('**/composer.lock') }}
+    
+    - name: Install dependencies
+      run: composer install --no-progress --prefer-dist
+    
+    - name: Run PHPUnit with coverage
+      run: |
+        php -v
+        php -m | grep xdebug
+        vendor/bin/phpunit --version
+        vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
+    
+    - name: Verify coverage file
+      run: |
+        echo "Checking coverage.xml..."
+        if [ -f coverage.xml ]; then
+          echo "✓ coverage.xml exists"
+          echo "First 5 lines:"
+          head -5 coverage.xml
+          echo "File size: $(wc -l < coverage.xml) lines"
+        else
+          echo "✗ coverage.xml NOT FOUND!"
+          ls -la
+        fi
+    
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        flags: php-tests
+        name: php-8.0-coverage
+        fail_ci_if_error: false  # Не падать если загрузка не удалась
