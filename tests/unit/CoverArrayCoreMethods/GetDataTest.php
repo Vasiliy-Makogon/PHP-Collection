@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 #[CoversClass(CoverArray::class)]
-class getDataTest extends TestCase
+class GetDataTest extends TestCase
 {
     /**
      * Tests getData() returns the internal data array.

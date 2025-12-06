@@ -1,7 +1,7 @@
 {
-    "name":"krugozor/cover",
+    "name": "krugozor/cover",
     "description": "PHP Array Object (PHP collection)",
-    "type":"library",
+    "type": "library",
     "keywords": [
         "cover array",
         "php array cover",
@@ -14,19 +14,19 @@
         "php collection",
         "php array"
     ],
-    "require":{
+    "require": {
         "php": ">=8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^9.5"
     },
     "authors": [
         {
             "name": "Vasiliy Makogon"
         }
     ],
-    "autoload" : {
-        "psr-4" : {
+    "autoload": {
+        "psr-4": {
             "Krugozor\\Cover\\": "src/"
         }
     }
