@@ -2,7 +2,7 @@
 
 [![PHP 8.0+](https://img.shields.io/badge/php-8.0%2B-blue.svg)](https://php.net/releases/8.0/)
 [![Tests](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/main/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
+[![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/master/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
 
 [![Latest Stable Version](https://poser.pugx.org/krugozor/cover/v)](https://packagist.org/packages/krugozor/cover)
 [![Total Downloads](https://poser.pugx.org/krugozor/cover/downloads)](https://packagist.org/packages/krugozor/cover)
