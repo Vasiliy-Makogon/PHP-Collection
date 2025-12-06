@@ -50,12 +50,72 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testAllMethod(): void
     {
-        $this->assertTrue($this->data->get('languages')->all(function ($value) {
-            return is_iterable($value);
+        // Test with array where all elements satisfy condition
+        // Тест с массивом, где все элементы удовлетворяют условию
+        $data1 = [2, 4, 6, 8, 10];
+        $cover1 = new CoverArray($data1);
+
+        $this->assertTrue($cover1->all(function ($value, $key) {
+            return $value % 2 === 0; // все числа четные
         }));
 
-        $this->assertFalse($this->data->get('languages.backend')->all(function ($value) {
-            return is_int($value);
+        // Test with array where not all elements satisfy condition
+        // Тест с массивом, где не все элементы удовлетворяют условию
+        $data2 = [2, 4, 5, 8, 10];
+        $cover2 = new CoverArray($data2);
+
+        $this->assertFalse($cover2->all(function ($value, $key) {
+            return $value % 2 === 0; // 5 не четное
+        }));
+
+        // Test with array of strings
+        // Тест с массивом строк
+        $data3 = ['apple', 'apricot', 'avocado'];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertTrue($cover3->all(function ($value, $key) {
+            return str_starts_with($value, 'a');
+        }));
+
+        $data4 = ['apple', 'banana', 'apricot'];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertFalse($cover4->all(function ($value, $key) {
+            return str_starts_with($value, 'a');
+        }));
+
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data5 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertTrue($cover5->all(function ($value, $key) {
+            return is_string($key) && is_int($value);
+        }));
+
+        // Test with empty array (should return true)
+        // Тест с пустым массивом (должен вернуть true)
+        $data6 = [];
+        $cover6 = new CoverArray($data6);
+
+        $this->assertTrue($cover6->all(function ($value, $key) {
+            return $value > 10; // для пустого массива всегда true
+        }));
+
+        // Test with callback that checks both value and key
+        // Тест с callback, который проверяет и значение, и ключ
+        $data7 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $cover7 = new CoverArray($data7);
+
+        $this->assertTrue($cover7->all(function ($value, $key) {
+            return is_int($key) && is_string($value);
+        }));
+
+        $data8 = [0 => 'zero', 1 => 1, 2 => 'two'];
+        $cover8 = new CoverArray($data8);
+
+        $this->assertFalse($cover8->all(function ($value, $key) {
+            return is_string($value);
         }));
     }
 
@@ -78,12 +138,65 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testAnyMethod(): void
     {
-        $this->assertTrue($this->data->get('languages.backend')->any(function ($value, $key) {
-            return $value == 'PHP' && $key == 0;
+        // Test with array of numbers
+        // Тест с массивом чисел
+        $data1 = [1, 2, 3, 4, 5];
+        $cover1 = new CoverArray($data1);
+
+        $this->assertTrue($cover1->any(function ($value, $key) {
+            return $value > 3;
         }));
 
-        $this->assertFalse($this->data->get('languages')->any(function ($value, $key) {
-            return $key == 'undefined';
+        $this->assertFalse($cover1->any(function ($value, $key) {
+            return $value > 10;
+        }));
+
+        // Test with array of strings
+        // Тест с массивом строк
+        $data2 = ['apple', 'banana', 'cherry'];
+        $cover2 = new CoverArray($data2);
+
+        $this->assertTrue($cover2->any(function ($value, $key) {
+            return $value === 'banana';
+        }));
+
+        $this->assertFalse($cover2->any(function ($value, $key) {
+            return $value === 'orange';
+        }));
+
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data3 = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertTrue($cover3->any(function ($value, $key) {
+            return $key === 'age' && $value === 30;
+        }));
+
+        $this->assertFalse($cover3->any(function ($value, $key) {
+            return $key === 'country' && $value === 'USA';
+        }));
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data4 = [];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertFalse($cover4->any(function ($value, $key) {
+            return $value === 'anything';
+        }));
+
+        // Test with callback that uses both value and key
+        // Тест с callback, который использует и значение, и ключ
+        $data5 = [10 => 'ten', 20 => 'twenty', 30 => 'thirty'];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertTrue($cover5->any(function ($value, $key) {
+            return $key > 15 && strpos($value, 'tw') === 0;
+        }));
+
+        $this->assertFalse($cover5->any(function ($value, $key) {
+            return $key > 40 || $value === 'forty';
         }));
     }
 
@@ -106,41 +219,64 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testChangeKeyCaseMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = [
-            'country' => 'Russia',
-            'region' => 'Moscow region',
-            'city' => 'Podolsk',
-            'street' => 'Kirov st.'
-        ];
+        // Test changing keys to lowercase (default)
+        // Тест изменения ключей в нижний регистр (по умолчанию)
+        $data1 = ['Apple' => 1, 'Banana' => 2, 'Cherry' => 3];
 
-        // original function
+        $expected1 = array_change_key_case($data1, CASE_LOWER);
+
+        $cover1 = new CoverArray($data1);
         $this->assertSame(
-            $expected,
-            array_change_key_case($data->getDataAsArray())
+            $expected1,
+            $cover1->changeKeyCase(CASE_LOWER)->getDataAsArray()
         );
 
+        // Test changing keys to uppercase
+        // Тест изменения ключей в верхний регистр
+        $data2 = ['apple' => 1, 'banana' => 2, 'cherry' => 3];
+
+        $expected2 = array_change_key_case($data2, CASE_UPPER);
+
+        $cover2 = new CoverArray($data2);
         $this->assertSame(
-            $expected,
-            $data->changeKeyCase()->getDataAsArray()
+            $expected2,
+            $cover2->changeKeyCase(CASE_UPPER)->getDataAsArray()
         );
 
-        $expected = [
-            'COUNTRY' => 'Russia',
-            'REGION' => 'Moscow region',
-            'CITY' => 'Podolsk',
-            'STREET' => 'Kirov st.'
-        ];
+        // Test with mixed case keys to lowercase
+        // Тест с ключами в смешанном регистре в нижний регистр
+        $data3 = ['Apple' => 1, 'BANANA' => 2, 'cherry' => 3];
 
-        // original function
+        $expected3 = array_change_key_case($data3, CASE_LOWER);
+
+        $cover3 = new CoverArray($data3);
         $this->assertSame(
-            $expected,
-            array_change_key_case($data->getDataAsArray(), CASE_UPPER)
+            $expected3,
+            $cover3->changeKeyCase(CASE_LOWER)->getDataAsArray()
         );
 
+        // Test with numeric keys (should remain unchanged)
+        // Тест с числовыми ключами (должны остаться без изменений)
+        $data4 = [0 => 'zero', 'Apple' => 1, 1 => 'one'];
+
+        $expected4 = array_change_key_case($data4, CASE_UPPER);
+
+        $cover4 = new CoverArray($data4);
         $this->assertSame(
-            $expected,
-            $data->changeKeyCase(CASE_UPPER)->getDataAsArray()
+            $expected4,
+            $cover4->changeKeyCase(CASE_UPPER)->getDataAsArray()
+        );
+
+        // Test with special characters in keys
+        // Тест со специальными символами в ключах
+        $data5 = ['foo-bar' => 1, 'test_key' => 2, 'привет' => 3];
+
+        $expected5 = array_change_key_case($data5, CASE_UPPER);
+
+        $cover5 = new CoverArray($data5);
+        $this->assertSame(
+            $expected5,
+            $cover5->changeKeyCase(CASE_UPPER)->getDataAsArray()
         );
     }
 
@@ -161,46 +297,60 @@ class PhpEquivalentMethodsTest extends TestCase
      * @see CoverArray::chunk()
      * @see array_chunk()
      */
-    public function testChunkMethod()
+    public function testChunkMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = [
-            0 => [0 => 'Russia', 1 => 'Moscow region'],
-            1 => [0 => 'Podolsk', 1 => 'Kirov st.']
-        ];
+        $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date', 'e' => 'elderberry'];
+        $cover = new CoverArray($data);
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_chunk($data->getDataAsArray(), 2)
-        );
+        // Test chunk without preserving keys
+        // Тест разбиения без сохранения ключей
+        $expected1 = array_chunk($data, 2, false);
 
         $this->assertSame(
-            $expected,
-            $data->chunk(2)->getDataAsArray()
+            $expected1,
+            $cover->chunk(2, false)->getDataAsArray()
         );
 
-        $expected = [
-            0 => ['country' => 'Russia', 'region' => 'Moscow region'],
-            1 => ['city' => 'Podolsk', 'street' => 'Kirov st.']
-        ];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_chunk($data->getDataAsArray(), 2, true)
-        );
+        // Test chunk preserving keys
+        // Тест разбиения с сохранением ключей
+        $expected2 = array_chunk($data, 2, true);
 
         $this->assertSame(
-            $expected,
-            $data->chunk(2, true)->getDataAsArray()
+            $expected2,
+            $cover->chunk(2, true)->getDataAsArray()
         );
 
+        // Test chunk with size 3
+        // Тест разбиения на размер 3
+        $expected3 = array_chunk($data, 3, false);
+
+        $this->assertSame(
+            $expected3,
+            $cover->chunk(3, false)->getDataAsArray()
+        );
+
+        // Test chunk with size larger than array
+        // Тест разбиения на размер больше массива
+        $expected4 = array_chunk($data, 10, false);
+
+        $this->assertSame(
+            $expected4,
+            $cover->chunk(10, false)->getDataAsArray()
+        );
+
+        // Test chunk with size 1
+        // Тест разбиения на размер 1
+        $expected5 = array_chunk($data, 1, true);
+
+        $this->assertSame(
+            $expected5,
+            $cover->chunk(1, true)->getDataAsArray()
+        );
+
+        // Test exception for invalid chunk size (0)
+        // Тест исключения для недопустимого размера части (0)
         $this->expectException(ValueError::class);
-        $this->assertSame(
-            $expected,
-            $data->chunk(0, true)->getDataAsArray()
-        );
+        $cover->chunk(0, false);
     }
 
     /**
@@ -222,41 +372,49 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testColumnMethod(): void
     {
-        $data = new NewTypeArray([
+        $data = [
             ['id' => 2135, 'first_name' => 'John', 'last_name' => 'Doe'],
             ['id' => 3245, 'first_name' => 'Sally', 'last_name' => 'Smith'],
             ['id' => 5342, 'first_name' => 'Jane', 'last_name' => 'Jones'],
             ['id' => 5623, 'first_name' => 'Peter', 'last_name' => 'Doe']
-        ]);
-        $expected = ['John', 'Sally', 'Jane', 'Peter'];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_column($data->getDataAsArray(), 'first_name')
-        );
-
-        $this->assertSame(
-            $expected,
-            $data->column('first_name')->getDataAsArray()
-        );
-
-        $expected = [
-            2135 => 'John',
-            3245 => 'Sally',
-            5342 => 'Jane',
-            5623 => 'Peter'
         ];
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_column($data->getDataAsArray(), 'first_name', 'id')
-        );
+        $cover = new CoverArray($data);
+
+        // Test without index key
+        // Тест без ключа индекса
+        $expected1 = array_column($data, 'first_name');
 
         $this->assertSame(
-            $expected,
-            $data->column('first_name', 'id')->getDataAsArray()
+            $expected1,
+            $cover->column('first_name')->getDataAsArray()
+        );
+
+        // Test with index key
+        // Тест с ключом индекса
+        $expected2 = array_column($data, 'first_name', 'id');
+
+        $this->assertSame(
+            $expected2,
+            $cover->column('first_name', 'id')->getDataAsArray()
+        );
+
+        // Test with null column key (returns array of nulls)
+        // Тест с null в качестве ключа столбца (возвращает массив null)
+        $expected3 = array_column($data, null, 'id');
+
+        $this->assertSame(
+            $expected3,
+            $cover->column(null, 'id')->getDataAsArray()
+        );
+
+        // Test with both null column and index keys
+        // Тест с null в качестве ключа столбца и индекса
+        $expected4 = array_column($data, null);
+
+        $this->assertSame(
+            $expected4,
+            $cover->column(null)->getDataAsArray()
         );
     }
 
@@ -279,40 +437,28 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testCombineMethod(): void
     {
-        $valuesData = $this->data->get('address')->values();
-        $keysData = $this->data->get('address')->keys();
+        $keys = ['name', 'age', 'city'];
+        $values = ['John', 30, 'New York'];
 
-        $expected = [
-            'country' => 'Russia',
-            'region' => 'Moscow region',
-            'city' => 'Podolsk',
-            'street' => 'Kirov st.'
-        ];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_combine(
-                $keysData->getDataAsArray(),
-                $valuesData->getDataAsArray()
-            )
-        );
+        $expected = array_combine($keys, $values);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
             $expected,
-            NewTypeArray::combine(
-                $keysData->getDataAsArray(),
-                $valuesData->getDataAsArray()
+            CoverArray::combine(
+                $keys,
+                $values
             )->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
             $expected,
-            NewTypeArray::combine(
-                $keysData,
-                $valuesData
+            CoverArray::combine(
+                new CoverArray($keys),
+                new CoverArray($values)
             )->getDataAsArray()
         );
     }
@@ -321,34 +467,72 @@ class PhpEquivalentMethodsTest extends TestCase
      * Tests the countValues() method (array_count_values equivalent).
      *
      * This test verifies that the countValues() method correctly counts
-     * the occurrences of each distinct value in the CoverArray,
-     * mirroring the behavior of PHP's array_count_values() function.
+     * the occurrences of each value in the CoverArray, returning a new
+     * CoverArray where keys are the original values and values are their counts.
      *
      *
      * Тестирование метода countValues() (эквивалент array_count_values).
      *
      * Этот тест проверяет, что метод countValues() корректно подсчитывает
-     * вхождения каждого уникального значения в CoverArray,
-     * отражая поведение функции array_count_values() PHP.
+     * количество вхождений каждого значения в CoverArray, возвращая новый
+     * CoverArray, где ключи - это исходные значения, а значения - их количество.
      *
      * @see CoverArray::countValues()
      * @see array_count_values()
      */
     public function testCountValuesMethod(): void
     {
-        $data = $this->data->get('languages.backend');
-        $expected = ['PHP' => 1, 'MySql' => 1];
+        // Test with simple array of strings
+        // Тест с простым массивом строк
+        $data = ['apple', 'banana', 'apple', 'orange', 'banana', 'apple'];
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_count_values($data->getDataAsArray())
-        );
+        $expected = array_count_values($data);
 
-        $this->assertSame(
-            $expected,
-            $data->countValues()->getDataAsArray()
-        );
+        // CoverArray method
+        // метод CoverArray
+        $cover = new CoverArray($data);
+        $result = $cover->countValues();
+
+        $this->assertSame($expected, $result->getDataAsArray());
+
+        // Test with numbers
+        // Тест с числами
+        $data2 = [1, 2, 1, 3, 2, 1, 1];
+
+        $expected2 = array_count_values($data2);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover2 = new CoverArray($data2);
+        $result2 = $cover2->countValues();
+
+        $this->assertSame($expected2, $result2->getDataAsArray());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data3 = [];
+
+        $expected3 = array_count_values($data3);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover3 = new CoverArray($data3);
+        $result3 = $cover3->countValues();
+
+        $this->assertSame($expected3, $result3->getDataAsArray());
+
+        // Test with mixed string and number values
+        // Тест со смешанными строками и числами
+        $data4 = ['apple', 1, 'banana', 1, 'apple', 2, 'apple'];
+
+        $expected4 = array_count_values($data4);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover4 = new CoverArray($data4);
+        $result4 = $cover4->countValues();
+
+        $this->assertSame($expected4, $result4->getDataAsArray());
     }
 
     /**
@@ -370,37 +554,128 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testDiffMethod(): void
     {
-        $data = $this->data->get('languages.frontend');
-        $expected = [];
+        // Test with simple arrays
+        // Тест с простыми массивами
+        $data1 = [1, 2, 3, 4, 5];
+        $diff1 = [2, 4];
+        $diff2 = [3];
 
-        $additionalData1 = new NewTypeArray(['HTML']);
-        $additionalData2 = new NewTypeArray(['CSS', 'JavaScript']);
+        $expected1 = array_diff($data1, $diff1, $diff2);
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_diff(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->diff(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->diff($diff1, $diff2)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->diff(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->diff(
+                new CoverArray($diff1),
+                new CoverArray($diff2)
+            )->getDataAsArray()
+        );
+
+        // Test with associative arrays (compares values, not keys)
+        // Тест с ассоциативными массивами (сравнивает значения, не ключи)
+        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
+        $diff3 = ['banana', 'date'];
+
+        $expected2 = array_diff($data2, $diff3);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->diff($diff3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->diff(new CoverArray($diff3))->getDataAsArray()
+        );
+
+        // Test with mixed types
+        // Тест со смешанными типами
+        $data3 = [1, '1', 2, '2', 3];
+        $diff4 = [1, '2'];
+
+        $expected3 = array_diff($data3, $diff4);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->diff($diff4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->diff(new CoverArray($diff4))->getDataAsArray()
+        );
+
+        // Test with empty diff array
+        // Тест с пустым массивом для сравнения
+        $data4 = ['a', 'b', 'c'];
+        $diff5 = [];
+
+        $expected4 = array_diff($data4, $diff5);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->diff($diff5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->diff(new CoverArray($diff5))->getDataAsArray()
+        );
+
+        // Test with multiple diff arrays
+        // Тест с несколькими массивами для сравнения
+        $data5 = ['red', 'green', 'blue', 'yellow', 'purple'];
+        $diff6 = ['green', 'yellow'];
+        $diff7 = ['red'];
+        $diff8 = ['blue'];
+
+        $expected5 = array_diff($data5, $diff6, $diff7, $diff8);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->diff($diff6, $diff7, $diff8)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->diff(
+                new CoverArray($diff6),
+                new CoverArray($diff7),
+                new CoverArray($diff8)
             )->getDataAsArray()
         );
     }
@@ -424,45 +699,146 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testDiffAssocMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['country' => 'Russia'];
+        // Test with simple associative arrays
+        // Тест с простыми ассоциативными массивами
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $diff1 = ['b' => 2, 'c' => 30, 'e' => 5];
 
-        $additionalData1 = new NewTypeArray([
-            'country' => 'another',
-            'region' => 'Moscow region',
-            'city' => 'Podolsk',
-            'street' => 'Kirov st.'
-        ]);
-        $additionalData2 = new NewTypeArray([
-            'another' => 'another',
-        ]);
+        $expected1 = array_diff_assoc($data1, $diff1);
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_diff_assoc(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->diffAssoc(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->diffAssoc($diff1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->diffAssoc(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->diffAssoc(new CoverArray($diff1))->getDataAsArray()
+        );
+
+        // Test with multiple diff arrays
+        // Тест с несколькими массивами для сравнения
+        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $diff2 = ['b' => 2, 'c' => 30];
+        $diff3 = ['a' => 10, 'd' => 4];
+
+        $expected2 = array_diff_assoc($data2, $diff2, $diff3);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->diffAssoc($diff2, $diff3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->diffAssoc(
+                new CoverArray($diff2),
+                new CoverArray($diff3)
             )->getDataAsArray()
+        );
+
+        // Test with numeric keys (compares both key and value)
+        // Тест с числовыми ключами (сравнивает и ключ, и значение)
+        $data3 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $diff4 = [0 => 'zero', 1 => 'ONE', 3 => 'three'];
+
+        $expected3 = array_diff_assoc($data3, $diff4);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->diffAssoc($diff4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->diffAssoc(new CoverArray($diff4))->getDataAsArray()
+        );
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data4 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+        $diff5 = ['a' => 'apple', 0 => 'ZERO', '1' => 'one'];
+
+        $expected4 = array_diff_assoc($data4, $diff5);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->diffAssoc($diff5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->diffAssoc(new CoverArray($diff5))->getDataAsArray()
+        );
+
+        // Test with empty diff array (should return entire array)
+        // Тест с пустым массивом для сравнения (должен вернуть весь массив)
+        $data5 = ['x' => 10, 'y' => 20, 'z' => 30];
+        $diff6 = [];
+
+        $expected5 = array_diff_assoc($data5, $diff6);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->diffAssoc($diff6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->diffAssoc(new CoverArray($diff6))->getDataAsArray()
+        );
+
+        // Test where all elements are removed
+        // Тест, где все элементы удаляются
+        $data6 = ['a' => 1, 'b' => 2];
+        $diff7 = ['a' => 1, 'b' => 2];
+
+        $expected6 = array_diff_assoc($data6, $diff7);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->diffAssoc($diff7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->diffAssoc(new CoverArray($diff7))->getDataAsArray()
         );
     }
 
@@ -485,43 +861,146 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testDiffKeyMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['city' => 'Podolsk'];
+        // Test with string keys
+        // Тест со строковыми ключами
+        $data1 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+        $diff1 = ['a' => 'apricot', 'c' => 'coconut'];
 
-        $additionalData1 = new NewTypeArray([
-            'country' => 'Russia',
-            'region' => 'Moscow region',
-        ]);
-        $additionalData2 = new NewTypeArray([
-            'street' => 'Kirov st.'
-        ]);
+        $expected1 = array_diff_key($data1, $diff1);
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_diff_key(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->diffKey(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->diffKey($diff1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->diffKey(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->diffKey(new CoverArray($diff1))->getDataAsArray()
+        );
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
+        $diff2 = [1 => 'ONE', 3 => 'THREE'];
+
+        $expected2 = array_diff_key($data2, $diff2);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->diffKey($diff2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->diffKey(new CoverArray($diff2))->getDataAsArray()
+        );
+
+        // Test with multiple diff arrays
+        // Тест с несколькими массивами для сравнения
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+        $diff3 = ['a' => 10, 'c' => 30];
+        $diff4 = ['b' => 20, 'd' => 40];
+
+        $expected3 = array_diff_key($data3, $diff3, $diff4);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->diffKey($diff3, $diff4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->diffKey(
+                new CoverArray($diff3),
+                new CoverArray($diff4)
             )->getDataAsArray()
+        );
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data4 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+        $diff5 = ['a' => 'apricot', 0 => 'ZERO'];
+
+        $expected4 = array_diff_key($data4, $diff5);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->diffKey($diff5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->diffKey(new CoverArray($diff5))->getDataAsArray()
+        );
+
+        // Test with empty diff array (should return entire array)
+        // Тест с пустым массивом для сравнения (должен вернуть весь массив)
+        $data5 = ['x' => 10, 'y' => 20, 'z' => 30];
+        $diff6 = [];
+
+        $expected5 = array_diff_key($data5, $diff6);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->diffKey($diff6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->diffKey(new CoverArray($diff6))->getDataAsArray()
+        );
+
+        // Test where all keys are removed
+        // Тест, где все ключи удаляются
+        $data6 = ['a' => 1, 'b' => 2];
+        $diff7 = ['a' => 100, 'b' => 200];
+
+        $expected6 = array_diff_key($data6, $diff7);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->diffKey($diff7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->diffKey(new CoverArray($diff7))->getDataAsArray()
         );
     }
 
@@ -544,17 +1023,6 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testDiffUassocMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['city' => 'Podolsk'];
-
-        $additionalData1 = new NewTypeArray([
-            'country' => 'Russia',
-            'region' => 'Moscow region',
-        ]);
-        $additionalData2 = new NewTypeArray([
-            'street' => 'Kirov st.'
-        ]);
-
         $callback = function ($a, $b) {
             if ($a === $b) {
                 return 0;
@@ -562,35 +1030,165 @@ class PhpEquivalentMethodsTest extends TestCase
             return $a <=> $b;
         };
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_diff_uassoc(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray(),
-                $callback
-            )
-        );
+        // Test with string keys using callback
+        // Тест со строковыми ключами с использованием callback
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $diff1 = ['a' => 1, 'b' => 20];
+
+        $expected1 = array_diff_uassoc($data1, $diff1, $callback);
+
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->diffUassoc(
-                $callback,
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->diffUassoc($callback, $diff1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->diffUassoc(
+            $expected1,
+            $cover1->diffUassoc($callback, new CoverArray($diff1))->getDataAsArray()
+        );
+
+        // Test with numeric keys using callback
+        // Тест с числовыми ключами с использованием callback
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $diff2 = [0 => 'zero', 1 => 'ONE'];
+
+        $expected2 = array_diff_uassoc($data2, $diff2, $callback);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->diffUassoc($callback, $diff2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->diffUassoc($callback, new CoverArray($diff2))->getDataAsArray()
+        );
+
+        // Test with multiple diff arrays
+        // Тест с несколькими массивами для сравнения
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $diff3 = ['a' => 1, 'b' => 20];
+        $diff4 = ['c' => 30, 'd' => 4];
+
+        $expected3 = array_diff_uassoc($data3, $diff3, $diff4, $callback);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->diffUassoc($callback, $diff3, $diff4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->diffUassoc(
                 $callback,
-                $additionalData1,
-                $additionalData2
+                new CoverArray($diff3),
+                new CoverArray($diff4)
             )->getDataAsArray()
+        );
+
+        // Test with case-insensitive comparison callback
+        // Тест с callback для сравнения без учета регистра
+        $caseInsensitiveCallback = function ($a, $b) {
+            return strcasecmp((string) $a, (string) $b);
+        };
+
+        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $diff5 = ['a' => 'apple', 'b' => 'banana'];
+
+        $expected4 = array_diff_uassoc($data4, $diff5, $caseInsensitiveCallback);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->diffUassoc($caseInsensitiveCallback, $diff5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->diffUassoc($caseInsensitiveCallback, new CoverArray($diff5))->getDataAsArray()
+        );
+
+        // Test with custom key comparison logic
+        // Тест с пользовательской логикой сравнения ключей
+        $customCallback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            // Приводим к строке и сравниваем длину
+            $lenA = strlen((string) $a);
+            $lenB = strlen((string) $b);
+
+            if ($lenA === $lenB) {
+                return strcmp((string) $a, (string) $b);
+            }
+            return $lenA <=> $lenB;
+        };
+
+        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $diff6 = ['aa' => 10, 'ccc' => 3];
+
+        $expected5 = array_diff_uassoc($data5, $diff6, $customCallback);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->diffUassoc($customCallback, $diff6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->diffUassoc($customCallback, new CoverArray($diff6))->getDataAsArray()
+        );
+
+        // Test with empty diff array
+        // Тест с пустым массивом для сравнения
+        $data6 = ['x' => 10, 'y' => 20];
+        $diff7 = [];
+
+        $expected6 = array_diff_uassoc($data6, $diff7, $callback);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->diffUassoc($callback, $diff7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->diffUassoc($callback, new CoverArray($diff7))->getDataAsArray()
         );
     }
 
@@ -613,17 +1211,6 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testDiffUkeyMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['city' => 'Podolsk'];
-
-        $additionalData1 = new NewTypeArray([
-            'country' => 'Russia',
-            'region' => 'Moscow region',
-        ]);
-        $additionalData2 = new NewTypeArray([
-            'street' => 'Kirov st.'
-        ]);
-
         $callback = function ($a, $b) {
             if ($a === $b) {
                 return 0;
@@ -631,35 +1218,188 @@ class PhpEquivalentMethodsTest extends TestCase
             return $a <=> $b;
         };
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_diff_ukey(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray(),
-                $callback
-            )
-        );
+        // Test with string keys using callback
+        // Тест со строковыми ключами с использованием callback
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $diff1 = ['a' => 100, 'b' => 200];
+
+        $expected1 = array_diff_ukey($data1, $diff1, $callback);
+
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->diffUkey(
-                $callback,
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->diffUkey($callback, $diff1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->diffUkey(
+            $expected1,
+            $cover1->diffUkey($callback, new CoverArray($diff1))->getDataAsArray()
+        );
+
+        // Test with numeric keys using callback
+        // Тест с числовыми ключами с использованием callback
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $diff2 = [0 => 'ZERO', 1 => 'ONE'];
+
+        $expected2 = array_diff_ukey($data2, $diff2, $callback);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->diffUkey($callback, $diff2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->diffUkey($callback, new CoverArray($diff2))->getDataAsArray()
+        );
+
+        // Test with multiple diff arrays
+        // Тест с несколькими массивами для сравнения
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $diff3 = ['a' => 10, 'b' => 20];
+        $diff4 = ['c' => 30, 'd' => 40];
+
+        $expected3 = array_diff_ukey($data3, $diff3, $diff4, $callback);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->diffUkey($callback, $diff3, $diff4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->diffUkey(
                 $callback,
-                $additionalData1,
-                $additionalData2
+                new CoverArray($diff3),
+                new CoverArray($diff4)
             )->getDataAsArray()
+        );
+
+        // Test with case-insensitive comparison callback
+        // Тест с callback для сравнения без учета регистра
+        $caseInsensitiveCallback = function ($a, $b) {
+            return strcasecmp((string) $a, (string) $b);
+        };
+
+        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $diff5 = ['a' => 'apricot', 'b' => 'blueberry'];
+
+        $expected4 = array_diff_ukey($data4, $diff5, $caseInsensitiveCallback);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->diffUkey($caseInsensitiveCallback, $diff5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->diffUkey($caseInsensitiveCallback, new CoverArray($diff5))->getDataAsArray()
+        );
+
+        // Test with custom key comparison logic (comparing string lengths of keys)
+        // Тест с пользовательской логикой сравнения ключей (сравнение длины строк ключей)
+        $customCallback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            // Приводим к строке и сравниваем длину
+            $lenA = strlen((string) $a);
+            $lenB = strlen((string) $b);
+
+            if ($lenA === $lenB) {
+                return strcmp((string) $a, (string) $b);
+            }
+            return $lenA <=> $lenB;
+        };
+
+        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $diff6 = ['aa' => 10, 'ccc' => 30];
+
+        $expected5 = array_diff_ukey($data5, $diff6, $customCallback);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->diffUkey($customCallback, $diff6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->diffUkey($customCallback, new CoverArray($diff6))->getDataAsArray()
+        );
+
+        // Test with empty diff array
+        // Тест с пустым массивом для сравнения
+        $data6 = ['x' => 10, 'y' => 20];
+        $diff7 = [];
+
+        $expected6 = array_diff_ukey($data6, $diff7, $callback);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->diffUkey($callback, $diff7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->diffUkey($callback, new CoverArray($diff7))->getDataAsArray()
+        );
+
+        // Test where all keys are removed
+        // Тест, где все ключи удаляются
+        $data7 = ['a' => 1, 'b' => 2];
+        $diff8 = ['a' => 100, 'b' => 200];
+
+        $expected7 = array_diff_ukey($data7, $diff8, $callback);
+
+        $cover7 = new CoverArray($data7);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected7,
+            $cover7->diffUkey($callback, $diff8)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected7,
+            $cover7->diffUkey($callback, new CoverArray($diff8))->getDataAsArray()
         );
     }
 
@@ -682,24 +1422,86 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testFillMethod(): void
     {
-        $expected = [2 => 'foo', 3 => 'foo'];
-        $start_index = 2;
-        $count = 2;
-        $value = 'foo';
+        // Test with positive start index
+        // Тест с положительным начальным индексом
+        $expected1 = [2 => 'foo', 3 => 'foo'];
 
-        // original function
         $this->assertSame(
-            $expected,
-            array_fill($start_index, $count, $value)
+            $expected1,
+            CoverArray::fill(2, 2, 'foo')->getDataAsArray()
         );
 
+        // Test with zero start index
+        // Тест с нулевым начальным индексом
+        $expected2 = [0 => 'bar', 1 => 'bar', 2 => 'bar'];
+
         $this->assertSame(
-            $expected,
-            NewTypeArray::fill(
-                $start_index,
-                $count,
-                $value
-            )->getDataAsArray()
+            $expected2,
+            CoverArray::fill(0, 3, 'bar')->getDataAsArray()
+        );
+
+        // Test with negative start index
+        // Тест с отрицательным начальным индексом
+        $expected3 = [-2 => 'test', -1 => 'test', 0 => 'test'];
+
+        $this->assertSame(
+            $expected3,
+            CoverArray::fill(-2, 3, 'test')->getDataAsArray()
+        );
+
+        // Test with count 0 (should return empty array)
+        // Тест с количеством 0 (должен вернуть пустой массив)
+        $expected4 = [];
+
+        $this->assertSame(
+            $expected4,
+            CoverArray::fill(5, 0, 'value')->getDataAsArray()
+        );
+
+        // Test with integer value
+        // Тест с целочисленным значением
+        $expected5 = [0 => 42, 1 => 42, 2 => 42];
+
+        $this->assertSame(
+            $expected5,
+            CoverArray::fill(0, 3, 42)->getDataAsArray()
+        );
+
+        // Test with array value
+        // Тест со значением-массивом
+        $arrayValue = ['a', 'b', 'c'];
+        $expected6 = [0 => $arrayValue, 1 => $arrayValue];
+
+        $this->assertSame(
+            $expected6,
+            CoverArray::fill(0, 2, $arrayValue)->getDataAsArray()
+        );
+
+        // Test with null value
+        // Тест со значением null
+        $expected7 = [1 => null, 2 => null, 3 => null];
+
+        $this->assertSame(
+            $expected7,
+            CoverArray::fill(1, 3, null)->getDataAsArray()
+        );
+
+        // Test with boolean value
+        // Тест с булевым значением
+        $expected8 = [0 => true, 1 => true, 2 => true];
+
+        $this->assertSame(
+            $expected8,
+            CoverArray::fill(0, 3, true)->getDataAsArray()
+        );
+
+        // Test with count 1
+        // Тест с количеством 1
+        $expected9 = [10 => 'single'];
+
+        $this->assertSame(
+            $expected9,
+            CoverArray::fill(10, 1, 'single')->getDataAsArray()
         );
     }
 
@@ -722,32 +1524,151 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testFillKeysMethod(): void
     {
-        $keysData = new NewTypeArray(['foo', 5, 10, 'bar']);
-        $value = 'banana';
-        $expected = ['foo' => 'banana', 5 => 'banana', 10 => 'banana', 'bar' => 'banana'];
+        // Test with string and integer keys
+        // Тест со строковыми и целочисленными ключами
+        $keys1 = ['foo', 5, 10, 'bar'];
+        $value1 = 'banana';
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_fill_keys($keysData->getDataAsArray(), $value)
-        );
+        $expected1 = array_fill_keys($keys1, $value1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            NewTypeArray::fillKeys(
-                $keysData->getDataAsArray(),
-                $value
-            )->getDataAsArray()
+            $expected1,
+            CoverArray::fillKeys($keys1, $value1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            NewTypeArray::fillKeys(
-                $keysData,
-                $value
-            )->getDataAsArray()
+            $expected1,
+            CoverArray::fillKeys(new CoverArray($keys1), $value1)->getDataAsArray()
+        );
+
+        // Test with only string keys
+        // Тест только со строковыми ключами
+        $keys2 = ['name', 'age', 'city'];
+        $value2 = 'unknown';
+
+        $expected2 = array_fill_keys($keys2, $value2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            CoverArray::fillKeys($keys2, $value2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            CoverArray::fillKeys(new CoverArray($keys2), $value2)->getDataAsArray()
+        );
+
+        // Test with only numeric keys
+        // Тест только с числовыми ключами
+        $keys3 = [0, 1, 2, 3];
+        $value3 = 42;
+
+        $expected3 = array_fill_keys($keys3, $value3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            CoverArray::fillKeys($keys3, $value3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            CoverArray::fillKeys(new CoverArray($keys3), $value3)->getDataAsArray()
+        );
+
+        // Test with mixed types in value (array)
+        // Тест со смешанными типами в значении (массив)
+        $keys4 = ['a', 'b', 'c'];
+        $value4 = ['nested' => 'value'];
+
+        $expected4 = array_fill_keys($keys4, $value4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            CoverArray::fillKeys($keys4, $value4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            CoverArray::fillKeys(new CoverArray($keys4), $value4)->getDataAsArray()
+        );
+
+        // Test with null value
+        // Тест со значением null
+        $keys5 = ['x', 'y', 'z'];
+        $value5 = null;
+
+        $expected5 = array_fill_keys($keys5, $value5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            CoverArray::fillKeys($keys5, $value5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            CoverArray::fillKeys(new CoverArray($keys5), $value5)->getDataAsArray()
+        );
+
+        // Test with empty keys array
+        // Тест с пустым массивом ключей
+        $keys6 = [];
+        $value6 = 'any';
+
+        $expected6 = array_fill_keys($keys6, $value6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            CoverArray::fillKeys($keys6, $value6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            CoverArray::fillKeys(new CoverArray($keys6), $value6)->getDataAsArray()
+        );
+
+        // Test with duplicate keys (should create array with duplicate keys, which is allowed)
+        // Тест с дублирующимися ключами (должен создать массив с дублирующимися ключами, что разрешено)
+        $keys7 = ['a', 'b', 'a', 'c'];
+        $value7 = 'duplicate';
+
+        $expected7 = array_fill_keys($keys7, $value7);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected7,
+            CoverArray::fillKeys($keys7, $value7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected7,
+            CoverArray::fillKeys(new CoverArray($keys7), $value7)->getDataAsArray()
         );
     }
 
@@ -770,95 +1691,130 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testFilterMethod(): void
     {
-        // pass value as the only argument to callback
-
-        $data = $this->data->get('languages.backend');
-        $expected = ['PHP'];
-        $callback = function ($value) {
-            return preg_match('~P~', $value);
+        // Test with callback that filters by value
+        // Тест с callback, который фильтрует по значению
+        $data1 = [1, 2, 3, 4, 5];
+        $callback1 = function ($value) {
+            return $value % 2 === 0; // только четные числа
         };
 
-        // original function
+        $expected1 = array_filter($data1, $callback1);
+
+        $cover1 = new CoverArray($data1);
         $this->assertSame(
-            $expected,
-            array_filter(
-                $data->getDataAsArray(),
-                $callback
-            )
+            $expected1,
+            $cover1->filter($callback1)->getDataAsArray()
         );
 
-        $this->assertSame(
-            ['PHP'],
-            $data->filter($callback)->getDataAsArray()
-        );
-
-        // pass key as the only argument to callback
-
-        $data = $this->data->get('languages');
-        $expected = ['backend' => ['PHP', 'MySql']];
-        $callback = function ($key) {
-            return $key === 'backend';
+        // Test with callback that filters by key (ARRAY_FILTER_USE_KEY)
+        // Тест с callback, который фильтрует по ключу (ARRAY_FILTER_USE_KEY)
+        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $callback2 = function ($key) {
+            return in_array($key, ['a', 'c']); // только ключи 'a' и 'c'
         };
 
-        // original function
+        $expected2 = array_filter($data2, $callback2, ARRAY_FILTER_USE_KEY);
+
+        $cover2 = new CoverArray($data2);
         $this->assertSame(
-            $expected,
-            array_filter(
-                $data->getDataAsArray(),
-                $callback,
-                ARRAY_FILTER_USE_KEY
-            )
+            $expected2,
+            $cover2->filter($callback2, ARRAY_FILTER_USE_KEY)->getDataAsArray()
         );
 
-        $this->assertSame(
-            $expected,
-            $data->filter(
-                $callback,
-                ARRAY_FILTER_USE_KEY
-            )->getDataAsArray()
-        );
-
-        // pass both value and key as arguments to callback
-
-        $data = $this->data->get('languages');
-        $expected = ['backend' => ['PHP', 'MySql']];
-        $callback = function ($value, $key) {
-            return $key === 'backend' && is_iterable($value) && $value[0] === 'PHP';
+        // Test with callback that filters by both value and key (ARRAY_FILTER_USE_BOTH)
+        // Тест с callback, который фильтрует и по значению, и по ключу (ARRAY_FILTER_USE_BOTH)
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $callback3 = function ($value, $key) {
+            return $value > 1 && $key !== 'c'; // значение > 1 и ключ не 'c'
         };
 
-        // original function
+        $expected3 = array_filter($data3, $callback3, ARRAY_FILTER_USE_BOTH);
+
+        $cover3 = new CoverArray($data3);
         $this->assertSame(
-            $expected,
-            array_filter(
-                $data->getDataAsArray(),
-                $callback,
-                ARRAY_FILTER_USE_BOTH
-            )
+            $expected3,
+            $cover3->filter($callback3, ARRAY_FILTER_USE_BOTH)->getDataAsArray()
         );
 
+        // Test without callback (removes empty values) - excluding empty array to avoid PHP version differences
+        // Тест без callback (удаляет пустые значения) - исключаем пустой массив, чтобы избежать различий между версиями PHP
+        $data4 = [0 => 'a', 1 => false, 2 => null, 3 => '', 4 => 'b'];
+
+        $expected4 = array_filter($data4);
+
+        $cover4 = new CoverArray($data4);
         $this->assertSame(
-            $expected,
-            $data->filter(
-                $callback,
-                ARRAY_FILTER_USE_BOTH
-            )->getDataAsArray()
+            $expected4,
+            $cover4->filter()->getDataAsArray()
         );
 
-        // without callback
+        // Test with callback that always returns false
+        // Тест с callback, который всегда возвращает false
+        $data5 = ['x' => 1, 'y' => 2, 'z' => 3];
+        $callback5 = function ($value) {
+            return false;
+        };
 
-        $data = NewTypeArray::fromExplode(',', ',0')
-            ->append(null);
-        $expected = [];
+        $expected5 = array_filter($data5, $callback5);
 
-        // original function
+        $cover5 = new CoverArray($data5);
         $this->assertSame(
-            $expected,
-            array_filter($data->getDataAsArray())
+            $expected5,
+            $cover5->filter($callback5)->getDataAsArray()
         );
 
+        // Test with callback that always returns true
+        // Тест с callback, который всегда возвращает true
+        $data6 = ['x' => 1, 'y' => 2, 'z' => 3];
+        $callback6 = function ($value) {
+            return true;
+        };
+
+        $expected6 = array_filter($data6, $callback6);
+
+        $cover6 = new CoverArray($data6);
         $this->assertSame(
-            $expected,
-            $data->filter()->getDataAsArray()
+            $expected6,
+            $cover6->filter($callback6)->getDataAsArray()
+        );
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data7 = [];
+
+        $expected7 = array_filter($data7);
+
+        $cover7 = new CoverArray($data7);
+        $this->assertSame(
+            $expected7,
+            $cover7->filter()->getDataAsArray()
+        );
+
+        // Test with array containing only falsey values (excluding empty array)
+        // Тест с массивом, содержащим только ложные значения (исключая пустой массив)
+        $data8 = [0, false, null, ''];
+
+        $expected8 = array_filter($data8);
+
+        $cover8 = new CoverArray($data8);
+        $this->assertSame(
+            $expected8,
+            $cover8->filter()->getDataAsArray()
+        );
+
+        // Test with callback that uses only value (default mode)
+        // Тест с callback, который использует только значение (режим по умолчанию)
+        $data9 = [10, 20, 30, 40, 50];
+        $callback9 = function ($value) {
+            return $value > 25;
+        };
+
+        $expected9 = array_filter($data9, $callback9);
+
+        $cover9 = new CoverArray($data9);
+        $this->assertSame(
+            $expected9,
+            $cover9->filter($callback9)->getDataAsArray()
         );
     }
 
@@ -879,14 +1835,85 @@ class PhpEquivalentMethodsTest extends TestCase
      * @see CoverArray::find()
      * @see array_find()
      */
-    public function testFindMethod()
+    public function testFindMethod(): void
     {
-        $this->assertSame(1982, $this->data->get('birthday')->find(function ($value) {
-            return $value > 1000;
+        // Test finding an element in array of numbers
+        // Тест поиска элемента в массиве чисел
+        $data1 = [1, 3, 5, 7, 9];
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame(5, $cover1->find(function ($value, $key) {
+            return $value > 4 && $key === 2;
         }));
 
-        $this->assertNull($this->data->find(function ($value) {
-            return false;
+        $this->assertNull($cover1->find(function ($value, $key) {
+            return $value > 10;
+        }));
+
+        // Test finding an element in array of strings
+        // Тест поиска элемента в массиве строк
+        $data2 = ['apple', 'banana', 'cherry', 'date'];
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame('cherry', $cover2->find(function ($value, $key) {
+            return str_starts_with($value, 'c');
+        }));
+
+        $this->assertNull($cover2->find(function ($value, $key) {
+            return str_starts_with($value, 'z');
+        }));
+
+        // Test finding an element in associative array
+        // Тест поиска элемента в ассоциативном массиве
+        $data3 = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame(30, $cover3->find(function ($value, $key) {
+            return $key === 'age' && $value > 20;
+        }));
+
+        $this->assertNull($cover3->find(function ($value, $key) {
+            return $key === 'country';
+        }));
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data4 = [];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertNull($cover4->find(function ($value, $key) {
+            return $value === 'anything';
+        }));
+
+        // Test finding first element when multiple elements satisfy condition
+        // Тест поиска первого элемента, когда несколько элементов удовлетворяют условию
+        $data5 = [10, 20, 30, 40, 50];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertSame(30, $cover5->find(function ($value, $key) {
+            return $value >= 30;
+        }));
+
+        // Test with callback that uses both value and key
+        // Тест с callback, который использует и значение, и ключ
+        $data6 = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame('two', $cover6->find(function ($value, $key) {
+            return $key === 2 && strlen($value) === 3;
+        }));
+
+        // Test finding element that matches multiple conditions
+        // Тест поиска элемента, соответствующего нескольким условиям
+        $data7 = ['a' => 5, 'b' => 10, 'c' => 15, 'd' => 20];
+        $cover7 = new CoverArray($data7);
+
+        $this->assertSame(15, $cover7->find(function ($value, $key) {
+            return $value % 5 === 0 && $value % 3 === 0;
+        }));
+
+        $this->assertNull($cover7->find(function ($value, $key) {
+            return $value > 100;
         }));
     }
 
@@ -907,15 +1934,196 @@ class PhpEquivalentMethodsTest extends TestCase
      * @see CoverArray::findKey()
      * @see array_find_key()
      */
-    public function testFindKeyMethod()
+    public function testFindKeyMethod(): void
     {
-        $this->assertSame(2, $this->data->get('birthday')->findKey(function ($value) {
-            return $value == 1982;
+        // Test finding key of an element in array of numbers
+        // Тест поиска ключа элемента в массиве чисел
+        $data1 = [10, 20, 30, 40, 50];
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame(2, $cover1->findKey(function ($value, $key) {
+            return $value === 30;
         }));
 
-        $this->assertNull($this->data->findKey(function ($value) {
+        $this->assertNull($cover1->findKey(function ($value, $key) {
+            return $value === 100;
+        }));
+
+        // Test finding key of an element in associative array
+        // Тест поиска ключа элемента в ассоциативном массиве
+        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame('b', $cover2->findKey(function ($value, $key) {
+            return $value === 'banana';
+        }));
+
+        $this->assertNull($cover2->findKey(function ($value, $key) {
+            return $value === 'date';
+        }));
+
+        // Test finding key using key in callback
+        // Тест поиска ключа с использованием ключа в callback
+        $data3 = [5 => 'five', 10 => 'ten', 15 => 'fifteen'];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame(10, $cover3->findKey(function ($value, $key) {
+            return $key === 10;
+        }));
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data4 = [];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertNull($cover4->findKey(function ($value, $key) {
+            return $value === 'anything';
+        }));
+
+        // Test finding first key when multiple elements satisfy condition
+        // Тест поиска первого ключа, когда несколько элементов удовлетворяют условию
+        $data5 = ['x' => 1, 'y' => 2, 'z' => 3, 'w' => 4];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertSame('y', $cover5->findKey(function ($value, $key) {
+            return $value >= 2;
+        }));
+
+        // Test with callback that uses both value and key
+        // Тест с callback, который использует и значение, и ключ
+        $data6 = ['first' => 10, 'second' => 20, 'third' => 30];
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame('second', $cover6->findKey(function ($value, $key) {
+            return $value > 15 && $key === 'second';
+        }));
+
+        // Test with callback that always returns false
+        // Тест с callback, который всегда возвращает false
+        $data7 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $cover7 = new CoverArray($data7);
+
+        $this->assertNull($cover7->findKey(function ($value, $key) {
             return false;
         }));
+
+        // Test with callback that always returns true (should return first key)
+        // Тест с callback, который всегда возвращает true (должен вернуть первый ключ)
+        $data8 = ['one' => 1, 'two' => 2, 'three' => 3];
+        $cover8 = new CoverArray($data8);
+
+        $this->assertSame('one', $cover8->findKey(function ($value, $key) {
+            return true;
+        }));
+
+        // Test finding key with complex condition
+        // Тест поиска ключа со сложным условием
+        $data9 = ['item1' => 5, 'item2' => 12, 'item3' => 8, 'item4' => 15];
+        $cover9 = new CoverArray($data9);
+
+        $this->assertSame('item2', $cover9->findKey(function ($value, $key) {
+            return $value % 2 === 0 && $value > 10;
+        }));
+
+        $this->assertNull($cover9->findKey(function ($value, $key) {
+            return $value > 100;
+        }));
+    }
+
+    /**
+     * Tests the first() method (array_first equivalent).
+     *
+     * This test verifies that the first() method correctly returns the first
+     * element of the array without affecting the internal array pointer,
+     * returning null if the array is empty, mirroring the behavior of array_first().
+     *
+     *
+     * Тестирование метода first() (эквивалент array_first).
+     *
+     * Этот тест проверяет, что метод first() корректно возвращает первый
+     * элемент массива, не затрагивая внутренний указатель массива,
+     * возвращая null, если массив пуст, отражая поведение функции array_first().
+     *
+     * @see CoverArray::first()
+     */
+    public function testFirstMethod(): void
+    {
+        // Test with sequential numeric array
+        // Тест с последовательным числовым массивом
+        $data1 = [10, 20, 30, 40];
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame(10, $cover1->first());
+
+        // Test with associative array (preserving insertion order in PHP 7+)
+        // Тест с ассоциативным массивом (сохраняется порядок вставки в PHP 7+)
+        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame('apple', $cover2->first());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data3 = [];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertNull($cover3->first());
+
+        // Test with array containing null as first element
+        // Тест с массивом, содержащим null в качестве первого элемента
+        $data4 = [null, 'second', 'third'];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertNull($cover4->first());
+
+        // Test with array containing false as first element
+        // Тест с массивом, содержащим false в качестве первого элемента
+        $data5 = [false, true, true];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertFalse($cover5->first());
+
+        // Test with array containing zero as first element
+        // Тест с массивом, содержащим 0 в качестве первого элемента
+        $data6 = [0, 1, 2];
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame(0, $cover6->first());
+
+        // Test with array containing empty string as first element
+        // Тест с массивом, содержащим пустую строку в качестве первого элемента
+        $data7 = ['', 'not empty', 'another'];
+        $cover7 = new CoverArray($data7);
+
+        $this->assertSame('', $cover7->first());
+
+        // Test with mixed key types array
+        // Тест с массивом со смешанными типами ключей
+        $data8 = [0 => 'zero', 'one' => 1, 2 => 'two'];
+        $cover8 = new CoverArray($data8);
+
+        $this->assertSame('zero', $cover8->first());
+
+        // Test that method doesn't affect array pointer (same result on multiple calls)
+        // Тест, что метод не затрагивает указатель массива (одинаковый результат при нескольких вызовах)
+        $data9 = ['first', 'second', 'third'];
+        $cover9 = new CoverArray($data9);
+
+        $this->assertSame('first', $cover9->first());
+        $this->assertSame('first', $cover9->first()); // Second call should return same result
+        $this->assertSame('first', $cover9->first()); // Third call should return same result
+
+        // Test with array containing array as first element
+        // Тест с массивом, содержащим массив в качестве первого элемента
+        $nestedArray = ['nested' => 'value'];
+        $data10 = [$nestedArray, 'simple', 123];
+        $cover10 = new CoverArray($data10);
+
+        // Since CoverArray converts nested arrays to CoverArray instances
+        // Так как CoverArray преобразует вложенные массивы в экземпляры CoverArray
+        $firstElement = $cover10->first();
+        $this->assertInstanceOf(CoverArray::class, $firstElement);
+        $this->assertSame($nestedArray, $firstElement->getDataAsArray());
     }
 
     /**
@@ -937,23 +2145,88 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testFlipMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = [
-            'Russia' => 'country',
-            'Moscow region' => 'region',
-            'Podolsk' => 'city',
-            'Kirov st.' => 'street'
-        ];
+        // Test with simple associative array
+        // Тест с простым ассоциативным массивом
+        $data1 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
 
-        // original function
+        $expected1 = array_flip($data1);
+
+        $cover1 = new CoverArray($data1);
         $this->assertSame(
-            $expected,
-            array_flip($data->getDataAsArray())
+            $expected1,
+            $cover1->flip()->getDataAsArray()
         );
 
+        // Test with numeric keys (will become values)
+        // Тест с числовыми ключами (станут значениями)
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+
+        $expected2 = array_flip($data2);
+
+        $cover2 = new CoverArray($data2);
         $this->assertSame(
-            $expected,
-            $data->flip()->getDataAsArray()
+            $expected2,
+            $cover2->flip()->getDataAsArray()
+        );
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3];
+
+        $expected3 = array_flip($data3);
+
+        $cover3 = new CoverArray($data3);
+        $this->assertSame(
+            $expected3,
+            $cover3->flip()->getDataAsArray()
+        );
+
+        // Test with duplicate values (only last duplicate will be kept)
+        // Тест с дублирующимися значениями (сохранится только последний дубликат)
+        $data4 = ['x' => 'fruit', 'y' => 'fruit', 'z' => 'vegetable'];
+
+        $expected4 = array_flip($data4);
+
+        $cover4 = new CoverArray($data4);
+        $this->assertSame(
+            $expected4,
+            $cover4->flip()->getDataAsArray()
+        );
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data5 = [];
+
+        $expected5 = array_flip($data5);
+
+        $cover5 = new CoverArray($data5);
+        $this->assertSame(
+            $expected5,
+            $cover5->flip()->getDataAsArray()
+        );
+
+        // Test with numeric string values that become integer keys
+        // Тест с числовыми строковыми значениями, которые становятся целочисленными ключами
+        $data6 = ['one' => '1', 'two' => '2', 'three' => '3'];
+
+        $expected6 = array_flip($data6);
+
+        $cover6 = new CoverArray($data6);
+        $this->assertSame(
+            $expected6,
+            $cover6->flip()->getDataAsArray()
+        );
+
+        // Test with values that are valid string and integer types
+        // Тест со значениями, которые являются допустимыми строковыми и целочисленными типами
+        $data7 = ['a' => 'apple', 'b' => 2, 'c' => '3'];
+
+        $expected7 = array_flip($data7);
+
+        $cover7 = new CoverArray($data7);
+        $this->assertSame(
+            $expected7,
+            $cover7->flip()->getDataAsArray()
         );
     }
 
@@ -976,42 +2249,129 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIntersectMethod(): void
     {
-        $data = $this->data->get('languages.frontend');
+        // Test with simple arrays
+        // Тест с простыми массивами
+        $data1 = [1, 2, 3, 4, 5];
+        $intersect1 = [2, 3, 6];
+        $intersect2 = [3, 4, 7];
 
-        $additionalData1 = clone $data;
-        $additionalData1->offsetUnset(0); // remove 'HTML' by index
+        $expected1 = array_intersect($data1, $intersect1, $intersect2);
 
-        $additionalData2 = clone $data;
-        $additionalData2->offsetUnset(1); // remove 'CSS' by index
-
-        $expected = [2 => 'JavaScript'];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_intersect(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->intersect(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->intersect($intersect1, $intersect2)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->intersect(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->intersect(
+                new CoverArray($intersect1),
+                new CoverArray($intersect2)
             )->getDataAsArray()
+        );
+
+        // Test with associative arrays (compares values, not keys)
+        // Тест с ассоциативными массивами (сравнивает значения, не ключи)
+        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
+        $intersect3 = ['banana', 'date', 'elderberry'];
+
+        $expected2 = array_intersect($data2, $intersect3);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->intersect($intersect3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->intersect(new CoverArray($intersect3))->getDataAsArray()
+        );
+
+        // Test with multiple arrays for intersection
+        // Тест с несколькими массивами для пересечения
+        $data3 = ['red', 'green', 'blue', 'yellow', 'purple'];
+        $intersect4 = ['green', 'yellow', 'orange'];
+        $intersect5 = ['blue', 'green', 'violet'];
+        $intersect6 = ['green', 'indigo'];
+
+        $expected3 = array_intersect($data3, $intersect4, $intersect5, $intersect6);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->intersect($intersect4, $intersect5, $intersect6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->intersect(
+                new CoverArray($intersect4),
+                new CoverArray($intersect5),
+                new CoverArray($intersect6)
+            )->getDataAsArray()
+        );
+
+        // Test with empty intersection array
+        // Тест с пустым массивом для пересечения
+        $data4 = ['a', 'b', 'c'];
+        $intersect7 = [];
+
+        $expected4 = array_intersect($data4, $intersect7);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->intersect($intersect7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->intersect(new CoverArray($intersect7))->getDataAsArray()
+        );
+
+        // Test with no intersection
+        // Тест без пересечения
+        $data5 = [1, 2, 3];
+        $intersect8 = [4, 5, 6];
+
+        $expected5 = array_intersect($data5, $intersect8);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->intersect($intersect8)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->intersect(new CoverArray($intersect8))->getDataAsArray()
         );
     }
 
@@ -1034,44 +2394,146 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIntersectAssocMethod(): void
     {
-        $data = $this->data->get('languages.frontend');
+        // Test with associative arrays (compares both keys and values)
+        // Тест с ассоциативными массивами (сравнивает и ключи, и значения)
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect1 = ['b' => 2, 'c' => 30, 'e' => 5];
 
-        $additionalData1 = clone $data;
-        $additionalData1->offsetUnset(0); // remove 'HTML' by index
-        $additionalData1->append('HTML');
+        $expected1 = array_intersect_assoc($data1, $intersect1);
 
-        $additionalData2 = clone $data;
-        $additionalData2->offsetUnset(1); // remove 'CSS' by index
-        $additionalData2->append('CSS');
-
-        $expected = [2 => 'JavaScript'];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_intersect_assoc(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->intersectAssoc(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->intersectAssoc($intersect1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->intersectAssoc(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->intersectAssoc(new CoverArray($intersect1))->getDataAsArray()
+        );
+
+        // Test with multiple arrays for intersection
+        // Тест с несколькими массивами для пересечения
+        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect2 = ['b' => 2, 'c' => 30];
+        $intersect3 = ['a' => 1, 'd' => 40];
+
+        $expected2 = array_intersect_assoc($data2, $intersect2, $intersect3);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectAssoc($intersect2, $intersect3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectAssoc(
+                new CoverArray($intersect2),
+                new CoverArray($intersect3)
             )->getDataAsArray()
+        );
+
+        // Test with numeric keys (compares both key and value)
+        // Тест с числовыми ключами (сравнивает и ключ, и значение)
+        $data3 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $intersect4 = [0 => 'zero', 1 => 'ONE', 2 => 'two'];
+
+        $expected3 = array_intersect_assoc($data3, $intersect4);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectAssoc($intersect4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectAssoc(new CoverArray($intersect4))->getDataAsArray()
+        );
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data4 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+        $intersect5 = ['a' => 'apple', 0 => 'ZERO', '1' => 'one'];
+
+        $expected4 = array_intersect_assoc($data4, $intersect5);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectAssoc($intersect5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectAssoc(new CoverArray($intersect5))->getDataAsArray()
+        );
+
+        // Test with empty intersection array (should return empty array)
+        // Тест с пустым массивом для пересечения (должен вернуть пустой массив)
+        $data5 = ['x' => 10, 'y' => 20, 'z' => 30];
+        $intersect6 = [];
+
+        $expected5 = array_intersect_assoc($data5, $intersect6);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectAssoc($intersect6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectAssoc(new CoverArray($intersect6))->getDataAsArray()
+        );
+
+        // Test with complete match
+        // Тест с полным совпадением
+        $data6 = ['a' => 1, 'b' => 2];
+        $intersect7 = ['a' => 1, 'b' => 2];
+
+        $expected6 = array_intersect_assoc($data6, $intersect7);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectAssoc($intersect7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectAssoc(new CoverArray($intersect7))->getDataAsArray()
         );
     }
 
@@ -1095,42 +2557,146 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIntersectKeyMethod(): void
     {
-        $data = $this->data->get('address');
+        // Test with associative arrays
+        // Тест с ассоциативными массивами
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect1 = ['b' => 20, 'c' => 30, 'e' => 50];
 
-        $additionalData1 = clone $data;
-        $additionalData1->offsetUnset('region');
+        $expected1 = array_intersect_key($data1, $intersect1);
 
-        $additionalData2 = clone $data;
-        $additionalData2->offsetUnset('city');
-
-        $expected = ['country' => 'Russia', 'street' => 'Kirov st.'];
-
-        // original function
-        $this->assertSame(
-            $expected,
-            array_intersect_key(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->intersectKey(
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->intersectKey($intersect1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->intersectKey(
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->intersectKey(new CoverArray($intersect1))->getDataAsArray()
+        );
+
+        // Test with multiple arrays for intersection
+        // Тест с несколькими массивами для пересечения
+        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+        $intersect2 = ['a' => 10, 'c' => 30];
+        $intersect3 = ['b' => 200, 'd' => 400, 'e' => 500];
+
+        $expected2 = array_intersect_key($data2, $intersect2, $intersect3);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectKey($intersect2, $intersect3)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectKey(
+                new CoverArray($intersect2),
+                new CoverArray($intersect3)
             )->getDataAsArray()
+        );
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data3 = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
+        $intersect4 = [1 => 'ONE', 3 => 'THREE', 4 => 'four'];
+
+        $expected3 = array_intersect_key($data3, $intersect4);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectKey($intersect4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectKey(new CoverArray($intersect4))->getDataAsArray()
+        );
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data4 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+        $intersect5 = ['a' => 'apricot', 0 => 'ZERO'];
+
+        $expected4 = array_intersect_key($data4, $intersect5);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectKey($intersect5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectKey(new CoverArray($intersect5))->getDataAsArray()
+        );
+
+        // Test with empty intersection array (should return empty array)
+        // Тест с пустым массивом для пересечения (должен вернуть пустой массив)
+        $data5 = ['x' => 10, 'y' => 20, 'z' => 30];
+        $intersect6 = [];
+
+        $expected5 = array_intersect_key($data5, $intersect6);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectKey($intersect6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectKey(new CoverArray($intersect6))->getDataAsArray()
+        );
+
+        // Test with no common keys
+        // Тест без общих ключей
+        $data6 = ['a' => 1, 'b' => 2];
+        $intersect7 = ['c' => 3, 'd' => 4];
+
+        $expected6 = array_intersect_key($data6, $intersect7);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectKey($intersect7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectKey(new CoverArray($intersect7))->getDataAsArray()
         );
     }
 
@@ -1153,46 +2719,175 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIntersectUassocMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['country' => 'Russia', 'street' => 'Kirov st.'];
+        // Define a callback that works with mixed key types
+        // Определяем callback, который работает со смешанными типами ключей
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
 
-        $additionalData1 = clone $data;
-        $additionalData1->offsetUnset('region');
-        $additionalData1->offsetSet('REGION', 'Moscow region');
+        // Test with string keys
+        // Тест со строковыми ключами
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect1 = ['a' => 1, 'b' => 20];
 
-        $additionalData2 = clone $data;
-        $additionalData2->offsetUnset('city');
-        $additionalData2->offsetSet('city', 'PODOLSK');
+        $expected1 = array_intersect_uassoc($data1, $intersect1, $callback);
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_intersect_uassoc(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray(),
-                'strcmp'
-            )
-        );
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->intersectUassoc(
-                'strcmp',
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->intersectUassoc($callback, $intersect1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->intersectUassoc(
-                'strcmp',
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->intersectUassoc($callback, new CoverArray($intersect1))->getDataAsArray()
+        );
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $intersect2 = [0 => 'zero', 1 => 'ONE'];
+
+        $expected2 = array_intersect_uassoc($data2, $intersect2, $callback);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectUassoc($callback, $intersect2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectUassoc($callback, new CoverArray($intersect2))->getDataAsArray()
+        );
+
+        // Test with multiple arrays
+        // Тест с несколькими массивами
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect3 = ['a' => 1, 'b' => 20];
+        $intersect4 = ['c' => 30, 'd' => 4];
+
+        $expected3 = array_intersect_uassoc($data3, $intersect3, $intersect4, $callback);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectUassoc($callback, $intersect3, $intersect4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectUassoc(
+                $callback,
+                new CoverArray($intersect3),
+                new CoverArray($intersect4)
             )->getDataAsArray()
+        );
+
+        // Test with case-insensitive comparison callback
+        // Тест с callback для сравнения без учета регистра
+        $caseInsensitiveCallback = function ($a, $b) {
+            return strcasecmp((string) $a, (string) $b);
+        };
+
+        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $intersect5 = ['a' => 'apple', 'b' => 'banana'];
+
+        $expected4 = array_intersect_uassoc($data4, $intersect5, $caseInsensitiveCallback);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectUassoc($caseInsensitiveCallback, $intersect5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectUassoc($caseInsensitiveCallback, new CoverArray($intersect5))->getDataAsArray()
+        );
+
+        // Test with custom key comparison logic
+        // Тест с пользовательской логикой сравнения ключей
+        $customCallback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            // Compare by string length first
+            // Сначала сравниваем по длине строки
+            $lenA = strlen((string) $a);
+            $lenB = strlen((string) $b);
+
+            if ($lenA === $lenB) {
+                return strcmp((string) $a, (string) $b);
+            }
+            return $lenA <=> $lenB;
+        };
+
+        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $intersect6 = ['aa' => 10, 'ccc' => 3];
+
+        $expected5 = array_intersect_uassoc($data5, $intersect6, $customCallback);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectUassoc($customCallback, $intersect6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectUassoc($customCallback, new CoverArray($intersect6))->getDataAsArray()
+        );
+
+        // Test with empty intersection array
+        // Тест с пустым массивом для пересечения
+        $data6 = ['x' => 10, 'y' => 20];
+        $intersect7 = [];
+
+        $expected6 = array_intersect_uassoc($data6, $intersect7, $callback);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectUassoc($callback, $intersect7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectUassoc($callback, new CoverArray($intersect7))->getDataAsArray()
         );
     }
 
@@ -1215,58 +2910,198 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIntersectUkeyMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['country' => 'Russia', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
-
-        $additionalData1 = clone $data;
-        $additionalData1->offsetUnset('region');
-        $additionalData1->offsetSet('REGION', 'Moscow region');
-
-        $additionalData2 = clone $data;
-        $additionalData2->offsetUnset('city');
-        $additionalData2->offsetSet('city', 'PODOLSK');
-
-        $key_compare_func = function ($key1, $key2) {
-            if ($key1 == $key2) {
+        // Define a callback that works with mixed key types
+        // Определяем callback, который работает со смешанными типами ключей
+        $callback = function ($a, $b) {
+            if ($a === $b) {
                 return 0;
-            } else {
-                if ($key1 > $key2) {
-                    return 1;
-                } else {
-                    return -1;
-                }
             }
+            return $a <=> $b;
         };
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_intersect_ukey(
-                $data->getDataAsArray(),
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray(),
-                $key_compare_func
-            )
-        );
+        // Test with string keys
+        // Тест со строковыми ключами
+        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect1 = ['a' => 10, 'b' => 20, 'd' => 40];
+
+        $expected1 = array_intersect_ukey($data1, $intersect1, $callback);
+
+        $cover1 = new CoverArray($data1);
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->intersectUkey(
-                $key_compare_func,
-                $additionalData1->getDataAsArray(),
-                $additionalData2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->intersectUkey($callback, $intersect1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->intersectUkey(
-                $key_compare_func,
-                $additionalData1,
-                $additionalData2
+            $expected1,
+            $cover1->intersectUkey($callback, new CoverArray($intersect1))->getDataAsArray()
+        );
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $intersect2 = [1 => 'ONE', 2 => 'TWO', 3 => 'three'];
+
+        $expected2 = array_intersect_ukey($data2, $intersect2, $callback);
+
+        $cover2 = new CoverArray($data2);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectUkey($callback, $intersect2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->intersectUkey($callback, new CoverArray($intersect2))->getDataAsArray()
+        );
+
+        // Test with multiple arrays
+        // Тест с несколькими массивами
+        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect3 = ['a' => 10, 'b' => 20];
+        $intersect4 = ['c' => 30, 'd' => 40];
+
+        $expected3 = array_intersect_ukey($data3, $intersect3, $intersect4, $callback);
+
+        $cover3 = new CoverArray($data3);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectUkey($callback, $intersect3, $intersect4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->intersectUkey(
+                $callback,
+                new CoverArray($intersect3),
+                new CoverArray($intersect4)
             )->getDataAsArray()
+        );
+
+        // Test with case-insensitive comparison callback
+        // Тест с callback для сравнения без учета регистра
+        $caseInsensitiveCallback = function ($a, $b) {
+            return strcasecmp((string) $a, (string) $b);
+        };
+
+        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $intersect5 = ['a' => 'apricot', 'b' => 'blueberry'];
+
+        $expected4 = array_intersect_ukey($data4, $intersect5, $caseInsensitiveCallback);
+
+        $cover4 = new CoverArray($data4);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectUkey($caseInsensitiveCallback, $intersect5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->intersectUkey($caseInsensitiveCallback, new CoverArray($intersect5))->getDataAsArray()
+        );
+
+        // Test with custom key comparison logic
+        // Тест с пользовательской логикой сравнения ключей
+        $customCallback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            // Compare by string length first
+            // Сначала сравниваем по длине строки
+            $lenA = strlen((string) $a);
+            $lenB = strlen((string) $b);
+
+            if ($lenA === $lenB) {
+                return strcmp((string) $a, (string) $b);
+            }
+            return $lenA <=> $lenB;
+        };
+
+        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $intersect6 = ['aa' => 10, 'ccc' => 30];
+
+        $expected5 = array_intersect_ukey($data5, $intersect6, $customCallback);
+
+        $cover5 = new CoverArray($data5);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectUkey($customCallback, $intersect6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->intersectUkey($customCallback, new CoverArray($intersect6))->getDataAsArray()
+        );
+
+        // Test with empty intersection array
+        // Тест с пустым массивом для пересечения
+        $data6 = ['x' => 10, 'y' => 20];
+        $intersect7 = [];
+
+        $expected6 = array_intersect_ukey($data6, $intersect7, $callback);
+
+        $cover6 = new CoverArray($data6);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectUkey($callback, $intersect7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->intersectUkey($callback, new CoverArray($intersect7))->getDataAsArray()
+        );
+
+        // Test with no common keys
+        // Тест без общих ключей
+        $data7 = ['a' => 1, 'b' => 2];
+        $intersect8 = ['c' => 3, 'd' => 4];
+
+        $expected7 = array_intersect_ukey($data7, $intersect8, $callback);
+
+        $cover7 = new CoverArray($data7);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected7,
+            $cover7->intersectUkey($callback, $intersect8)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected7,
+            $cover7->intersectUkey($callback, new CoverArray($intersect8))->getDataAsArray()
         );
     }
 
@@ -1289,9 +3124,125 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIsListMethod(): void
     {
-        $this->assertTrue($this->data->get('birthday')->isList());
-        $this->assertTrue((new NewTypeArray())->isList());
-        $this->assertFalse($this->data->isList());
+        // 1. Sequential numeric array starting from 0 (should be a list)
+        $data1 = [0 => 'a', 1 => 'b', 2 => 'c'];
+        $cover1 = new CoverArray($data1);
+        $this->assertTrue($cover1->isList());
+
+        // 2. Array with non-sequential keys (should not be a list)
+        $data2 = [0 => 'a', 2 => 'c', 3 => 'd'];
+        $cover2 = new CoverArray($data2);
+        $this->assertFalse($cover2->isList());
+
+        // 3. Array starting from non-zero key (should not be a list)
+        $data3 = [1 => 'a', 2 => 'b', 3 => 'c'];
+        $cover3 = new CoverArray($data3);
+        $this->assertFalse($cover3->isList());
+
+        // 4. Associative array (string keys, not a list)
+        $data4 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $cover4 = new CoverArray($data4);
+        $this->assertFalse($cover4->isList());
+
+        // 5. Empty array (empty array is considered a list)
+        $data5 = [];
+        $cover5 = new CoverArray($data5);
+        $this->assertTrue($cover5->isList());
+
+        // 6. Mixed keys (some numeric, some string, not a list)
+        $data6 = [0 => 'a', 'b' => 2, 2 => 'c'];
+        $cover6 = new CoverArray($data6);
+        $this->assertFalse($cover6->isList());
+
+        // 7. Numeric string keys (should be a list in PHP 8.1)
+        $data7 = ['0' => 'a', '1' => 'b', '2' => 'c'];
+        $cover7 = new CoverArray($data7);
+        $this->assertTrue($cover7->isList());
+
+        // 8. Keys out of order but sequential (not a list in PHP 8.1)
+        $data8 = [2 => 'c', 0 => 'a', 1 => 'b'];
+        $cover8 = new CoverArray($data8);
+        $this->assertFalse($cover8->isList());
+
+        // 9. List with a gap (not a list)
+        $data9 = [0 => 'a', 1 => 'b', 3 => 'd'];
+        $cover9 = new CoverArray($data9);
+        $this->assertFalse($cover9->isList());
+
+        // 10. List with all keys but mixed value types
+        $data10 = [0 => 'a', 1 => 2, 2 => null, 3 => false];
+        $cover10 = new CoverArray($data10);
+        $this->assertTrue($cover10->isList());
+
+        // 11. Mixed key types: int and string numeric (should be a list in PHP 8.1)
+        $data11 = [0 => 'a', '1' => 'b', 2 => 'c'];
+        $cover11 = new CoverArray($data11);
+        $this->assertTrue($cover11->isList());
+
+        // 12. Non-sequential numeric string keys (not a list)
+        $data12 = ['0' => 'a', '2' => 'c'];
+        $cover12 = new CoverArray($data12);
+        $this->assertFalse($cover12->isList());
+
+        // 13. Float keys (they get cast to int, so should be a list)
+        $data13 = [0.0 => 'a', 1.0 => 'b', 2.0 => 'c'];
+        $cover13 = new CoverArray($data13);
+        $this->assertTrue($cover13->isList());
+
+        // 14. Keys with leading zeros (not considered numeric by array_is_list)
+        $data14 = ['00' => 'a', '01' => 'b', '02' => 'c'];
+        $cover14 = new CoverArray($data14);
+        $this->assertFalse($cover14->isList());
+
+        // 15. Keys with negative numbers (not a list)
+        $data15 = [-1 => 'a', 0 => 'b', 1 => 'c'];
+        $cover15 = new CoverArray($data15);
+        $this->assertFalse($cover15->isList());
+
+        // 16. Keys with spaces (not considered numeric)
+        $data16 = [' 0' => 'a', '1 ' => 'b', ' 2 ' => 'c'];
+        $cover16 = new CoverArray($data16);
+        $this->assertFalse($cover16->isList());
+
+        // 17. Single element with key 0 (should be a list)
+        $data17 = [0 => 'single'];
+        $cover17 = new CoverArray($data17);
+        $this->assertTrue($cover17->isList());
+
+        // 18. Single element with string key '0' (should be a list)
+        $data18 = ['0' => 'single'];
+        $cover18 = new CoverArray($data18);
+        $this->assertTrue($cover18->isList());
+
+        // 19. Keys with plus sign (not a list)
+        $data19 = ['+0' => 'a', '+1' => 'b'];
+        $cover19 = new CoverArray($data19);
+        $this->assertFalse($cover19->isList());
+
+        // 20. Keys with decimal points (not a list)
+        $data20 = ['0.0' => 'a', '1.0' => 'b'];
+        $cover20 = new CoverArray($data20);
+        $this->assertFalse($cover20->isList());
+
+        // 21. Keys that are hex (not a list)
+        $data21 = ['0x0' => 'a', '0x1' => 'b'];
+        $cover21 = new CoverArray($data21);
+        $this->assertFalse($cover21->isList());
+
+        // 22. Keys with scientific notation (not a list)
+        $data22 = ['1e0' => 'a', '1e1' => 'b'];
+        $cover22 = new CoverArray($data22);
+        $this->assertFalse($cover22->isList());
+
+        // 23. Keys that are boolean true/false (not a list)
+        $data23 = [true => 'a', false => 'b'];
+        $cover23 = new CoverArray($data23);
+        $this->assertFalse($cover23->isList());
+
+        // 24. Keys that are NULL (not a list)
+        $data24 = [null => 'a', 1 => 'b'];
+        $cover24 = new CoverArray($data24);
+        $this->assertFalse($cover24->isList());
     }
 
     /**
@@ -1313,9 +3264,69 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testKeyExistsMethod(): void
     {
-        $this->assertTrue($this->data->get('birthday')->keyExists('1'));
-        $this->assertTrue($this->data->get('address')->keyExists('city'));
-        $this->assertFalse($this->data->keyExists('undefined'));
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data1 = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
+
+        $expected1 = array_key_exists('name', $data1);
+        $expected2 = array_key_exists('country', $data1);
+
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame($expected1, $cover1->keyExists('name'));
+        $this->assertSame($expected2, $cover1->keyExists('country'));
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
+
+        $expected3 = array_key_exists(0, $data2);
+        $expected4 = array_key_exists(3, $data2);
+
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame($expected3, $cover2->keyExists(0));
+        $this->assertSame($expected4, $cover2->keyExists(3));
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data3 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+
+        $expected5 = array_key_exists('a', $data3);
+        $expected6 = array_key_exists(0, $data3);
+        $expected7 = array_key_exists('1', $data3);
+        $expected8 = array_key_exists(1, $data3);
+
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame($expected5, $cover3->keyExists('a'));
+        $this->assertSame($expected6, $cover3->keyExists(0));
+        $this->assertSame($expected7, $cover3->keyExists('1'));
+        $this->assertSame($expected8, $cover3->keyExists(1));
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data4 = [];
+
+        $expected9 = array_key_exists('any', $data4);
+
+        $cover4 = new CoverArray($data4);
+
+        $this->assertSame($expected9, $cover4->keyExists('any'));
+
+        // Test with boolean and null keys
+        // Тест с булевыми и null ключами
+        $data5 = ['' => 'empty', 0 => 'zero', 1 => 'one'];
+
+        $expected10 = array_key_exists(false, $data5);
+        $expected11 = array_key_exists(true, $data5);
+        $expected12 = array_key_exists(null, $data5);
+
+        $cover5 = new CoverArray($data5);
+
+        $this->assertSame($expected10, $cover5->keyExists(false));
+        $this->assertSame($expected11, $cover5->keyExists(true));
+        $this->assertSame($expected12, $cover5->keyExists(null));
     }
 
     /**
@@ -1337,9 +3348,60 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testKeyFirstMethod(): void
     {
-        $this->assertSame('country', $this->data->get('address')->keyFirst());
-        $this->assertSame(0, $this->data->get('birthday')->keyFirst());
-        $this->assertNull((new NewTypeArray())->keyFirst());
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data1 = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+
+        $expected1 = array_key_first($data1);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover1 = new CoverArray($data1);
+        $this->assertSame($expected1, $cover1->keyFirst());
+
+        // Test with sequential numeric array
+        // Тест с последовательным числовым массивом
+        $data2 = [18, 8, 1982];
+
+        $expected2 = array_key_first($data2);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover2 = new CoverArray($data2);
+        $this->assertSame($expected2, $cover2->keyFirst());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data3 = [];
+
+        $expected3 = array_key_first($data3);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover3 = new CoverArray($data3);
+        $this->assertSame($expected3, $cover3->keyFirst());
+
+        // Test with mixed keys array
+        // Тест с массивом со смешанными ключами
+        $data4 = [0 => 'zero', 'a' => 'apple', 1 => 'one', 'b' => 'banana'];
+
+        $expected4 = array_key_first($data4);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover4 = new CoverArray($data4);
+        $this->assertSame($expected4, $cover4->keyFirst());
+
+        // Test with single element array
+        // Тест с массивом из одного элемента
+        $data5 = ['single' => 'element'];
+
+        $expected5 = array_key_first($data5);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover5 = new CoverArray($data5);
+        $this->assertSame($expected5, $cover5->keyFirst());
     }
 
     /**
@@ -1361,9 +3423,82 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testKeyLastMethod(): void
     {
-        $this->assertSame('street', $this->data->get('address')->keyLast());
-        $this->assertSame(2, $this->data->get('birthday')->keyLast());
-        $this->assertNull((new NewTypeArray())->keyLast());
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data1 = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
+
+        $expected1 = array_key_last($data1);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover1 = new CoverArray($data1);
+        $this->assertSame($expected1, $cover1->keyLast());
+
+        // Test with sequential numeric array
+        // Тест с последовательным числовым массивом
+        $data2 = [18, 8, 1982];
+
+        $expected2 = array_key_last($data2);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover2 = new CoverArray($data2);
+        $this->assertSame($expected2, $cover2->keyLast());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data3 = [];
+
+        $expected3 = array_key_last($data3);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover3 = new CoverArray($data3);
+        $this->assertSame($expected3, $cover3->keyLast());
+
+        // Test with mixed keys array
+        // Тест с массивом со смешанными ключами
+        $data4 = [0 => 'zero', 'a' => 'apple', 1 => 'one', 'b' => 'banana'];
+
+        $expected4 = array_key_last($data4);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover4 = new CoverArray($data4);
+        $this->assertSame($expected4, $cover4->keyLast());
+
+        // Test with single element array
+        // Тест с массивом из одного элемента
+        $data5 = ['single' => 'element'];
+
+        $expected5 = array_key_last($data5);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover5 = new CoverArray($data5);
+        $this->assertSame($expected5, $cover5->keyLast());
+
+        // Test with numeric keys not starting from 0
+        // Тест с числовыми ключами, не начинающимися с 0
+        $data6 = [5 => 'five', 10 => 'ten', 15 => 'fifteen'];
+
+        $expected6 = array_key_last($data6);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover6 = new CoverArray($data6);
+        $this->assertSame($expected6, $cover6->keyLast());
+
+        // Test with reordered array (should return last key in current order, not insertion order)
+        // Тест с переупорядоченным массивом (должен вернуть последний ключ в текущем порядке, а не порядке вставки)
+        $data7 = ['z' => 'last', 'a' => 'first', 'm' => 'middle'];
+
+        $expected7 = array_key_last($data7);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover7 = new CoverArray($data7);
+        $this->assertSame($expected7, $cover7->keyLast());
     }
 
     /**
@@ -1383,49 +3518,225 @@ class PhpEquivalentMethodsTest extends TestCase
      * @see CoverArray::keys()
      * @see array_keys()
      */
-    public function testKeysMethod()
+    public function testKeysMethod(): void
     {
-        $data = $this->data->get('address');
-        $expected = ['country', 'region', 'city', 'street'];
+        // Test getting all keys from associative array
+        // Тест получения всех ключей из ассоциативного массива
+        $data1 = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_keys($data->getDataAsArray())
-        );
+        $expected1 = array_keys($data1);
 
-        $this->assertSame(
-            $expected,
-            $data->keys()->getDataAsArray()
-        );
+        // CoverArray method
+        // метод CoverArray
+        $cover1 = new CoverArray($data1);
+        $this->assertSame($expected1, $cover1->keys()->getDataAsArray());
 
-        $data = $this->data->get('languages');
-        $expected = ['backend', 'frontend'];
+        // Test getting all keys from nested array structure
+        // Тест получения всех ключей из вложенной структуры массива
+        $data2 = [
+            'backend' => ['PHP', 'MySql'],
+            'frontend' => ['HTML', 'CSS', 'JavaScript']
+        ];
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_keys($data->getDataAsArray())
-        );
+        $expected2 = array_keys($data2);
 
-        $this->assertSame(
-            $expected,
-            $data->keys()->getDataAsArray()
-        );
+        // CoverArray method
+        // метод CoverArray
+        $cover2 = new CoverArray($data2);
+        $this->assertSame($expected2, $cover2->keys()->getDataAsArray());
 
-        $data = $this->data->get('languages.backend');
-        $expected = [0];
+        // Test getting keys filtered by value with strict comparison
+        // Тест получения ключей, отфильтрованных по значению с строгим сравнением
+        $data3 = ['PHP', 'MySql'];
 
-        // original function
-        $this->assertSame(
-            $expected,
-            array_keys($data->getDataAsArray(), 'PHP', true)
-        );
+        $expected3 = array_keys($data3, 'PHP', true);
 
-        $this->assertSame(
-            $expected,
-            $data->keys('PHP', true)->getDataAsArray()
-        );
+        // CoverArray method
+        // метод CoverArray
+        $cover3 = new CoverArray($data3);
+        $this->assertSame($expected3, $cover3->keys('PHP', true)->getDataAsArray());
+
+        // Test getting keys filtered by value with loose comparison
+        // Тест получения ключей, отфильтрованных по значению с нестрогим сравнением
+        $data4 = [0 => '0', 1 => 0, 2 => false, 3 => null, 4 => ''];
+
+        $expected4 = array_keys($data4, '0', false);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover4 = new CoverArray($data4);
+        $this->assertSame($expected4, $cover4->keys('0', false)->getDataAsArray());
+
+        $expected5 = array_keys($data4, '0', true);
+        $this->assertSame($expected5, $cover4->keys('0', true)->getDataAsArray());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data5 = [];
+
+        $expected6 = array_keys($data5);
+        $expected7 = array_keys($data5, 'value', true);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover5 = new CoverArray($data5);
+        $this->assertSame($expected6, $cover5->keys()->getDataAsArray());
+        $this->assertSame($expected7, $cover5->keys('value', true)->getDataAsArray());
+
+        // Test with duplicate values
+        // Тест с дублирующимися значениями
+        $data6 = ['a' => 'apple', 'b' => 'banana', 'c' => 'apple', 'd' => 'cherry', 'e' => 'apple'];
+
+        $expected8 = array_keys($data6, 'apple', true);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover6 = new CoverArray($data6);
+        $this->assertSame($expected8, $cover6->keys('apple', true)->getDataAsArray());
+
+        // Test with numeric keys
+        // Тест с числовыми ключами
+        $data7 = [10 => 'ten', 20 => 'twenty', 30 => 'thirty', 40 => 'forty'];
+
+        $expected9 = array_keys($data7);
+        $expected10 = array_keys($data7, 'thirty', true);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover7 = new CoverArray($data7);
+        $this->assertSame($expected9, $cover7->keys()->getDataAsArray());
+        $this->assertSame($expected10, $cover7->keys('thirty', true)->getDataAsArray());
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data8 = ['a' => 1, 0 => 2, 'c' => 1, 1 => 2];
+
+        $expected11 = array_keys($data8, 1, true);
+        $expected12 = array_keys($data8, 2, true);
+
+        // CoverArray method
+        // метод CoverArray
+        $cover8 = new CoverArray($data8);
+        $this->assertSame($expected11, $cover8->keys(1, true)->getDataAsArray());
+        $this->assertSame($expected12, $cover8->keys(2, true)->getDataAsArray());
+    }
+
+    /**
+     * Tests the last() method (array_last equivalent).
+     *
+     * This test verifies that the last() method correctly returns
+     * the last element of the CoverArray, or null for empty arrays,
+     * providing convenient access to the final element.
+     *
+     *
+     * Тестирование метода last() (эквивалент array_last).
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * последний элемент CoverArray, или null для пустых массивов,
+     * предоставляя удобный доступ к конечному элементу.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastMethod(): void
+    {
+        // Test with sequential numeric array
+        // Тест с последовательным числовым массивом
+        $data1 = ['PHP', 'MySql'];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover1 = new CoverArray($data1);
+        $this->assertSame('MySql', $cover1->last());
+
+        // Test with associative array
+        // Тест с ассоциативным массивом
+        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover2 = new CoverArray($data2);
+        $this->assertSame('cherry', $cover2->last());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data3 = [];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover3 = new CoverArray($data3);
+        $this->assertNull($cover3->last());
+
+        // Test with single element array
+        // Тест с массивом из одного элемента
+        $data4 = ['single' => 'element'];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover4 = new CoverArray($data4);
+        $this->assertSame('element', $cover4->last());
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data5 = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover5 = new CoverArray($data5);
+        $this->assertSame('one', $cover5->last());
+
+        // Test with numeric keys not starting from 0
+        // Тест с числовыми ключами, не начинающимися с 0
+        $data6 = [5 => 'five', 10 => 'ten', 15 => 'fifteen'];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover6 = new CoverArray($data6);
+        $this->assertSame('fifteen', $cover6->last());
+
+        // Test with null value as last element
+        // Тест с null значением в качестве последнего элемента
+        $data7 = ['a' => 1, 'b' => null];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover7 = new CoverArray($data7);
+        $this->assertNull($cover7->last());
+
+        // Test with false value as last element
+        // Тест со значением false в качестве последнего элемента
+        $data8 = ['a' => true, 'b' => false];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover8 = new CoverArray($data8);
+        $this->assertFalse($cover8->last());
+
+        // Test with zero value as last element
+        // Тест с нулевым значением в качестве последнего элемента
+        $data9 = ['a' => 1, 'b' => 0];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover9 = new CoverArray($data9);
+        $this->assertSame(0, $cover9->last());
+
+        // Test with empty string as last element
+        // Тест с пустой строкой в качестве последнего элемента
+        $data10 = ['a' => 'not empty', 'b' => ''];
+
+        // CoverArray method
+        // метод CoverArray
+        $cover10 = new CoverArray($data10);
+        $this->assertSame('', $cover10->last());
+
+        // Test that method doesn't affect array pointer (same result on multiple calls)
+        // Тест, что метод не затрагивает указатель массива (одинаковый результат при нескольких вызовах)
+        $data11 = ['first', 'second', 'third'];
+        $cover11 = new CoverArray($data11);
+
+        $this->assertSame('third', $cover11->last());
+        $this->assertSame('third', $cover11->last()); // Second call should return same result
+        $this->assertSame('third', $cover11->last()); // Third call should return same result
     }
 
     /**
@@ -1447,57 +3758,211 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testMapMethod(): void
     {
-        $data = $this->data->get('address');
+        // Test with single array (preserves keys)
+        // Тест с одним массивом (сохраняет ключи)
+        $data1 = ['country' => 'Russia', 'region' => 'Moscow region', 'city' => 'Podolsk', 'street' => 'Kirov st.'];
 
-        // The returned array will preserve the keys of the array argument if and only if exactly one array is passed.
-        $expected = [
+        $expected1 = [
             'country' => '--Russia',
             'region' => '--Moscow region',
             'city' => '--Podolsk',
             'street' => '--Kirov st.'
         ];
 
+        $cover1 = new CoverArray($data1);
+
         // original function
+        // оригинальная функция
         $this->assertSame(
-            $expected,
+            $expected1,
             array_map(
                 fn(mixed $value): string => "--$value",
-                $data->getDataAsArray()
+                $data1
             )
         );
 
+        // CoverArray method
+        // метод CoverArray
         $this->assertSame(
-            $expected,
-            $data->map(
+            $expected1,
+            $cover1->map(
                 fn(mixed $value): string => "--$value"
             )->getDataAsArray()
         );
 
-        // If more than one array is passed, the returned array will have sequential integer keys.
-        $expected = [
+        // Test with multiple arrays (returns sequential integer keys)
+        // Тест с несколькими массивами (возвращает последовательные целочисленные ключи)
+        $data2 = ['Russia', 'Moscow region', 'Podolsk', 'Kirov st.'];
+        $keys2 = ['country', 'region', 'city', 'street'];
+
+        $expected2 = [
             0 => 'country: Russia',
             1 => 'region: Moscow region',
             2 => 'city: Podolsk',
             3 => 'street: Kirov st.'
         ];
 
+        $cover2 = new CoverArray($data2);
+        $coverKeys2 = new CoverArray($keys2);
+
         // original function
+        // оригинальная функция
         $this->assertSame(
-            $expected,
+            $expected2,
             array_map(
                 fn(mixed $value, mixed $key): string => "$key: $value",
-                $data->getDataAsArray(),
-                $data->keys()->getDataAsArray()
+                $data2,
+                $keys2
             )
         );
 
+        // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->map(
+            $expected2,
+            $cover2->map(
                 fn(mixed $value, mixed $key): string => "$key: $value",
-                $data->keys()->getDataAsArray()
+                $keys2
             )->getDataAsArray()
         );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->map(
+                fn(mixed $value, mixed $key): string => "$key: $value",
+                $coverKeys2
+            )->getDataAsArray()
+        );
+
+        // Test with null callback (identity function)
+        // Тест с null callback (функция идентичности)
+        $data3 = [1, 2, 3, 4];
+
+        $expected3 = array_map(null, $data3);
+
+        $cover3 = new CoverArray($data3);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected3, array_map(null, $data3));
+
+        // CoverArray method
+        // метод CoverArray
+        $this->assertSame($expected3, $cover3->map(null)->getDataAsArray());
+
+        // Test with three arrays
+        // Тест с тремя массивами
+        $data4 = [1, 2, 3];
+        $data5 = [4, 5, 6];
+        $data6 = [7, 8, 9];
+
+        $expected4 = array_map(
+            fn($a, $b, $c) => $a + $b + $c,
+            $data4,
+            $data5,
+            $data6
+        );
+
+        $cover4 = new CoverArray($data4);
+        $cover5 = new CoverArray($data5);
+        $cover6 = new CoverArray($data6);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame(
+            $expected4,
+            array_map(
+                fn($a, $b, $c) => $a + $b + $c,
+                $data4,
+                $data5,
+                $data6
+            )
+        );
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->map(
+                fn($a, $b, $c) => $a + $b + $c,
+                $data5,
+                $data6
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->map(
+                fn($a, $b, $c) => $a + $b + $c,
+                $cover5,
+                $cover6
+            )->getDataAsArray()
+        );
+
+        // Test with arrays of different lengths (should use the shortest)
+        // Тест с массивами разной длины (должен использовать самый короткий)
+        $data7 = [1, 2, 3, 4];
+        $data8 = [10, 20];
+
+        $expected5 = array_map(
+            fn($a, $b) => $a * $b,
+            $data7,
+            $data8
+        );
+
+        $cover7 = new CoverArray($data7);
+        $cover8 = new CoverArray($data8);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame(
+            $expected5,
+            array_map(
+                fn($a, $b) => $a * $b,
+                $data7,
+                $data8
+            )
+        );
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover7->map(
+                fn($a, $b) => $a * $b,
+                $data8
+            )->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover7->map(
+                fn($a, $b) => $a * $b,
+                $cover8
+            )->getDataAsArray()
+        );
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data9 = [];
+
+        $expected6 = array_map(fn($v) => $v * 2, $data9);
+
+        $cover9 = new CoverArray($data9);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected6, array_map(fn($v) => $v * 2, $data9));
+
+        // CoverArray method
+        // метод CoverArray
+        $this->assertSame($expected6, $cover9->map(fn($v) => $v * 2)->getDataAsArray());
     }
 
     /**
@@ -1519,31 +3984,202 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testMergeMethod(): void
     {
-        $data = $this->data->get('languages.backend');
-        $merge = $this->data->get('languages.frontend');
-        $expected = ['PHP', 'MySql', 'HTML', 'CSS', 'JavaScript'];
+        // Test merging numeric arrays (keys are reindexed)
+        // Тест объединения числовых массивов (ключи переиндексируются)
+        $data1 = ['PHP', 'MySql'];
+        $merge1 = ['HTML', 'CSS', 'JavaScript'];
+
+        $expected1 = array_merge($data1, $merge1);
+
+        $cover1 = new CoverArray($data1);
+        $coverMerge1 = new CoverArray($merge1);
 
         // original function
-        $this->assertSame(
-            $expected,
-            array_merge(
-                $data->getDataAsArray(),
-                $merge->getDataAsArray(),
-            )
-        );
+        // оригинальная функция
+        $this->assertSame($expected1, array_merge($data1, $merge1));
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data->merge(
-                $merge->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->merge($merge1)->getDataAsArray()
         );
 
         // arguments as CoverArray
+        // аргументы как CoverArray
         $this->assertSame(
-            $expected,
-            $data->merge($merge)->getDataAsArray()
+            $expected1,
+            $cover1->merge($coverMerge1)->getDataAsArray()
+        );
+
+        // Test merging associative arrays (string keys are overwritten)
+        // Тест объединения ассоциативных массивов (строковые ключи перезаписываются)
+        $data2 = ['a' => 'apple', 'b' => 'banana'];
+        $merge2 = ['b' => 'blueberry', 'c' => 'cherry'];
+
+        $expected2 = array_merge($data2, $merge2);
+
+        $cover2 = new CoverArray($data2);
+        $coverMerge2 = new CoverArray($merge2);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected2, array_merge($data2, $merge2));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover2->merge($merge2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover2->merge($coverMerge2)->getDataAsArray()
+        );
+
+        // Test merging multiple arrays
+        // Тест объединения нескольких массивов
+        $data3 = ['x' => 1, 'y' => 2];
+        $merge3a = ['y' => 20, 'z' => 3];
+        $merge3b = ['z' => 30, 'w' => 4];
+
+        $expected3 = array_merge($data3, $merge3a, $merge3b);
+
+        $cover3 = new CoverArray($data3);
+        $coverMerge3a = new CoverArray($merge3a);
+        $coverMerge3b = new CoverArray($merge3b);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected3, array_merge($data3, $merge3a, $merge3b));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover3->merge($merge3a, $merge3b)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover3->merge($coverMerge3a, $coverMerge3b)->getDataAsArray()
+        );
+
+        // Test merging with mixed numeric and string keys
+        // Тест объединения со смешанными числовыми и строковыми ключами
+        $data4 = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
+        $merge4 = [1 => 'ONE', 'b' => 'banana', 2 => 'two'];
+
+        $expected4 = array_merge($data4, $merge4);
+
+        $cover4 = new CoverArray($data4);
+        $coverMerge4 = new CoverArray($merge4);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected4, array_merge($data4, $merge4));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover4->merge($merge4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover4->merge($coverMerge4)->getDataAsArray()
+        );
+
+        // Test merging empty arrays
+        // Тест объединения пустых массивов
+        $data5 = ['a' => 1, 'b' => 2];
+        $merge5 = [];
+
+        $expected5 = array_merge($data5, $merge5);
+
+        $cover5 = new CoverArray($data5);
+        $coverMerge5 = new CoverArray($merge5);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected5, array_merge($data5, $merge5));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover5->merge($merge5)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover5->merge($coverMerge5)->getDataAsArray()
+        );
+
+        // Test merging all empty arrays
+        // Тест объединения всех пустых массивов
+        $data6 = [];
+        $merge6 = [];
+
+        $expected6 = array_merge($data6, $merge6);
+
+        $cover6 = new CoverArray($data6);
+        $coverMerge6 = new CoverArray($merge6);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected6, array_merge($data6, $merge6));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover6->merge($merge6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover6->merge($coverMerge6)->getDataAsArray()
+        );
+
+        // Test merging with integer keys that are reindexed
+        // Тест объединения с целочисленными ключами, которые переиндексируются
+        $data7 = [10 => 'ten', 20 => 'twenty'];
+        $merge7 = [30 => 'thirty', 40 => 'forty'];
+
+        $expected7 = array_merge($data7, $merge7);
+
+        $cover7 = new CoverArray($data7);
+        $coverMerge7 = new CoverArray($merge7);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected7, array_merge($data7, $merge7));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected7,
+            $cover7->merge($merge7)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected7,
+            $cover7->merge($coverMerge7)->getDataAsArray()
         );
     }
 
@@ -1566,9 +4202,12 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testMergeRecursiveMethod(): void
     {
-        $data1 = new NewTypeArray(['color' => ['favorite' => 'red'], 5]);
-        $data2 = new NewTypeArray([10, 'color' => ['favorite' => 'green', 'blue']]);
-        $expected = [
+        // Test merging arrays with nested associative keys
+        // Тест объединения массивов с вложенными ассоциативными ключами
+        $data1 = ['color' => ['favorite' => 'red'], 5];
+        $data2 = [10, 'color' => ['favorite' => 'green', 'blue']];
+
+        $expected1 = [
             'color' => [
                 'favorite' => [
                     0 => 'red',
@@ -1580,21 +4219,208 @@ class PhpEquivalentMethodsTest extends TestCase
             1 => 10,
         ];
 
+        $cover1 = new CoverArray($data1);
+        $cover2 = new CoverArray($data2);
+
         // original function
-        $this->assertSame(
-            $expected,
-            array_merge_recursive(
-                $data1->getDataAsArray(),
-                $data2->getDataAsArray(),
-            )
-        );
+        // оригинальная функция
+        $this->assertSame($expected1, array_merge_recursive($data1, $data2));
 
         // arguments as array
+        // аргументы как массив
         $this->assertSame(
-            $expected,
-            $data1->mergeRecursive(
-                $data2->getDataAsArray()
-            )->getDataAsArray()
+            $expected1,
+            $cover1->mergeRecursive($data2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected1,
+            $cover1->mergeRecursive($cover2)->getDataAsArray()
+        );
+
+        // Test merging with multiple identical string keys at different levels
+        // Тест объединения с несколькими одинаковыми строковыми ключами на разных уровнях
+        $data3 = [
+            'user' => [
+                'name' => 'John',
+                'contacts' => ['email' => 'john@example.com']
+            ],
+            'settings' => ['theme' => 'dark']
+        ];
+
+        $data4 = [
+            'user' => [
+                'age' => 30,
+                'contacts' => ['phone' => '123-456-7890']
+            ],
+            'settings' => ['language' => 'en']
+        ];
+
+        $expected2 = array_merge_recursive($data3, $data4);
+
+        $cover3 = new CoverArray($data3);
+        $cover4 = new CoverArray($data4);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected2, array_merge_recursive($data3, $data4));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected2,
+            $cover3->mergeRecursive($data4)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected2,
+            $cover3->mergeRecursive($cover4)->getDataAsArray()
+        );
+
+        // Test merging numeric keys (they get reindexed, not merged)
+        // Тест объединения числовых ключей (они переиндексируются, а не объединяются)
+        $data5 = [0 => ['a', 'b'], 1 => ['c', 'd']];
+        $data6 = [0 => ['e', 'f'], 1 => ['g', 'h']];
+
+        $expected3 = array_merge_recursive($data5, $data6);
+
+        $cover5 = new CoverArray($data5);
+        $cover6 = new CoverArray($data6);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected3, array_merge_recursive($data5, $data6));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected3,
+            $cover5->mergeRecursive($data6)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected3,
+            $cover5->mergeRecursive($cover6)->getDataAsArray()
+        );
+
+        // Test merging three arrays recursively
+        // Тест объединения трех массивов рекурсивно
+        $data7 = ['a' => ['x' => 1]];
+        $data8 = ['a' => ['y' => 2]];
+        $data9 = ['a' => ['z' => 3]];
+
+        $expected4 = array_merge_recursive($data7, $data8, $data9);
+
+        $cover7 = new CoverArray($data7);
+        $cover8 = new CoverArray($data8);
+        $cover9 = new CoverArray($data9);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected4, array_merge_recursive($data7, $data8, $data9));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected4,
+            $cover7->mergeRecursive($data8, $data9)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected4,
+            $cover7->mergeRecursive($cover8, $cover9)->getDataAsArray()
+        );
+
+        // Test merging with empty arrays
+        // Тест объединения с пустыми массивами
+        $data10 = ['key' => 'value', 'nested' => ['a' => 1]];
+        $data11 = [];
+
+        $expected5 = array_merge_recursive($data10, $data11);
+
+        $cover10 = new CoverArray($data10);
+        $cover11 = new CoverArray($data11);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected5, array_merge_recursive($data10, $data11));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected5,
+            $cover10->mergeRecursive($data11)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected5,
+            $cover10->mergeRecursive($cover11)->getDataAsArray()
+        );
+
+        // Test merging arrays with scalar values for same string key (creates array)
+        // Тест объединения массивов со скалярными значениями для одного и того же строкового ключа (создает массив)
+        $data12 = ['fruit' => 'apple'];
+        $data13 = ['fruit' => 'banana'];
+
+        $expected6 = array_merge_recursive($data12, $data13);
+
+        $cover12 = new CoverArray($data12);
+        $cover13 = new CoverArray($data13);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected6, array_merge_recursive($data12, $data13));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected6,
+            $cover12->mergeRecursive($data13)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected6,
+            $cover12->mergeRecursive($cover13)->getDataAsArray()
+        );
+
+        // Test merging arrays with mixed numeric and string keys
+        // Тест объединения массивов со смешанными числовыми и строковыми ключами
+        $data14 = [0 => 'zero', 'a' => ['x' => 1]];
+        $data15 = [0 => 'ZERO', 'a' => ['y' => 2], 'b' => 'new'];
+
+        $expected7 = array_merge_recursive($data14, $data15);
+
+        $cover14 = new CoverArray($data14);
+        $cover15 = new CoverArray($data15);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected7, array_merge_recursive($data14, $data15));
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected7,
+            $cover14->mergeRecursive($data15)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected7,
+            $cover14->mergeRecursive($cover15)->getDataAsArray()
         );
     }
 
@@ -1633,52 +4459,6 @@ class PhpEquivalentMethodsTest extends TestCase
     }
 
     /**
-     * Tests the getFirst() method (array_first equivalent).
-     *
-     * This test verifies that the getFirst() method correctly returns
-     * the first element of the CoverArray, or null for empty arrays,
-     * providing convenient access to the initial element.
-     *
-     *
-     * Тестирование метода getFirst() (эквивалент array_first).
-     *
-     * Этот тест проверяет, что метод getFirst() корректно возвращает
-     * первый элемент CoverArray, или null для пустых массивов,
-     * предоставляя удобный доступ к начальному элементу.
-     *
-     * @see CoverArray::getFirst()
-     * @see array_first()
-     */
-    public function testGetFirstMethod(): void
-    {
-        $this->assertSame('PHP', $this->data->get('languages.backend')->getFirst());
-        $this->assertSame(null, (new NewTypeArray())->getFirst());
-    }
-
-    /**
-     * Tests the getLast() method (array_last equivalent).
-     *
-     * This test verifies that the getLast() method correctly returns
-     * the last element of the CoverArray, or null for empty arrays,
-     * providing convenient access to the final element.
-     *
-     *
-     * Тестирование метода getLast() (эквивалент array_last).
-     *
-     * Этот тест проверяет, что метод getLast() корректно возвращает
-     * последний элемент CoverArray, или null для пустых массивов,
-     * предоставляя удобный доступ к конечному элементу.
-     *
-     * @see CoverArray::getLast()
-     * @see array_last()
-     */
-    public function testGetLastMethod(): void
-    {
-        $this->assertSame('MySql', $this->data->get('languages.backend')->getLast());
-        $this->assertSame(null, (new NewTypeArray())->getLast());
-    }
-
-    /**
      * Tests the prepend() and unshift() methods (array_unshift equivalent).
      *
      * This test verifies that the prepend() method (and its unshift() alias)
@@ -1699,13 +4479,13 @@ class PhpEquivalentMethodsTest extends TestCase
     public function testPrependMethod(): void
     {
         $this->data->get('languages.backend')->prepend('C++');
-        $this->assertSame('C++', $this->data->get('languages.backend')->getFirst());
+        $this->assertSame('C++', $this->data->get('languages.backend')->first());
 
         $this->data->get('languages.backend')->prepend(['Python', 'Ruby']);
-        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->getFirst()->getDataAsArray());
+        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->first()->getDataAsArray());
 
         $this->data->get('languages.backend')->unshift('Java', 'C#');
-        $this->assertSame('C#', $this->data->get('languages.backend')->getFirst());
+        $this->assertSame('C#', $this->data->get('languages.backend')->first());
     }
 
     /**
@@ -1729,13 +4509,13 @@ class PhpEquivalentMethodsTest extends TestCase
     public function testAppendMethod(): void
     {
         $this->data->get('languages.backend')->append('C++');
-        $this->assertSame('C++', $this->data->get('languages.backend')->getLast());
+        $this->assertSame('C++', $this->data->get('languages.backend')->last());
 
         $this->data->get('languages.backend')->append(['Python', 'Ruby']);
-        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->getLast()->getDataAsArray());
+        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->last()->getDataAsArray());
 
         $this->data->get('languages.backend')->push('Java', 'C#');
-        $this->assertSame('C#', $this->data->get('languages.backend')->getLast());
+        $this->assertSame('C#', $this->data->get('languages.backend')->last());
     }
 
     /**

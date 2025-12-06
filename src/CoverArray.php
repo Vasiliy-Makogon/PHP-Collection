@@ -231,6 +231,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     /**
      * Implementing the Countable interface.
      *
+     * Реализует интерфейс Countable.
+     *
      * @return int
      */
     final public function count(): int
@@ -1122,6 +1124,30 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
+     * Returns the first element of the array (array_first equivalent).
+     *
+     * Returns the value of the first element in the array without affecting
+     * the internal array pointer. Returns null if the array is empty.
+     *
+     *
+     * Получает первое значение массива (эквивалент array_first).
+     *
+     * Возвращает значение первого элемента массива, не затрагивая внутренний указатель массива.
+     * Возвращает null, если массив пуст.
+     *
+     * @return mixed First element value or null if array is empty.
+     *               Значение первого элемента или null, если массив пуст.
+     */
+    final public function first(): mixed
+    {
+        if (!function_exists('array_first')) {
+            return $this->count() > 0 ? $this->data[array_key_first($this->data)] : null;
+        }
+
+        return array_first($this->data);
+    }
+
+    /**
      * Exchanges all keys with their associated values in an array (array_flip equivalent).
      *
      * Returns a new array with keys and values flipped. Values become keys and keys become values.
@@ -1311,21 +1337,23 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Checks whether a given array is a list (array_is_list equivalent).
+     * Checks if the array is a list (array_is_list equivalent).
      *
-     * Returns true if the array keys are 0, 1, 2, ... sequentially with no gaps.
-     * An empty array is considered a list.
+     * Returns true if the array keys are sequential integers starting from 0,
+     * and there are no gaps in the sequence. An empty array is considered a list.
+     * This method ensures compatibility with PHP 8.1's array_is_list function
+     * while providing a polyfill for older PHP versions.
      *
      *
-     * Проверяет, представляет ли данный массив список (эквивалент array_is_list).
+     * Проверяет, является ли массив списком (эквивалент array_is_list).
      *
-     * Возвращает true, если ключи массива равны 0, 1, 2, ... последовательно без пропусков.
-     * Пустой массив считается списком.
+     * Возвращает true, если ключи массива являются последовательными целыми числами,
+     * начинающимися с 0, и в последовательности нет пропусков. Пустой массив считается списком.
+     * Этот метод обеспечивает совместимость с функцией array_is_list PHP 8.1,
+     * предоставляя полифил для более старых версий PHP.
      *
      * @return bool True if the array is a list, false otherwise.
      *              Возвращает true, если массив является списком, иначе false.
-     * @author Mark Amery
-     * @see https://stackoverflow.com/a/173479/24207350
      * @see array_is_list()
      */
     final public function isList(): bool
@@ -1335,7 +1363,26 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 return true;
             }
 
-            return array_keys($this->data) === range(0, $this->count() - 1);
+            $keys = array_keys($this->data);
+            $i = 0;
+            foreach ($keys as $key) {
+                // Check if key is integer or numeric string without leading zeros
+                if (is_int($key)) {
+                    if ($key !== $i) {
+                        return false;
+                    }
+                } elseif (is_string($key)) {
+                    // Check if string is numeric without leading zeros
+                    if (!ctype_digit($key) || (int)$key !== $i || ltrim($key, '0') !== (string)$i) {
+                        return false;
+                    }
+                } else {
+                    // Not int or string, definitely not a list
+                    return false;
+                }
+                $i++;
+            }
+            return true;
         }
 
         return array_is_list($this->data);
@@ -1431,6 +1478,30 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 ? array_keys($this->data, $filter_value, $strict)
                 : array_keys($this->data)
         );
+    }
+
+    /**
+     * Returns the last element of the array (array_last equivalent).
+     *
+     * Returns the value of the last element in the array without affecting
+     * the internal array pointer. Returns null if the array is empty.
+     *
+     *
+     * Получает последнее значение массива (эквивалент array_last).
+     *
+     * Возвращает значение последнего элемента массива, не затрагивая внутренний указатель массива.
+     * Возвращает null, если массив пуст.
+     *
+     * @return mixed Last element value or null if array is empty.
+     *               Значение последнего элемента или null, если массив пуст.
+     */
+    final public function last(): mixed
+    {
+        if (!function_exists('array_last')) {
+            return $this->count() > 0 ? $this->data[array_key_last($this->data)] : null;
+        }
+
+        return array_last($this->data);
     }
 
     /**
@@ -1793,46 +1864,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     final public function push(mixed ...$args): static
     {
         return $this->append(...$args);
-    }
-
-    /**
-     * Returns the first element of the array (array_first equivalent).
-     *
-     * Returns the value of the first element in the array without affecting
-     * the internal array pointer. Returns null if the array is empty.
-     *
-     *
-     * Получает первое значение массива (эквивалент array_first).
-     *
-     * Возвращает значение первого элемента массива, не затрагивая внутренний указатель массива.
-     * Возвращает null, если массив пуст.
-     *
-     * @return mixed First element value or null if array is empty.
-     *               Значение первого элемента или null, если массив пуст.
-     */
-    final public function getFirst(): mixed
-    {
-        return $this->count() > 0 ? $this->data[array_key_first($this->data)] : null;
-    }
-
-    /**
-     * Returns the last element of the array (array_last equivalent).
-     *
-     * Returns the value of the last element in the array without affecting
-     * the internal array pointer. Returns null if the array is empty.
-     *
-     *
-     * Получает последнее значение массива (эквивалент array_last).
-     *
-     * Возвращает значение последнего элемента массива, не затрагивая внутренний указатель массива.
-     * Возвращает null, если массив пуст.
-     *
-     * @return mixed Last element value or null if array is empty.
-     *               Значение последнего элемента или null, если массив пуст.
-     */
-    final public function getLast(): mixed
-    {
-        return $this->count() > 0 ? $this->data[array_key_last($this->data)] : null;
     }
 
     /**
