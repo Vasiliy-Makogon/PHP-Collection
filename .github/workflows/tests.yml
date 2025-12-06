@@ -22,27 +22,17 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php-version }}
-                  coverage: pcov
+                  coverage: xdebug
                   tools: composer
-
-            - name: Cache Composer dependencies
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-${{ matrix.php-version }}-
 
             - name: Install dependencies
               run: composer install --no-progress --prefer-dist
 
             - name: Run tests with coverage
-              run: vendor/bin/phpunit --coverage-clover=coverage.xml
+              run: vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
 
             - name: Upload coverage to Codecov
-                # Загружаем покрытие только для одной версии, чтобы не дублировать
-              if: matrix.php-version == '8.0'
               uses: codecov/codecov-action@v3
               with:
                   file: ./coverage.xml
-                  flags: php-${{ matrix.php-version }}
+                  flags: php-tests
