@@ -983,13 +983,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         );
     }
 
-    ///
-    ///
-    ///
-    ///
-    ///
-    ///
-
     /**
      * Applies the callback to the elements of the given arrays.
      *
@@ -1206,7 +1199,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @param CoverArray|array $data
      * @return array
      */
-    private static function convertToPlainArray(CoverArray|array $data): array
+    final protected static function convertToPlainArray(CoverArray|array $data): array
     {
         return $data instanceof self ? $data->getDataAsArray() : $data;
     }

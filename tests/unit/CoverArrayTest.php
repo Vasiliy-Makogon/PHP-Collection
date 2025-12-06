@@ -942,6 +942,12 @@ class CoverArrayTest extends TestCase
         $this->assertInstanceOf(NewTypeArray::class, $allTypesCover['object']);
         $this->assertEquals('value', $allTypesCover['object']['key']);
 
+        // Test with Unicode characters
+        $unicodeJson = '{"text": "© émojî 🚀", "name": "Jöhn Dœ"}';
+        $unicodeCover = NewTypeArray::fromJson($unicodeJson);
+        $this->assertEquals('© émojî 🚀', $unicodeCover['text']);
+        $this->assertEquals('Jöhn Dœ', $unicodeCover['name']);
+
         // Test depth parameter - JSON with 3 levels of nesting, depth 4 should work
         $deepJson = '{"a": {"b": {"c": "value"}}}'; // 3 levels: a->b->c
         $deepCover = NewTypeArray::fromJson($deepJson, 4); // Need depth 4 for 3 levels
@@ -951,7 +957,8 @@ class CoverArrayTest extends TestCase
         // Test that fromJson and toJson are inverses (round-trip)
         $originalData = new NewTypeArray([
             'name' => 'Test',
-            'nested' => ['a' => 1, 'b' => 2]
+            'nested' => ['a' => 1, 'b' => 2],
+            'unicode' => '© émojî 🚀'
         ]);
 
         $json = $originalData->toJson();
@@ -961,6 +968,7 @@ class CoverArrayTest extends TestCase
         $this->assertEquals($originalData['name'], $reconstructed['name']);
         $this->assertEquals($originalData['nested']['a'], $reconstructed['nested']['a']);
         $this->assertEquals($originalData['nested']['b'], $reconstructed['nested']['b']);
+        $this->assertEquals($originalData['unicode'], $reconstructed['unicode']);
 
         // Test error handling - invalid JSON should throw JsonException
         $this->expectException(JsonException::class);
@@ -975,6 +983,11 @@ class CoverArrayTest extends TestCase
         $malformedJson = '{"test": "' . "\x80" . '"}'; // Invalid UTF-8 sequence
         $this->expectException(JsonException::class);
         NewTypeArray::fromJson($malformedJson);
+
+        // Test with large nested JSON (stress test)
+        $largeNestedJson = '{"level1": {"level2": {"level3": {"level4": {"level5": "deep"}}}}}';
+        $largeNestedCover = NewTypeArray::fromJson($largeNestedJson, 6);
+        $this->assertEquals('deep', $largeNestedCover['level1']['level2']['level3']['level4']['level5']);
     }
 
     /**
@@ -1018,7 +1031,8 @@ class CoverArrayTest extends TestCase
             'boolean_false' => false,
             'null' => null,
             'array' => [1, 2, 3],
-            'object' => new NewTypeArray(['key' => 'value'])
+            'object' => new NewTypeArray(['key' => 'value']),
+            'unicode' => '© émojî 🚀'
         ]);
 
         $allTypesJson = $allTypes->toJson();
@@ -1034,6 +1048,32 @@ class CoverArrayTest extends TestCase
         $this->assertEquals([1, 2, 3], $decodedAllTypes['array']);
         $this->assertIsArray($decodedAllTypes['object']);
         $this->assertEquals(['key' => 'value'], $decodedAllTypes['object']);
+        $this->assertEquals('© émojî 🚀', $decodedAllTypes['unicode']);
+
+        // Test with mixed nested arrays and objects (matching fromJson test)
+        $nestedObjects = new NewTypeArray([
+            'users' => [
+                new NewTypeArray(['id' => 1, 'name' => 'John']),
+                new NewTypeArray(['id' => 2, 'name' => 'Jane'])
+            ],
+            'settings' => new NewTypeArray([
+                'theme' => 'dark',
+                'notifications' => true
+            ])
+        ]);
+
+        $nestedObjectsJson = $nestedObjects->toJson();
+        $this->assertJson($nestedObjectsJson);
+        $decodedNested = json_decode($nestedObjectsJson, true);
+
+        $this->assertIsArray($decodedNested['users']);
+        $this->assertCount(2, $decodedNested['users']);
+        $this->assertEquals(1, $decodedNested['users'][0]['id']);
+        $this->assertEquals('John', $decodedNested['users'][0]['name']);
+        $this->assertEquals(2, $decodedNested['users'][1]['id']);
+        $this->assertEquals('Jane', $decodedNested['users'][1]['name']);
+        $this->assertEquals('dark', $decodedNested['settings']['theme']);
+        $this->assertTrue($decodedNested['settings']['notifications']);
 
         // Test with empty JSON object (matching fromJson test)
         $emptyObject = new NewTypeArray([]);
@@ -1041,7 +1081,7 @@ class CoverArrayTest extends TestCase
         $this->assertEquals('[]', $emptyObjectJson);
         $this->assertJson($emptyObjectJson);
 
-        // Test with empty nested array (similar to fromJson empty object test)
+        // Test with empty nested array (matching fromJson test)
         $emptyNested = new NewTypeArray(['empty' => []]);
         $emptyNestedJson = $emptyNested->toJson();
         $this->assertJson($emptyNestedJson);
@@ -1066,21 +1106,31 @@ class CoverArrayTest extends TestCase
         $this->assertStringContainsString("\n", $prettyJson);
         $this->assertJson($prettyJson);
 
+        // Test with JSON_UNESCAPED_SLASHES flag
+        $slashesData = new NewTypeArray(['path' => 'https://example.com/test/path']);
+        $slashesJson = $slashesData->toJson(JSON_UNESCAPED_SLASHES);
+        $this->assertStringContainsString('https://example.com/test/path', $slashesJson);
+
         // Test depth parameter
         $deepData = new NewTypeArray(['a' => ['b' => ['c' => 'value']]]);
-        $deepJson = $deepData->toJson(JSON_THROW_ON_ERROR, 3);
+        $deepJson = $deepData->toJson(JSON_THROW_ON_ERROR, 4); // Depth 4 for 3 levels
         $this->assertJson($deepJson);
         $decodedDeep = json_decode($deepJson, true);
         $this->assertEquals('value', $decodedDeep['a']['b']['c']);
 
+        // Test with large nested structure (matching fromJson stress test)
+        $largeNestedData = new NewTypeArray(['level1' => ['level2' => ['level3' => ['level4' => ['level5' => 'deep']]]]]);
+        $largeNestedJson = $largeNestedData->toJson(JSON_THROW_ON_ERROR, 6);
+        $this->assertJson($largeNestedJson);
+        $decodedLarge = json_decode($largeNestedJson, true);
+        $this->assertEquals('deep', $decodedLarge['level1']['level2']['level3']['level4']['level5']);
+
         // Test with insufficient depth - should throw JsonException
         $this->expectException(JsonException::class);
-        $deepData->toJson(JSON_THROW_ON_ERROR, 1);
+        $deepData->toJson(JSON_THROW_ON_ERROR, 2); // Depth 2 is insufficient for 3 levels
 
-        // Test with invalid UTF-8 sequence (if we can create one)
-        // Note: Creating invalid UTF-8 in PHP string is tricky, but we can test with mb_convert_encoding
+        // Test with invalid UTF-8 sequence
         if (function_exists('mb_convert_encoding')) {
-            // Create a string with invalid UTF-8 sequence by converting to UTF-16 and then to UTF-8 incorrectly
             $invalidUtf8 = mb_convert_encoding('invalid: ' . "\x80\x81", 'UTF-8', 'ISO-8859-1');
             $invalidData = new NewTypeArray(['invalid' => $invalidUtf8]);
 
@@ -1117,6 +1167,15 @@ class CoverArrayTest extends TestCase
             $decodedSubstitute = json_decode($jsonWithSubstitute, true);
             $this->assertArrayHasKey('invalid', $decodedSubstitute);
         }
+
+        // Test combination of multiple flags
+        $combinedData = new NewTypeArray([
+            'unicode' => '© émojî 🚀',
+            'url' => 'https://example.com/path'
+        ]);
+        $combinedJson = $combinedData->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $this->assertStringContainsString('©', $combinedJson);
+        $this->assertStringContainsString('https://example.com/path', $combinedJson);
     }
 
     /**
