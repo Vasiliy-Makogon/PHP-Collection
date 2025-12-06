@@ -4424,6 +4424,11 @@ class PhpEquivalentMethodsTest extends TestCase
         );
     }
 
+
+
+
+
+
     // Additional CoverArray-specific methods (not direct equivalents of PHP array functions)
 
     /**
