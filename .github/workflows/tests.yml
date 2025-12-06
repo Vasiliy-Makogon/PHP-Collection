@@ -1,63 +1,48 @@
-name: PHP Tests with Coverage
+name: PHP Tests
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Setup PHP with Xdebug
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.0'
-        coverage: xdebug
-        tools: composer
-        ini-values: xdebug.mode=coverage
-    
-    - name: Validate composer.json
-      run: composer validate --strict
-    
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.0-${{ hashFiles('**/composer.lock') }}
-    
-    - name: Install dependencies
-      run: composer install --no-progress --prefer-dist
-    
-    - name: Run PHPUnit with coverage
-      run: |
-        php -v
-        php -m | grep xdebug
-        vendor/bin/phpunit --version
-        vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
-    
-    - name: Verify coverage file
-      run: |
-        echo "Checking coverage.xml..."
-        if [ -f coverage.xml ]; then
-          echo "✓ coverage.xml exists"
-          echo "First 5 lines:"
-          head -5 coverage.xml
-          echo "File size: $(wc -l < coverage.xml) lines"
-        else
-          echo "✗ coverage.xml NOT FOUND!"
-          ls -la
-        fi
-    
-    - name: Upload to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./coverage.xml
-        flags: php-tests
-        name: php-8.0-coverage
-        fail_ci_if_error: false  # Не падать если загрузка не удалась
+    test:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                php-version: ['8.0', '8.1', '8.2', '8.3']
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup PHP ${{ matrix.php-version }}
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-version }}
+                  coverage: pcov
+                  tools: composer
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v3
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+            - name: Install dependencies
+              run: composer install --no-progress --prefer-dist
+
+            - name: Run tests with coverage
+              run: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+            - name: Upload coverage to Codecov
+                # Загружаем покрытие только для одной версии, чтобы не дублировать
+              if: matrix.php-version == '8.0'
+              uses: codecov/codecov-action@v3
+              with:
+                  file: ./coverage.xml
+                  flags: php-${{ matrix.php-version }}
