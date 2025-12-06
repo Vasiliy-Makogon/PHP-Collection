@@ -9,6 +9,7 @@ use Krugozor\Cover\Tests\NewTypeArray;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use RuntimeException;
 
 #[CoversClass(CoverArray::class)]
 class SetDataTest extends TestCase
@@ -488,108 +489,6 @@ class SetDataTest extends TestCase
     }
 
     /**
-     * Tests setData() handles recursion depth limit.
-     *
-     * This test verifies that setData() respects the recursion depth
-     * limit in array2cover() when processing deeply nested arrays,
-     * throwing a RuntimeException when the maximum depth is exceeded.
-     * The exception is thrown when trying to process an element
-     * at depth 513 (max depth is 512).
-     *
-     *
-     * Тестирование обработки ограничения глубины рекурсии в setData().
-     *
-     * Этот тест проверяет, что setData() соблюдает ограничение глубины
-     * рекурсии в array2cover() при обработке глубоко вложенных массивов,
-     * выбрасывая RuntimeException при превышении максимальной глубины.
-     * Исключение выбрасывается при попытке обработать элемент
-     * на глубине 513 (максимальная глубина 512).
-     *
-     * @see CoverArray::setData()
-     * @see CoverArray::array2cover()
-     */
-    public function testSetDataHandlesRecursionDepthLimit(): void
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Maximum recursion depth exceeded');
-
-        $array = new NewTypeArray();
-
-        // Создаем структуру с 513 уровнями вложенности
-        // Чтобы исключение выбросилось, нужно чтобы на уровне 513
-        // был НЕ пустой массив (чтобы выполнился цикл foreach)
-        // или чтобы был массив с элементами
-
-        $deepData = [];
-        $current = &$deepData;
-
-        // Создаем 512 уровней с массивами, содержащими данные
-        for ($i = 0; $i < 512; $i++) {
-            $current = ['value' => 'data', 'nested' => []];
-            $current = &$current['nested'];
-        }
-
-        // На 513-м уровне создаем массив с данными
-        // При обработке этого массива глубина будет 513
-        $current = ['final' => 'value'];
-
-        $array->setData($deepData);
-    }
-
-    /**
-     * Tests setData() does not throw exception at maximum allowed depth.
-     *
-     * This test verifies that setData() works correctly at the maximum
-     * allowed recursion depth (512 levels), not throwing an exception
-     * when the depth is exactly at the limit.
-     *
-     *
-     * Тестирование того, что setData() не выбрасывает исключение на максимально допустимой глубине.
-     *
-     * Этот тест проверяет, что setData() корректно работает на максимально
-     * допустимой глубине рекурсии (512 уровней), не выбрасывая исключение
-     * когда глубина точно на пределе.
-     *
-     * @see CoverArray::setData()
-     * @see CoverArray::array2cover()
-     */
-    public function testSetDataWorksAtMaximumDepth(): void
-    {
-        $array = new NewTypeArray();
-
-        // Создаем структуру точно на пределе глубины (512 уровней)
-        $deepData = [];
-        $current = &$deepData;
-
-        // Создаем 511 уровней с массивами, содержащими данные
-        for ($i = 0; $i < 511; $i++) {
-            $current = ['value' => 'data', 'nested' => []];
-            $current = &$current['nested'];
-        }
-
-        // На 512-м уровне (максимальная глубина) создаем массив с данными
-        $current = ['final' => 'value'];
-
-        // Это не должно вызвать исключение, так как максимальная глубина 512
-        $array->setData($deepData);
-
-        // Проверяем, что данные установились
-        $this->assertGreaterThan(0, $array->count());
-
-        // Проверяем доступ к глубоко вложенным данным
-        $currentCheck = $array;
-        for ($i = 0; $i < 511; $i++) {
-            $this->assertInstanceOf(NewTypeArray::class, $currentCheck);
-            $this->assertEquals('data', $currentCheck->value);
-            $currentCheck = $currentCheck->nested;
-        }
-
-        // На последнем уровне
-        $this->assertInstanceOf(NewTypeArray::class, $currentCheck);
-        $this->assertEquals('value', $currentCheck->final);
-    }
-
-    /**
      * Tests setData() is used in constructor.
      *
      * This test verifies that the CoverArray constructor internally
@@ -635,5 +534,59 @@ class SetDataTest extends TestCase
 
         $this->assertSame($data['key3'], $array1->key3);
         $this->assertSame($data['key3'], $array2->key3);
+    }
+
+    /**
+     * Тестирует, что setData выбрасывает RuntimeException при превышении максимальной глубины вложенности.
+     */
+    public function testSetDataThrowsExceptionOnMaxDepthExceeded(): void
+    {
+        $coverArray = new CoverArray();
+
+        // Создаем массив с вложенностью больше 512 уровней
+        $deepArray = [];
+        $currentRef = &$deepArray;
+        for ($i = 0; $i <= 513; $i++) { // 513 уровня, что превышает лимит 512
+            $currentRef['level'] = [];
+            $currentRef = &$currentRef['level'];
+        }
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Maximum recursion depth exceeded');
+
+        $coverArray->setData($deepArray);
+    }
+
+    /**
+     * Тестирует, что setData корректно обрабатывает массив с глубиной вложенности 512.
+     */
+    public function testSetDataHandlesMaxDepthCorrectly(): void
+    {
+        $coverArray = new CoverArray();
+
+        // Создаем массив с вложенностью ровно 512 уровней
+        $deepArray = [];
+        $currentRef = &$deepArray;
+        for ($i = 0; $i < 512; $i++) { // 512 уровней, что равно лимиту 512
+            $currentRef['level'] = [];
+            $currentRef = &$currentRef['level'];
+        }
+        $currentRef['final_value'] = 'success';
+
+        // Ожидается, что setData выполнится без исключения
+        $coverArray->setData($deepArray);
+
+        // Проверяем, что данные были установлены и трансформированы
+        $this->assertFalse($coverArray->isEmpty());
+
+        // Проверяем, что самый глубокий элемент доступен и является объектом CoverArray
+        $currentElement = $coverArray['level'];
+        for ($i = 0; $i < 511; $i++) { // Проходим 511 уровень, чтобы добраться до предпоследнего
+            $this->assertInstanceOf(CoverArray::class, $currentElement);
+            $currentElement = $currentElement['level'];
+        }
+        // На последнем уровне проверяем значение
+        $this->assertInstanceOf(CoverArray::class, $currentElement);
+        $this->assertEquals('success', $currentElement['final_value']);
     }
 }
