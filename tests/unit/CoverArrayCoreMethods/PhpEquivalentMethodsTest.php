@@ -4842,8 +4842,7 @@ class PhpEquivalentMethodsTest extends TestCase
         // Test with arrays inside array - should throw exception
         // Тест с массивами внутри массива - должно выбрасывать исключение
         $data1 = [2, [1, 2], 3];
-
-        //$this->expectException(ValueError::class);
+        $this->expectException(ValueError::class);
         $result = array_product($data1);
 
         $cover1 = new CoverArray($data1);
