@@ -22,7 +22,7 @@ namespace Krugozor\Cover;
  *
  * @package Krugozor\Cover
  * @author Vasiliy Makogon
- * @link https://github.com/Vasiliy-Makogon/Cover
+ * @link https://github.com/Vasiliy-Makogon/PHP-Collection
  */
 trait Simple
 {

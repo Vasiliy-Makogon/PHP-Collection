@@ -33,7 +33,7 @@ use JsonException;
  *
  * @package Krugozor\Cover
  * @author Vasiliy Makogon
- * @link https://github.com/Vasiliy-Makogon/Cover
+ * @link https://github.com/Vasiliy-Makogon/PHP-Collection
  */
 class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
 {
