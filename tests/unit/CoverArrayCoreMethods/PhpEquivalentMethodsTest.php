@@ -4699,174 +4699,179 @@ class PhpEquivalentMethodsTest extends TestCase
         $this->assertSame($expectedArray8, $cover8->getDataAsArray());
     }
 
-    /**
-     * Tests the product() method (array_product equivalent).
-     *
-     * This test verifies that the product() method correctly calculates
-     * the product of all values in the CoverArray, mirroring PHP's
-     * array_product() function behavior.
-     *
-     *
-     * Тестирование метода product() (эквивалент array_product).
-     *
-     * Этот тест проверяет, что метод product() корректно вычисляет
-     * произведение всех значений в CoverArray, отражая поведение
-     * функции array_product() PHP.
-     *
-     * @see CoverArray::product()
-     * @see array_product()
-     */
     public function testProductMethod(): void
     {
-        // Test with integers
-        // Тест с целыми числами
+        // Test with integers - product of integers
         $data1 = [2, 3, 4];
         $expected1 = array_product($data1);
-
         $cover1 = new CoverArray($data1);
-
         $this->assertSame($expected1, $cover1->product());
 
-        // Test with floats
-        // Тест с числами с плавающей точкой
+        // Test with floats - product of floating point numbers
         $data2 = [1.5, 2.5, 2.0];
         $expected2 = array_product($data2);
-
         $cover2 = new CoverArray($data2);
-
         $this->assertSame($expected2, $cover2->product());
 
-        // Test with empty array (should return 0)
-        // Тест с пустым массивом (должен вернуть 0)
+        // Test with empty array (should return 1, not 0!)
         $data3 = [];
         $expected3 = array_product($data3);
-
         $cover3 = new CoverArray($data3);
-
         $this->assertSame($expected3, $cover3->product());
 
         // Test with single element
-        // Тест с одним элементом
         $data4 = [5];
         $expected4 = array_product($data4);
-
         $cover4 = new CoverArray($data4);
-
-        // original function
-        // оригинальная функция
         $this->assertSame($expected4, $cover4->product());
 
         // Test with negative numbers
-        // Тест с отрицательными числами
         $data5 = [-2, 3, -4];
         $expected5 = array_product($data5);
-
         $cover5 = new CoverArray($data5);
-
-        // original function
-        // оригинальная функция
         $this->assertSame($expected5, $cover5->product());
 
-        // Test with zero value (product should be 0)
-        // Тест с нулевым значением (произведение должно быть 0)
+        // Test with zero value
         $data6 = [2, 3, 0, 5];
         $expected6 = array_product($data6);
-
         $cover6 = new CoverArray($data6);
-
         $this->assertSame($expected6, $cover6->product());
 
-        // Test with string numbers (should be converted)
-        // Тест с числовыми строками (должны преобразоваться)
+        // Test with string numbers (should be converted automatically)
         $data7 = ['2', '3', '4'];
         $expected7 = array_product($data7);
-
         $cover7 = new CoverArray($data7);
-
         $this->assertSame($expected7, $cover7->product());
 
         // Test with mixed numeric strings and numbers
-        // Тест со смешанными числовыми строками и числами
         $data8 = ['2.5', 3, 4];
         $expected8 = array_product($data8);
-
         $cover8 = new CoverArray($data8);
-
         $this->assertSame($expected8, $cover8->product());
 
-        // Test with non-numeric strings (treated as 0, so product is 0)
-        // Тест с нечисловыми строками (обрабатываются как 0, поэтому произведение 0)
+        // Test with non-numeric strings - generates E_WARNING in PHP >= 8.3, returns 0
+        // Тест с нечисловыми строками - генерирует E_WARNING в PHP >= 8.3, возвращает 0
         $data9 = [2, 3, 'abc', 4];
-        $expected9 = array_product($data9);
+
+        // Используем @ для подавления предупреждения от array_product() в PHP >= 8.3
+        $expected9 = @array_product($data9); // 0
 
         $cover9 = new CoverArray($data9);
 
-        $this->assertSame($expected9, $cover9->product());
+        // В PHP >= 8.3 наш метод также генерирует предупреждение, поэтому используем @
+        if (version_compare(PHP_VERSION, '8.3.0', '>=')) {
+            $this->assertSame($expected9, @$cover9->product());
+        } else {
+            $this->assertSame($expected9, $cover9->product());
+        }
 
-        // Test with boolean values (true=1, false=0)
-        // Тест с булевыми значениями (true=1, false=0)
+        // Test with boolean values
         $data10 = [2, true, 3, false, 4];
         $expected10 = array_product($data10);
-
         $cover10 = new CoverArray($data10);
-
         $this->assertSame($expected10, $cover10->product());
 
-        // Test with null values (treated as 0)
-        // Тест с null значениями (обрабатываются как 0)
+        // Test with null values
         $data11 = [2, 3, null, 4];
         $expected11 = array_product($data11);
-
         $cover11 = new CoverArray($data11);
-
         $this->assertSame($expected11, $cover11->product());
 
         // Test with large numbers
-        // Тест с большими числами
         $data12 = [1000, 1000, 1000];
         $expected12 = array_product($data12);
-
         $cover12 = new CoverArray($data12);
-
         $this->assertSame($expected12, $cover12->product());
 
-        // Test with associative array (only values are considered)
-        // Тест с ассоциативным массивом (учитываются только значения)
+        // Test with associative array
         $data13 = ['a' => 2, 'b' => 3, 'c' => 4];
         $expected13 = array_product($data13);
-
         $cover13 = new CoverArray($data13);
-
         $this->assertSame($expected13, $cover13->product());
 
         // Test with numeric string with leading zeros
-        // Тест с числовой строкой с ведущими нулями
         $data14 = ['02', '03'];
         $expected14 = array_product($data14);
-
         $cover14 = new CoverArray($data14);
-
         $this->assertSame($expected14, $cover14->product());
 
         // Test with very small float numbers
-        // Тест с очень маленькими числами с плавающей точкой
         $data15 = [0.1, 0.2, 0.3];
         $expected15 = array_product($data15);
-
         $cover15 = new CoverArray($data15);
-
         $this->assertSame($expected15, $cover15->product());
 
         // Test that original array is not modified
-        // Тест, что исходный массив не изменяется
         $data16 = [2, 3, 4];
         $expected16 = array_product($data16);
-
         $cover16 = new CoverArray($data16);
         $result = $cover16->product();
-
         $this->assertSame($expected16, $result);
         $this->assertSame([2, 3, 4], $cover16->getDataAsArray(), 'Original array should not be modified');
+    }
+
+    /**
+     * Additional tests for edge cases and invalid types
+     * Дополнительные тесты для граничных случаев и невалидных типов
+     */
+    public function testProductMethodEdgeCases(): void
+    {
+        // Test: Product with all null values - all nulls become 0
+        // Тест: Произведение всех null значений - все null становятся 0
+        $this->assertSame(0, (new CoverArray([null, null, null]))->product());
+
+        // Test: Product with all false values - all false become 0
+        // Тест: Произведение всех false значений - все false становятся 0
+        $this->assertSame(0, (new CoverArray([false, false, false]))->product());
+
+        // Test: Product with all true values - all true become 1
+        // Тест: Произведение всех true значений - все true становятся 1
+        $this->assertSame(1, (new CoverArray([true, true, true]))->product());
+
+        // Test: Product with mixed null and false - both become 0
+        // Тест: Произведение с mixed null и false - оба становятся 0
+        $this->assertSame(0, (new CoverArray([null, false, 5]))->product()); // 0 * 0 * 5 = 0
+
+        // Test: Product with scientific notation strings
+        // Тест: Произведение со строками в научной нотации
+        $this->assertSame(6000.0, (new CoverArray(['1.2e3', '5e0']))->product()); // 1200 * 5 = 6000
+    }
+
+    public function testProductMethodWithInvalidTypes(): void
+    {
+        // Test with arrays inside array - should throw exception
+        // Тест с массивами внутри массива - должно выбрасывать исключение
+        $data1 = [2, [1, 2], 3];
+
+        //$this->expectException(ValueError::class);
+        $result = array_product($data1);
+
+        $cover1 = new CoverArray($data1);
+        $this->expectException(ValueError::class);
+        $cover1->product();
+
+        // Test with objects - should throw exception
+        // Тест с объектами - должно выбрасывать исключение
+        $data2 = [2, new \stdClass(), 3];
+        $cover2 = new CoverArray($data2);
+        $this->expectException(ValueError::class);
+        $cover2->product();
+
+        // Test with resources - should throw exception
+        // Тест с ресурсами - должно выбрасывать исключение
+        $resource = fopen('php://memory', 'r');
+        $data3 = [2, $resource, 3];
+        $cover3 = new CoverArray($data3);
+        $this->expectException(ValueError::class);
+        $cover3->product();
+        fclose($resource);
+
+        // Test with callable - should throw exception
+        // Тест с callable - должно выбрасывать исключение
+        $data4 = [2, function() { return 5; }, 3];
+        $cover4 = new CoverArray($data4);
+        $this->expectException(ValueError::class);
+        $cover4->product();
     }
 
     /**

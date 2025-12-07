@@ -1675,14 +1675,100 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function product(): int|float
     {
-        $product = 1;
-
-        foreach ($this->data as $value) {
-            $numericValue = is_numeric($value) ? $value + 0 : 0;
-            $product *= $numericValue;
+        if (empty($this->data)) {
+            return 1;
         }
 
-        return $product;
+        $result = 1;
+        $hasFloat = false;
+
+        foreach ($this->data as $entry) {
+            // Для объектов
+            if (is_object($entry)) {
+                $dst = null;
+                $status = false;
+
+                // Пытаемся привести объект к числу
+                if (method_exists($entry, '__toString')) {
+                    try {
+                        $str = (string)$entry;
+                        if (is_numeric($str)) {
+                            $dst = is_float($str) ? (float)$str : (int)$str;
+                            $status = true;
+                        }
+                    } catch (\Exception $e) {
+                        $status = false;
+                    }
+                }
+
+                if ($status === false || ($dst !== null && !is_int($dst) && !is_float($dst))) {
+                    trigger_error(
+                        'array_product(): Multiplication is not supported on type ' . get_class($entry),
+                        E_WARNING
+                    );
+                    continue;
+                }
+
+                $result *= $dst;
+                if (is_float($dst)) {
+                    $hasFloat = true;
+                }
+                continue;
+            }
+
+            // Для остальных типов
+            if (is_int($entry)) {
+                $result *= $entry;
+            } elseif (is_float($entry)) {
+                $result *= $entry;
+                $hasFloat = true;
+            } elseif (is_string($entry)) {
+                if (is_numeric($entry)) {
+                    // Определяем, целое ли число или float
+                    $num = $entry + 0; // Автоматическое преобразование
+                    if (is_float($num)) {
+                        $hasFloat = true;
+                    }
+                    $result *= $num;
+                } else {
+                    // Нечисловая строка - умножаем на 0 с предупреждением
+                    if (version_compare(PHP_VERSION, '8.3.0', '>=')) {
+                        trigger_error(
+                            'array_product(): Multiplication is not supported on type string',
+                            E_WARNING
+                        );
+                    }
+                    $result *= 0;
+                }
+            } elseif (is_bool($entry)) {
+                $result *= $entry ? 1 : 0;
+            } elseif ($entry === null) {
+                $result *= 0;
+            } elseif (is_resource($entry)) {
+                // Ресурсы приводятся к их handle (целому числу)
+                $result *= (int)$entry;
+            } elseif (is_array($entry)) {
+                // Массивы игнорируются с предупреждением
+                trigger_error(
+                    'array_product(): Multiplication is not supported on type array',
+                    E_WARNING
+                );
+                // Не влияют на результат (не умножаем)
+            } else {
+                // Неизвестный тип
+                trigger_error(
+                    'array_product(): Multiplication is not supported on type ' . gettype($entry),
+                    E_WARNING
+                );
+            }
+        }
+
+        // Возвращаем int, если результат целочисленный и не было float значений
+        if (!$hasFloat && is_int($result)) {
+            return (int)$result;
+        }
+
+        return $result;
     }
 
     /**
@@ -2390,7 +2476,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         // TODO: Implement list equivalent
         // Note: This is tricky to implement as a method
-//        return list(...$vars) = $this->data;
+        //        return list(...$vars) = $this->data;
         return [];
     }
 
@@ -2659,7 +2745,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
 
     /////////////////////////
-
 
 
     /**
