@@ -7,21 +7,102 @@ on:
         branches: [ master ]
 
 jobs:
-    test:
+    test-php80:
         runs-on: ubuntu-latest
-
-        strategy:
-            matrix:
-                php-version: ['8.0', '8.1', '8.2', '8.3']
+        name: PHP 8.0 Tests
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
 
-            - name: Setup PHP ${{ matrix.php-version }}
+            - name: Setup PHP 8.0
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: ${{ matrix.php-version }}
+                  php-version: 8.0
+                  coverage: xdebug
+                  tools: composer
+
+            - name: Install dependencies
+              run: composer install --no-progress --prefer-dist
+
+            - name: Run tests with coverage
+              run: vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+              with:
+                  file: ./coverage.xml
+
+    test-php81:
+        runs-on: ubuntu-latest
+        name: PHP 8.1 Tests
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup PHP 8.1
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.1
+                  coverage: xdebug
+                  tools: composer
+
+            - name: Install dependencies
+              run: composer install --no-progress --prefer-dist
+
+            - name: Run tests with coverage
+              run: vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+              with:
+                  file: ./coverage.xml
+
+    test-php82:
+        runs-on: ubuntu-latest
+        name: PHP 8.2 Tests
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup PHP 8.2
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.2
+                  coverage: xdebug
+                  tools: composer
+
+            - name: Install dependencies
+              run: composer install --no-progress --prefer-dist
+
+            - name: Run tests with coverage
+              run: vendor/bin/phpunit --coverage-clover=coverage.xml --whitelist=src
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+              with:
+                  file: ./coverage.xml
+
+    test-php83:
+        runs-on: ubuntu-latest
+        name: PHP 8.3 Tests
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup PHP 8.3
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.3
                   coverage: xdebug
                   tools: composer
 
