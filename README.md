@@ -12,9 +12,8 @@
 | 8.4         | [![PHP 8.4](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php84.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php84.yml) |
 | 8.5         | [![PHP 8.5](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php85.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php85.yml) |
 
-[![Tests](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml)
+### Code Coverage
 [![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/master/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
-
 
 
 <h2>Introduction</h2>
