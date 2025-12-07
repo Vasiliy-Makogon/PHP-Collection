@@ -4699,6 +4699,25 @@ class PhpEquivalentMethodsTest extends TestCase
         $this->assertSame($expectedArray8, $cover8->getDataAsArray());
     }
 
+    /**
+     * Tests the product() method (array_product equivalent).
+     *
+     * This test verifies that the product() method correctly calculates
+     * the product of array values, mirroring PHP's array_product() function.
+     * It tests various scenarios including integers, floats, strings,
+     * booleans, null values, and edge cases like empty arrays and zero values.
+     *
+     *
+     * Тестирование метода product() (эквивалент array_product).
+     *
+     * Этот тест проверяет, что метод product() корректно вычисляет
+     * произведение значений массива, отражая поведение функции array_product() PHP.
+     * Он тестирует различные сценарии, включая целые числа, числа с плавающей точкой,
+     * строки, булевы значения, null и граничные случаи, такие как пустые массивы и нулевые значения.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
     public function testProductMethod(): void
     {
         // Test with integers - product of integers
@@ -4749,21 +4768,12 @@ class PhpEquivalentMethodsTest extends TestCase
         $cover8 = new CoverArray($data8);
         $this->assertSame($expected8, $cover8->product());
 
-        // Test with non-numeric strings - generates E_WARNING in PHP >= 8.3, returns 0
-        // Тест с нечисловыми строками - генерирует E_WARNING в PHP >= 8.3, возвращает 0
+        // Test with non-numeric strings - returns 0 in PHP >= 8.3, with E_WARNING suppressed
+        // Тест с нечисловыми строками - возвращает 0 в PHP >= 8.3, с подавленным E_WARNING
         $data9 = [2, 3, 'abc', 4];
-
-        // Используем @ для подавления предупреждения от array_product() в PHP >= 8.3
         $expected9 = @array_product($data9); // 0
-
         $cover9 = new CoverArray($data9);
-
-        // В PHP >= 8.3 наш метод также генерирует предупреждение, поэтому используем @
-        if (version_compare(PHP_VERSION, '8.3.0', '>=')) {
-            $this->assertSame($expected9, @$cover9->product());
-        } else {
-            $this->assertSame($expected9, $cover9->product());
-        }
+        $this->assertSame($expected9, $cover9->product());
 
         // Test with boolean values
         $data10 = [2, true, 3, false, 4];
@@ -4811,8 +4821,19 @@ class PhpEquivalentMethodsTest extends TestCase
     }
 
     /**
-     * Additional tests for edge cases and invalid types
-     * Дополнительные тесты для граничных случаев и невалидных типов
+     * Tests edge cases for the product() method (array_product equivalent).
+     *
+     * This test verifies edge cases for the product() method, including
+     * boolean conversions, null values, and scientific notation strings.
+     *
+     *
+     * Тестирование граничных случаев метода product() (эквивалент array_product).
+     *
+     * Этот тест проверяет граничные случаи метода product(), включая
+     * преобразования булевых значений, null значений и строк в научной нотации.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
      */
     public function testProductMethodEdgeCases(): void
     {
@@ -4834,9 +4855,35 @@ class PhpEquivalentMethodsTest extends TestCase
 
         // Test: Product with scientific notation strings
         // Тест: Произведение со строками в научной нотации
-        $this->assertSame(6000.0, (new CoverArray(['1.2e3', '5e0']))->product()); // 1200 * 5 = 6000
+        $this->assertSame(
+            array_product(['1.2e3', '5e0']), // Используем array_product как эталон
+            (new CoverArray(['1.2e3', '5e0']))->product()
+        );
     }
 
+    /**
+     * Tests the product() method with invalid/non-scalar types (array_product equivalent).
+     *
+     * This test verifies that the product() method handles invalid and non-scalar
+     * types (arrays, objects, resources, callables) correctly, matching the behavior
+     * of PHP's array_product() function with error suppression.
+     *
+     * Note: In PHP 8.3+, array_product() generates E_WARNING for non-scalar values
+     * and returns 0. In earlier versions, it returns 0 without warning.
+     *
+     *
+     * Тестирование метода product() с недопустимыми/нескалярными типами (эквивалент array_product).
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает недопустимые и
+     * нескалярные типы (массивы, объекты, ресурсы, callable), соответствуя поведению
+     * функции array_product() PHP с подавлением ошибок.
+     *
+     * Примечание: В PHP 8.3+ array_product() генерирует E_WARNING для нескалярных значений
+     * и возвращает 0. В более ранних версиях возвращает 0 без предупреждения.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
     public function testProductMethodWithInvalidTypes(): void
     {
         // Test with arrays inside array
@@ -4860,7 +4907,13 @@ class PhpEquivalentMethodsTest extends TestCase
         fclose($resource);
 
         // Test with callable
-        $data4 = [2, function() { return 5; }, 3];
+        $data4 = [
+            2,
+            function () {
+                return 5;
+            },
+            3
+        ];
         $expected4 = @array_product($data4); // 0
         $cover4 = new CoverArray($data4);
         $this->assertSame($expected4, $cover4->product());
@@ -5319,7 +5372,6 @@ class PhpEquivalentMethodsTest extends TestCase
         $this->data->get('languages.backend')->unshift('Java', 'C#');
         $this->assertSame('C#', $this->data->get('languages.backend')->first());
     }
-
 
 
     /**
