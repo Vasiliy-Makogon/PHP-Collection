@@ -19,19 +19,36 @@ In modern PHP development, we often work with arrays as the primary data structu
 
 CoverArray provides a clean, object-oriented interface that wraps PHP arrays while maintaining full compatibility with native functions:
 
+```php
+// Data: users with age and status
+// Task: get names of active users over 18, sorted by descending score
+$users = [
+    ['name' => 'Alice', 'age' => 25, 'active' => true, 'score' => 85],
+    ['name' => 'Bob', 'age' => 17, 'active' => false, 'score' => 45],
+    ['name' => 'Charlie', 'age' => 32, 'active' => true, 'score' => 92],
+    ['name' => 'Diana', 'age' => 19, 'active' => true, 'score' => 78],
+    ['name' => 'Eve', 'age' => 22, 'active' => false, 'score' => 61],
+];
+```
+
 #### Before (Native PHP):
 ```php
-$result = array_filter(
-    array_map('strtoupper', $data),
-    fn($item) => strlen($item) > 3
-);
+$filtered = array_filter($users, fn($u) => $u['active'] && $u['age'] >= 18);
+$sorted = usort($filtered, fn($a, $b) => $b['score'] <=> $a['score']) ? $filtered : [];
+$names = array_column($sorted, 'name');
+$result = implode(', ', $names);
+echo "Result: $result\n\n";
 ```
 #### After (CoverArray):
 ```php
-$result = (new CoverArray($data))
-    ->map('strtoupper')
-    ->filter(fn($item) => strlen($item) > 3)
-    ->getDataAsArray();
+// EVERYTHING IN ONE LINE!
+$result = (new \Krugozor\Cover\CoverArray($users))
+    ->filter(fn($u) => $u->active && $u->age >= 18)
+    ->usort(fn($a, $b) => $b->score <=> $a->score)
+    ->values()
+    ->column('name')
+    ->implode(', ');
+echo "Result: $result\n\n";
 ```
 #### Key Benefits
 * **Consistent API:** All methods follow `$array->method($arguments)` pattern

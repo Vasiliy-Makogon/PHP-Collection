@@ -2566,8 +2566,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function sort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement sort equivalent
         sort($this->data, $flags);
+
         return $this;
     }
 
@@ -2626,8 +2626,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function usort(callable $callback): static
     {
-        // TODO: Implement usort equivalent
         usort($this->data, $callback);
+
         return $this;
     }
 
