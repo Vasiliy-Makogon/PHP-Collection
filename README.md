@@ -37,24 +37,22 @@ $filtered = array_filter($users, fn($u) => $u['active'] && $u['age'] >= 18);
 $sorted = usort($filtered, fn($a, $b) => $b['score'] <=> $a['score']) ? $filtered : [];
 $names = array_column($sorted, 'name');
 $result = implode(', ', $names);
-echo "Result: $result\n\n";
 ```
 #### After (CoverArray):
 ```php
 // EVERYTHING IN ONE LINE!
-$result = (new \Krugozor\Cover\CoverArray($users))
+$result = (CoverArray::fromArray($users))
     ->filter(fn($u) => $u->active && $u->age >= 18)
     ->usort(fn($a, $b) => $b->score <=> $a->score)
     ->values()
     ->column('name')
     ->implode(', ');
-echo "Result: $result\n\n";
 ```
-#### Key Benefits
+### Key Benefits
 * **Consistent API:** All methods follow `$array->method($arguments)` pattern
 * **Method Chaining:** Chain multiple operations in a readable way
 * **IDE Support:** Full autocompletion and type hints
-* **Modern Syntax:** Designed for PHP 8.1+ with strict typing
+* **Modern Syntax:** Designed for PHP 8.0+ with strict typing
 * **Dot Notation:** Easy nested data access with `$array->get('user.profile.name')`
 * **JSON Support:** Built-in serialization/deserialization
 * **Immutable Operations:** Most methods return new instances, preserving original data
@@ -78,17 +76,9 @@ $processed = CoverArray::fromArray($rawData)
     ->sort(fn($a, $b) => $a['priority'] <=> $b['priority'])
     ->chunk(50);
 ```
-
-#### Designed for Modern PHP
-CoverArray embraces PHP's modern features:
-
-* **Strict typing** throughout
-* **Union types** and **mixed types**
-* **Readonly-like behavior** with immutable methods
-
 CoverArray bridges the gap between PHP's powerful array functions and modern object-oriented practices, making array manipulation more expressive, maintainable, and enjoyable.
 
-
+## State
 ### Test Status
 | PHP Version | Status                                                                                                                                                                               |
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -102,16 +92,13 @@ CoverArray bridges the gap between PHP's powerful array functions and modern obj
 ### Code Coverage
 [![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/master/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)
 
+## Requirements
+PHP >= 8.0
 
-<h2>Introduction</h2>
-
-<p>A PHP class for convenient and flexible array manipulation in object-oriented programming. Essentially, it's the "object array" that PHP has been missing.</p>
-
-<h2>Requirements</h2>
-<p>PHP >= 8.0</p>
-
-<h2>Installation</h2>
-<pre><code>composer require krugozor/cover</code></pre>
+## Installation
+```
+composer require krugozor/cover
+```
 
 <h2>Comparison Table: CoverArray Methods vs PHP Array Functions</h2>
 
