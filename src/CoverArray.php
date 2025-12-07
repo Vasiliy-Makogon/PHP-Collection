@@ -1675,7 +1675,14 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function product(): int|float
     {
-        return array_product($this->data);
+        $product = 1;
+
+        foreach ($this->data as $value) {
+            $numericValue = is_numeric($value) ? $value + 0 : 0;
+            $product *= $numericValue;
+        }
+
+        return $product;
     }
 
     /**
