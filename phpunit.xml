@@ -1,24 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true"
          verbose="true">
 
-    <testsuites>
-        <testsuite name="Unit Tests">
-            <directory>tests/unit</directory>
-        </testsuite>
-    </testsuites>
+  <!-- ДОБАВЬТЕ ЭТУ СЕКЦИЮ -->
+  <coverage>
+    <!-- Указываем какие файлы анализировать -->
+    <include>
+      <directory suffix=".php">src</directory>
+      <!-- добавьте другие директории если нужно -->
+    </include>
 
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
+    <!-- Исключаем тесты из анализа -->
+    <exclude>
+      <directory>tests</directory>
+      <directory>vendor</directory>
 
-    <logging>
-        <log type="coverage-clover" target="coverage.xml"/>
-        <log type="coverage-html" target="html-coverage" lowUpperBound="50" highLowerBound="90"/>
-    </logging>
+      <!-- Исключаем конкретный файл -->
+      <file>src/test.php</file>
+    </exclude>
+
+    <!-- Отчеты (у вас уже есть) -->
+    <report>
+      <clover outputFile="coverage.xml"/>
+      <html outputDirectory="html-coverage" lowUpperBound="50" highLowerBound="90"/>
+    </report>
+  </coverage>
+
+  <testsuites>
+    <testsuite name="Unit Tests">
+      <directory>tests/unit</directory>
+    </testsuite>
+  </testsuites>
+
+  <logging/>
 </phpunit>
