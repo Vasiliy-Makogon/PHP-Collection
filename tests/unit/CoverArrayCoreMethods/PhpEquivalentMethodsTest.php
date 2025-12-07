@@ -4839,38 +4839,31 @@ class PhpEquivalentMethodsTest extends TestCase
 
     public function testProductMethodWithInvalidTypes(): void
     {
-        // Test with arrays inside array - should throw exception
-        // Тест с массивами внутри массива - должно выбрасывать исключение
+        // Test with arrays inside array
         $data1 = [2, [1, 2], 3];
-        $this->expectException(ValueError::class);
-        $result = array_product($data1);
-
+        $expected1 = @array_product($data1);
         $cover1 = new CoverArray($data1);
-        $this->expectException(ValueError::class);
-        $cover1->product();
+        $this->assertSame($expected1, $cover1->product());
 
-        // Test with objects - should throw exception
-        // Тест с объектами - должно выбрасывать исключение
+        // Test with objects
         $data2 = [2, new \stdClass(), 3];
+        $expected2 = @array_product($data2); // 0
         $cover2 = new CoverArray($data2);
-        $this->expectException(ValueError::class);
-        $cover2->product();
+        $this->assertSame($expected2, $cover2->product());
 
-        // Test with resources - should throw exception
-        // Тест с ресурсами - должно выбрасывать исключение
+        // Test with resources
         $resource = fopen('php://memory', 'r');
         $data3 = [2, $resource, 3];
+        $expected3 = @array_product($data3); // 0 (PHP 8.3+) или handle ресурса (PHP < 8.3)
         $cover3 = new CoverArray($data3);
-        $this->expectException(ValueError::class);
-        $cover3->product();
+        $this->assertSame($expected3, $cover3->product());
         fclose($resource);
 
-        // Test with callable - should throw exception
-        // Тест с callable - должно выбрасывать исключение
+        // Test with callable
         $data4 = [2, function() { return 5; }, 3];
+        $expected4 = @array_product($data4); // 0
         $cover4 = new CoverArray($data4);
-        $this->expectException(ValueError::class);
-        $cover4->product();
+        $this->assertSame($expected4, $cover4->product());
     }
 
     /**
