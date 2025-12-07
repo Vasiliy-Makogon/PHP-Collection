@@ -65,15 +65,11 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Checks if the array is empty.
-     *
      * Returns true if the array contains no elements, false otherwise.
-     * This method provides a more readable alternative to checking count() > 0.
      *
      *
      * Проверяет, является ли массив пустым.
-     *
      * Возвращает true, если массив не содержит элементов, иначе false.
-     * Этот метод предоставляет более читаемую альтернативу проверке count() > 0.
      *
      * @return bool True if the array is empty, false otherwise.
      *              Возвращает true, если массив пуст, иначе false.
@@ -180,7 +176,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @note Эта реализация не обрабатывает глубокое клонирование вложенных объектов внутри объектов.
      *       Используйте сериализацию/десериализацию для полных глубоких копий при необходимости.
      *
-     * @see https://www.php.net/manual/en/language.oop5.cloning.php
      * @see CoverArray::copy()
      */
     public function __clone()
@@ -221,7 +216,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * $copy['obj']->property = 'changed'; // Does not affect $original
      *
      * @see CoverArray::__clone()
-     * @see https://www.php.net/manual/en/language.oop5.cloning.php
      */
     final public function copy(): static
     {
@@ -242,12 +236,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Implements the IteratorAggregate interface.
-     *
      * Returns an iterator for the array, allowing foreach loops to work.
      *
      *
      * Реализует интерфейс IteratorAggregate.
-     *
      * Возвращает итератор для массива, позволяя работать с циклами foreach.
      *
      * @return Traversable Iterator for the array data.
@@ -286,12 +278,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Implements the ArrayAccess::offsetGet interface method.
-     *
      * Returns the value at the specified offset, or null if the offset doesn't exist.
      *
      *
      * Реализует метод интерфейса ArrayAccess::offsetGet.
-     *
      * Возвращает значение по указанному смещению или null, если смещение не существует.
      *
      * @param mixed $offset The offset to retrieve.
@@ -306,12 +296,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Implements the ArrayAccess::offsetExists interface method.
-     *
      * Checks whether the specified offset exists in the array.
      *
      *
      * Реализует метод интерфейса ArrayAccess::offsetExists.
-     *
      * Проверяет, существует ли указанное смещение в массиве.
      *
      * @param mixed $offset The offset to check.
@@ -326,12 +314,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Implements the ArrayAccess::offsetUnset interface method.
-     *
      * Unsets the value at the specified offset if it exists.
      *
      *
      * Реализует метод интерфейса ArrayAccess::offsetUnset.
-     *
      * Удаляет значение по указанному смещению, если оно существует.
      *
      * @param mixed $offset The offset to unset.
@@ -366,12 +352,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Unserializes the object from serialized data.
-     *
      * Restores the object state from serialized data array.
      *
      *
      * Десериализует объект из сериализованных данных.
-     *
      * Восстанавливает состояние объекта из сериализованного массива данных.
      *
      * @param array $data Serialized data to restore from.
@@ -503,12 +487,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
     /**
      * Converts the CoverArray to a JSON string.
-     *
      * Serializes the CoverArray data to a JSON string representation.
      *
      *
      * Преобразует CoverArray в строку JSON.
-     *
      * Сериализует данные CoverArray в строковое представление JSON.
      *
      * @param int $flags Bitmask of JSON encode options.
@@ -602,7 +584,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return implode($separator, $this->data);
     }
 
-    // Start implementing aliases for PHP functions
+    /*******************************************************************************************************************
+     * Start implementing aliases for PHP functions
+     ******************************************************************************************************************/
 
     /**
      * Checks if all array elements satisfy a callback function (array_all equivalent).
@@ -2852,6 +2836,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         return $this->prepend(...$args);
     }
+
+    /*******************************************************************************************************************
+     * Start protected functions
+     ******************************************************************************************************************/
 
     /**
      * Converts arrays to CoverArray instances recursively.
