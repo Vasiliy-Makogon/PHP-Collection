@@ -4876,22 +4876,24 @@ class PhpEquivalentMethodsTest extends TestCase
 
         // Test: Product with hexadecimal strings
         // Тест: Произведение со строками в шестнадцатеричном формате
+        // Начиная с PHP 8.3, шестнадцатеричные строки не считаются числовыми по умолчанию
         $this->assertSame(
-            array_product(['0x10', '0x2']), // 16 * 2 = 32
+            @array_product(['0x10', '0x2']), // Используем @ для совместимости с PHP 8.3+
             (new CoverArray(['0x10', '0x2']))->product()
         );
 
         // Test: Product with octal strings
         // Тест: Произведение со строками в восьмеричном формате
+        // Начиная с PHP 8.3, восьмеричные строки не считаются числовыми по умолчанию
         $this->assertSame(
-            array_product(['010', '02']), // 8 * 2 = 16 (в PHP 8.0+ '010' = 10, в более ранних = 8)
+            @array_product(['010', '02']),
             (new CoverArray(['010', '02']))->product()
         );
 
         // Test: Product with INF and NAN - requires special handling
         // Тест: Произведение с INF и NAN - требует особой обработки
         $infNanData = [INF, 2, NAN];
-        $expectedInfNan = array_product($infNanData);
+        $expectedInfNan = @array_product($infNanData);
         $actualInfNan = (new CoverArray($infNanData))->product();
 
         // NAN is never equal to itself, so we need special handling
@@ -4932,6 +4934,13 @@ class PhpEquivalentMethodsTest extends TestCase
         } else {
             $this->assertSame($expectedNanOnly, $actualNanOnly);
         }
+
+        // Test: Product with binary strings (PHP 8.3+ requires @)
+        // Тест: Произведение с двоичными строками (PHP 8.3+ требует @)
+        $this->assertSame(
+            @array_product(['0b1010', '0b0011']), // 10 * 3 = 30
+            (new CoverArray(['0b1010', '0b0011']))->product()
+        );
     }
 
     /**
