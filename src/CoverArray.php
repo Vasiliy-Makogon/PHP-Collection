@@ -779,8 +779,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         return new static(
             array_combine(
-                static::convertToPlainArray($keys),
-                static::convertToPlainArray($values)
+                static::convertToPlain($keys),
+                static::convertToPlain($values)
             )
         );
     }
@@ -831,7 +831,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return new static(array_diff(
             $this->getDataAsArray(),
             ...array_map(
-                [self::class, 'convertToPlainArray'],
+                [self::class, 'convertToPlain'],
                 $arrays
             )
         ));
@@ -860,7 +860,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return new static(array_diff_assoc(
             $this->getDataAsArray(),
             ...array_map(
-                [self::class, 'convertToPlainArray'],
+                [self::class, 'convertToPlain'],
                 $arrays
             )
         ));
@@ -891,7 +891,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return new static(array_diff_key(
             $this->getDataAsArray(),
             ...array_map(
-                [self::class, 'convertToPlainArray'],
+                [self::class, 'convertToPlain'],
                 $arrays
             )
         ));
@@ -923,7 +923,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             call_user_func_array('array_diff_uassoc', array_merge(
                 [$this->getDataAsArray()],
                 array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 ),
                 [$key_compare_func]
@@ -959,7 +959,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             call_user_func_array('array_diff_ukey', array_merge(
                 [$this->getDataAsArray()],
                 array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 ),
                 [$key_compare_func]
@@ -1020,7 +1020,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         return new static(
             array_fill_keys(
-                static::convertToPlainArray($keys),
+                static::convertToPlain($keys),
                 $value
             )
         );
@@ -1195,7 +1195,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_intersect(
                 $this->data,
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 )
             )
@@ -1226,7 +1226,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_intersect_assoc(
                 $this->data,
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 )
             )
@@ -1259,7 +1259,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_intersect_key(
                 $this->data,
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 )
             )
@@ -1292,7 +1292,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             call_user_func_array('array_intersect_uassoc', array_merge(
                 [$this->data],
                 array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 ),
                 [$key_compare_func]
@@ -1328,7 +1328,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             call_user_func_array('array_intersect_ukey', array_merge(
                 [$this->data],
                 array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 ),
                 [$key_compare_func]
@@ -1525,7 +1525,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $callback,
                 ...array_merge([$this->data],
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     )
                 )
@@ -1557,7 +1557,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_merge(
                 $this->getDataAsArray(),
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 )
             )
@@ -1590,7 +1590,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_merge_recursive(
                 $this->getDataAsArray(),
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $arrays
                 )
             )
@@ -1813,7 +1813,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_replace(
                 $this->data,
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $replacement
                 )
             )
@@ -1840,7 +1840,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             array_replace_recursive(
                 $this->getDataAsArray(),
                 ...array_map(
-                    [self::class, 'convertToPlainArray'],
+                    [self::class, 'convertToPlain'],
                     $replacement
                 )
             )
@@ -1974,7 +1974,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     $value_compare_func
@@ -2006,7 +2006,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     [$value_compare_func]
@@ -2043,7 +2043,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     $value_compare_func,
@@ -2075,7 +2075,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     [$value_compare_func])
@@ -2106,7 +2106,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     [$value_compare_func])
@@ -2142,7 +2142,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                 $this->data,
                 ...array_merge(
                     array_map(
-                        [self::class, 'convertToPlainArray'],
+                        [self::class, 'convertToPlain'],
                         $arrays
                     ),
                     [$value_compare_func],
@@ -2318,7 +2318,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function in(mixed $needle, bool $strict = false): bool
     {
-        return in_array($needle, $this->data, $strict);
+        return in_array(
+            static::convertToPlain($needle), $this->getDataAsArray(),
+            $strict
+        );
     }
 
     /**
@@ -2661,28 +2664,53 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return $this->count();
     }
 
-
-
-    /////////////////////////
-
+    // Additional CoverArray-specific methods (not direct equivalents of PHP array functions)
 
     /**
-     * Recursively applies a callback function to all elements (array_walk_recursive equivalent).
+     * Applies a callback function to all elements recursively and returns a new CoverArray.
      *
-     * Applies a user-defined callback function to every element in a multidimensional array recursively.
-     * The callback function receives both value and key as parameters.
+     * Recursively applies a user-defined callback function to every element in a multidimensional
+     * array structure. The callback function receives both value and key as parameters and
+     * should return the transformed value.
+     *
+     * Important: Unlike PHP's array_walk_recursive() function which modifies the original array
+     * by reference, this method returns a new CoverArray instance with the transformed values,
+     * leaving the original object unchanged. This behavior is more similar to a recursive version
+     * of array_map() (which doesn't exist natively in PHP).
+     *
+     * Note: This method differs from map() which does not handle multidimensional arrays
+     * recursively and works with multiple input arrays.
+     *
+     * Time complexity: O(n) where n is the total number of elements (including nested elements).
+     * Space complexity: O(n) for the new array structure.
      *
      *
-     * Рекурсивно применяет callback-функцию ко всем элементам (эквивалент array_walk_recursive).
+     * Применяет callback-функцию ко всем элементам рекурсивно и возвращает новый CoverArray.
      *
-     * Рекурсивно применяет пользовательскую callback-функцию к каждому элементу в многомерном массиве.
-     * Callback-функция получает и значение, и ключ в качестве параметров.
+     * Рекурсивно применяет пользовательскую callback-функцию к каждому элементу в многомерной
+     * структуре массива. Callback-функция получает и значение, и ключ в качестве параметров и
+     * должна возвращать преобразованное значение.
+     *
+     * Важно: В отличие от функции PHP array_walk_recursive(), которая изменяет исходный массив
+     * по ссылке, этот метод возвращает новый экземпляр CoverArray с преобразованными значениями,
+     * оставляя исходный объект неизменным. Это поведение больше похоже на рекурсивную версию
+     * array_map() (которая не существует нативно в PHP).
+     *
+     * Примечание: Этот метод отличается от map(), который не обрабатывает многомерные массивы
+     * рекурсивно и работает с несколькими входными массивами.
+     *
+     * Временная сложность: O(n), где n - общее количество элементов (включая вложенные элементы).
+     * Пространственная сложность: O(n) для новой структуры массива.
      *
      * @param callable $callback Callback function to apply, must be callback(mixed $value, mixed $key): mixed.
      *                           Callback-функция для применения, должна быть callback(mixed $value, mixed $key): mixed.
      * @return static New CoverArray instance with callback applied recursively to all elements.
      *                Новый экземпляр CoverArray с рекурсивно примененным callback ко всем элементам.
+     *
      * @see array_walk_recursive()
+     * @see CoverArray::map()
+     * @see CoverArray::each()
+     * @see https://www.php.net/manual/en/function.array-walk-recursive.php
      */
     final public function eachRecursive(callable $callback): static
     {
@@ -2787,12 +2815,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @return static Current CoverArray instance with prepended elements.
      *                Текущий экземпляр CoverArray с добавленными в начало элементами.
      * @see array_unshift()
+     * @see CoverArray::unshift()
      */
     final public function prepend(mixed ...$args): static
     {
-        foreach ($args as $value) {
-            array_unshift($this->data, $this->array2cover($value));
+        if (empty($args)) {
+            return $this;
         }
+
+        $args = array_map([$this, 'array2cover'], $args);
+        array_unshift($this->data, ...$args);
 
         return $this;
     }
@@ -2874,25 +2906,39 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Converts CoverArray or array to plain PHP array.
+     * Normalizes data for PHP array functions.
      *
-     * Helper method that converts CoverArray instances to plain PHP arrays
-     * and leaves regular arrays unchanged. Used for interoperability with
-     * PHP's native array functions.
+     * Converts CoverArray instances to plain PHP arrays recursively,
+     * while leaving other data types unchanged. This method is used internally
+     * to ensure compatibility when passing data to PHP's native array functions
+     * that expect plain arrays as arguments.
+     *
+     * The method handles three cases:
+     * 1. CoverArray instances: converts to plain array using getDataAsArray()
+     * 2. Plain arrays: returns unchanged
+     * 3. Other types (scalars, objects, resources): returns as-is
      *
      *
-     * Преобразует CoverArray или массив в обычный массив PHP.
+     * Нормализует данные для функций массивов PHP.
      *
-     * Вспомогательный метод, который преобразует экземпляры CoverArray в обычные массивы PHP
-     * и оставляет обычные массивы неизменными. Используется для взаимодействия с
-     * нативными функциями массивов PHP.
+     * Преобразует экземпляры CoverArray в обычные массивы PHP рекурсивно,
+     * оставляя другие типы данных без изменений. Этот метод используется внутренне
+     * для обеспечения совместимости при передаче данных в нативные функции
+     * массивов PHP, которые ожидают обычные массивы в качестве аргументов.
      *
-     * @param CoverArray|array $data Data to convert to plain array.
-     *                               Данные для преобразования в обычный массив.
-     * @return array Plain PHP array representation.
-     *               Представление в виде обычного массива PHP.
+     * Метод обрабатывает три случая:
+     * 1. Экземпляры CoverArray: преобразует в обычный массив с помощью getDataAsArray()
+     * 2. Обычные массивы: возвращает без изменений
+     * 3. Другие типы (скаляры, объекты, ресурсы): возвращает как есть
+     *
+     * @param mixed $data Data to normalize (CoverArray, array, or any other type).
+     *                    Данные для нормализации (CoverArray, массив или любой другой тип).
+     * @return mixed Plain PHP array if input was CoverArray or array, original value otherwise.
+     *               Обычный массив PHP если на входе был CoverArray или массив, исходное значение в противном случае.
+     *
+     * @see CoverArray::getDataAsArray()
      */
-    final protected static function convertToPlainArray(CoverArray|array $data): array
+    final protected static function convertToPlain(mixed $data): mixed
     {
         return $data instanceof self ? $data->getDataAsArray() : $data;
     }

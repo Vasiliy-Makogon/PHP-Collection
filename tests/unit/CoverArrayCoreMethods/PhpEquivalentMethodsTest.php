@@ -3,34 +3,12 @@
 declare(strict_types=1);
 
 use Krugozor\Cover\CoverArray;
-use Krugozor\Cover\Tests\NewTypeArray;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CoverArray::class)]
 class PhpEquivalentMethodsTest extends TestCase
 {
-    /** @var NewTypeArray */
-    protected NewTypeArray $data;
-
-    public function setUp(): void
-    {
-        $this->data = new NewTypeArray([
-            'name' => 'Vasiliy',
-            'birthday' => [18, 8, 1982],
-            'languages' => [
-                'backend' => ['PHP', 'MySql'],
-                'frontend' => ['HTML', 'CSS', 'JavaScript']
-            ],
-            'address' => [
-                'country' => 'Russia',
-                'region' => 'Moscow region',
-                'city' => 'Podolsk',
-                'street' => 'Kirov st.'
-            ]
-        ]);
-    }
-
     /**
      * Tests the all() method (array_all equivalent).
      *
@@ -5399,6 +5377,7 @@ class PhpEquivalentMethodsTest extends TestCase
      * This test verifies that the eachRecursive() method correctly applies
      * a callback function to all elements of a multidimensional CoverArray,
      * returning a new instance with transformed values at all nesting levels.
+     * The method should not modify the original CoverArray instance.
      *
      *
      * Тестирование метода eachRecursive().
@@ -5406,22 +5385,153 @@ class PhpEquivalentMethodsTest extends TestCase
      * Этот тест проверяет, что метод eachRecursive() корректно применяет
      * callback-функцию ко всем элементам многомерного CoverArray,
      * возвращая новый экземпляр с преобразованными значениями на всех уровнях вложенности.
+     * Метод не должен изменять исходный экземпляр CoverArray.
      *
      * @see CoverArray::eachRecursive()
      */
     public function testEachRecursiveMethod(): void
     {
-        $data = $this->data->get('languages');
-        $expected = [
-            'backend' => ['0: PHP', '1: MySql'],
-            'frontend' => ['0: HTML', '1: CSS', '2: JavaScript']
+        // Create test data with multiple nesting levels
+        // Создаем тестовые данные с несколькими уровнями вложенности
+        $testData = [
+            'backend' => ['PHP', 'MySql'],
+            'frontend' => ['HTML', 'CSS', 'JavaScript'],
+            'nested' => [
+                'level1' => [
+                    'level2' => ['deep1', 'deep2'],
+                    'level2_simple' => 'simple_value'
+                ],
+                'numbers' => [1, 2, 3]
+            ],
+            'scalar' => 'plain_string'
         ];
 
+        $cover = new CoverArray($testData);
+
+        // Test 1: Basic recursive transformation with key-value concatenation
+        // Тест 1: Базовая рекурсивная трансформация с конкатенацией ключа и значения
+        $expected1 = [
+            'backend' => ['0: PHP', '1: MySql'],
+            'frontend' => ['0: HTML', '1: CSS', '2: JavaScript'],
+            'nested' => [
+                'level1' => [
+                    'level2' => ['0: deep1', '1: deep2'],
+                    'level2_simple' => 'level2_simple: simple_value'
+                ],
+                'numbers' => ['0: 1', '1: 2', '2: 3']
+            ],
+            'scalar' => 'scalar: plain_string'
+        ];
+
+        $result1 = $cover->eachRecursive(
+            fn(mixed $value, mixed $key): string => "$key: $value"
+        );
+
         $this->assertSame(
-            $expected,
-            $data->eachRecursive(
-                fn(mixed $value, mixed $key): string => "$key: $value"
-            )->getDataAsArray()
+            $expected1,
+            $result1->getDataAsArray()
+        );
+
+        // Test 2: Verify original object is not modified
+        // Тест 2: Проверяем, что исходный объект не изменен
+        $this->assertSame(
+            $testData,
+            $cover->getDataAsArray(),
+            'Original CoverArray should not be modified by eachRecursive()'
+        );
+
+        // Test 3: Numeric transformation - multiply all numeric values by 2
+        // Тест 3: Числовая трансформация - умножение всех числовых значений на 2
+        $numericData = [
+            'a' => 5,
+            'b' => [10, 20],
+            'c' => [
+                'inner' => [1, 2, 3]
+            ]
+        ];
+
+        $numericCover = new CoverArray($numericData);
+
+        $expected3 = [
+            'a' => 10,
+            'b' => [20, 40],
+            'c' => [
+                'inner' => [2, 4, 6]
+            ]
+        ];
+
+        $result3 = $numericCover->eachRecursive(
+            function (mixed $value, mixed $key) {
+                return is_numeric($value) ? $value * 2 : $value;
+            }
+        );
+
+        $this->assertSame(
+            $expected3,
+            $result3->getDataAsArray()
+        );
+
+        // Test 4: Type checking - only transform strings
+        // Тест 4: Проверка типов - преобразовываем только строки
+        $mixedData = [
+            'str' => 'hello',
+            'int' => 42,
+            'bool' => true,
+            'null' => null,
+            'array' => ['nested' => 'world']
+        ];
+
+        $mixedCover = new CoverArray($mixedData);
+
+        $expected4 = [
+            'str' => 'HELLO',
+            'int' => 42,
+            'bool' => true,
+            'null' => null,
+            'array' => ['nested' => 'WORLD']
+        ];
+
+        $result4 = $mixedCover->eachRecursive(
+            function (mixed $value, mixed $key) {
+                return is_string($value) ? strtoupper($value) : $value;
+            }
+        );
+
+        $this->assertSame(
+            $expected4,
+            $result4->getDataAsArray()
+        );
+
+        // Test 5: Empty array and edge cases
+        // Тест 5: Пустой массив и граничные случаи
+        $emptyCover = new CoverArray([]);
+        $emptyResult = $emptyCover->eachRecursive(
+            fn(mixed $value, mixed $key): string => "$key: $value"
+        );
+
+        $this->assertSame(
+            [],
+            $emptyResult->getDataAsArray()
+        );
+
+        // Test 6: Single level array (non-recursive case)
+        // Тест 6: Одномерный массив (нерекурсивный случай)
+        $singleLevel = new CoverArray(['a' => 1, 'b' => 2, 'c' => 3]);
+        $singleResult = $singleLevel->eachRecursive(
+            fn(mixed $value, mixed $key): int => $value * 10
+        );
+
+        $this->assertSame(
+            ['a' => 10, 'b' => 20, 'c' => 30],
+            $singleResult->getDataAsArray()
+        );
+
+        // Test 7: Verify the method returns a new CoverArray instance, not a plain array
+        // Тест 7: Проверяем, что метод возвращает новый экземпляр CoverArray, а не обычный массив
+        $this->assertInstanceOf(
+            CoverArray::class,
+            $cover->eachRecursive(fn($v) => $v),
+            'eachRecursive() should return a CoverArray instance'
         );
     }
 
@@ -5431,6 +5541,11 @@ class PhpEquivalentMethodsTest extends TestCase
      * This test verifies that the prepend() method (and its unshift() alias)
      * correctly adds one or more elements to the beginning of the CoverArray,
      * shifting existing elements to higher indices, mirroring PHP's array_unshift().
+     * Both methods modify the current instance and return it for method chaining.
+     *
+     * Note: When prepending to an array with string keys, the new elements
+     * receive numeric indices starting from 0, and existing string keys are preserved.
+     * This matches the behavior of PHP's array_unshift() function.
      *
      *
      * Тестирование методов prepend() и unshift() (эквивалент array_unshift).
@@ -5438,23 +5553,232 @@ class PhpEquivalentMethodsTest extends TestCase
      * Этот тест проверяет, что метод prepend() (и его псевдоним unshift())
      * корректно добавляет один или несколько элементов в начало CoverArray,
      * сдвигая существующие элементы на более высокие индексы, отражая array_unshift() PHP.
+     * Оба метода изменяют текущий экземпляр и возвращают его для цепочек вызовов.
      *
+     * Примечание: При добавлении элементов в массив со строковыми ключами,
+     * новые элементы получают числовые индексы, начиная с 0, а существующие строковые
+     * ключи сохраняются. Это соответствует поведению функции array_unshift() PHP.
+     *
+     * @covers \Krugozor\Cover\CoverArray::prepend
+     * @covers \Krugozor\Cover\CoverArray::unshift
      * @see CoverArray::prepend()
      * @see CoverArray::unshift()
      * @see array_unshift()
      */
     public function testPrependMethod(): void
     {
-        $this->data->get('languages.backend')->prepend('C++');
-        $this->assertSame('C++', $this->data->get('languages.backend')->first());
+        // Test 1: Basic prepend operation with single element
+        // Тест 1: Базовая операция prepend с одним элементом
+        $data1 = ['PHP', 'MySql'];
+        $cover1 = new CoverArray($data1);
 
-        $this->data->get('languages.backend')->prepend(['Python', 'Ruby']);
-        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->first()->getDataAsArray());
+        $result1 = $cover1->prepend('C++');
 
-        $this->data->get('languages.backend')->unshift('Java', 'C#');
-        $this->assertSame('C#', $this->data->get('languages.backend')->first());
+        $this->assertSame(
+            'C++',
+            $cover1->first(),
+            'First element should be "C++" after prepend'
+        );
+
+        $this->assertSame(
+            $cover1,
+            $result1,
+            'prepend() should return $this for method chaining'
+        );
+
+        $this->assertSame(
+            ['C++', 'PHP', 'MySql'],
+            $cover1->getDataAsArray()
+        );
+
+        // Test 2: Prepending multiple elements
+        // Тест 2: Добавление нескольких элементов в начало
+        $cover2 = new CoverArray(['PHP', 'MySql']);
+        $cover2->prepend('Python', 'Ruby');
+
+        $this->assertSame(
+            'Python',
+            $cover2->first(),
+            'First element should be "Python" after prepending multiple elements'
+        );
+
+        $this->assertSame(
+            ['Python', 'Ruby', 'PHP', 'MySql'],
+            $cover2->getDataAsArray()
+        );
+
+        // Test 3: Prepending an array (array becomes nested)
+        // Тест 3: Добавление массива (массив становится вложенным)
+        $cover3 = new CoverArray(['PHP', 'MySql']);
+        $cover3->prepend(['Python', 'Ruby']);
+
+        $firstElement = $cover3->first();
+        $this->assertInstanceOf(
+            CoverArray::class,
+            $firstElement,
+            'Prepended array should be converted to CoverArray'
+        );
+
+        $this->assertSame(
+            ['Python', 'Ruby'],
+            $firstElement->getDataAsArray(),
+            'Prepended array should be nested as CoverArray'
+        );
+
+        $this->assertSame(
+            [['Python', 'Ruby'], 'PHP', 'MySql'],
+            $cover3->getDataAsArray()
+        );
+
+        // Test 4: unshift() alias - should behave identically to prepend()
+        // Тест 4: Алиас unshift() - должен вести себя идентично prepend()
+        $cover4 = new CoverArray(['PHP', 'MySql']);
+        $cover4->unshift('Java', 'C#');
+
+        $this->assertSame(
+            'Java',
+            $cover4->first(),
+            'First element should be "Java" after unshift()'
+        );
+
+        $this->assertSame(
+            ['Java', 'C#', 'PHP', 'MySql'],
+            $cover4->getDataAsArray(),
+            'unshift() should prepend elements in order'
+        );
+
+        // Test 5: Verify unshift() returns $this for chaining
+        // Тест 5: Проверяем, что unshift() возвращает $this для цепочек вызовов
+        $cover5 = new CoverArray(['PHP']);
+        $returnValue = $cover5->unshift('Java');
+
+        $this->assertSame(
+            $cover5,
+            $returnValue,
+            'unshift() should return $this for method chaining'
+        );
+
+        // Test 6: Empty array prepend
+        // Тест 6: Добавление элементов в пустой массив
+        $cover6 = new CoverArray([]);
+        $cover6->prepend('first');
+
+        $this->assertSame(
+            ['first'],
+            $cover6->getDataAsArray(),
+            'Prepending to empty array should work correctly'
+        );
+
+        // Test 7: Prepending to associative array - numeric index for new element
+        // Тест 7: Добавление элемента в ассоциативный массив - числовой индекс для нового элемента
+        $cover7 = new CoverArray(['b' => 'PHP', 'c' => 'MySql']);
+        $cover7->prepend('Java'); // Передаем просто строку, не ассоциативный массив
+
+        $this->assertSame(
+            [0 => 'Java', 'b' => 'PHP', 'c' => 'MySql'],
+            $cover7->getDataAsArray(),
+            'When prepending to associative array, new element gets numeric index'
+        );
+
+        // Test 8: Prepending associative array (becomes nested at index 0)
+        // Тест 8: Добавление ассоциативного массива (становится вложенным по индексу 0)
+        $cover8 = new CoverArray(['b' => 'PHP', 'c' => 'MySql']);
+        $cover8->prepend(['a' => 'Java']); // Передаем ассоциативный массив
+
+        $firstElement8 = $cover8->first();
+        $this->assertInstanceOf(
+            CoverArray::class,
+            $firstElement8,
+            'Prepended associative array should be converted to CoverArray'
+        );
+
+        $this->assertSame(
+            ['a' => 'Java'],
+            $firstElement8->getDataAsArray(),
+            'Prepended associative array should be nested'
+        );
+
+        $this->assertSame(
+            [0 => ['a' => 'Java'], 'b' => 'PHP', 'c' => 'MySql'],
+            $cover8->getDataAsArray()
+        );
+
+        // Test 9: Mixed prepend - string keys and numeric indices
+        // Тест 9: Смешанное добавление - строковые ключи и числовые индексы
+        $cover9 = new CoverArray([0 => 'PHP', 1 => 'MySql']);
+        $cover9->prepend('new');
+
+        $this->assertSame(
+            [0 => 'new', 1 => 'PHP', 2 => 'MySql'],
+            $cover9->getDataAsArray(),
+            'Numeric indices should be reindexed when prepending new elements'
+        );
+
+        // Test 10: Verify both methods produce identical results
+        // Тест 10: Проверяем, что оба метода дают идентичные результаты
+        $initialData = ['c', 'd', 'e'];
+        $cover10a = new CoverArray($initialData);
+        $cover10b = new CoverArray($initialData);
+
+        $result10a = $cover10a->prepend('a', 'b');
+        $result10b = $cover10b->unshift('a', 'b');
+
+        $this->assertEquals(
+            $result10a->getDataAsArray(),
+            $result10b->getDataAsArray(),
+            'prepend() and unshift() should produce identical results'
+        );
+
+        // Test 11: Complex nested structure prepend
+        // Тест 11: Добавление сложной вложенной структуры
+        $cover11 = new CoverArray([
+            'backend' => ['PHP', 'MySql'],
+            'frontend' => ['HTML', 'CSS']
+        ]);
+
+        $cover11->prepend('new_top_level');
+
+        $this->assertSame(
+            [0 => 'new_top_level', 'backend' => ['PHP', 'MySql'], 'frontend' => ['HTML', 'CSS']],
+            $cover11->getDataAsArray(),
+            'Prepending to complex nested structure should work correctly'
+        );
+
+        // Test 12: Verify method modifies the instance (not returning new instance)
+        // Тест 12: Проверяем, что метод изменяет экземпляр (не возвращает новый)
+        $original = ['PHP', 'MySql'];
+        $cover12 = new CoverArray($original);
+        $result12 = $cover12->prepend('new');
+
+        $this->assertSame(
+            $cover12,
+            $result12,
+            'prepend() should modify and return the same instance'
+        );
+
+        $this->assertNotSame(
+            $original,
+            $cover12->getDataAsArray(),
+            'Original data should be modified'
+        );
+
+        // Test 13: Prepending empty (edge case)
+        // Тест 13: Добавление пустого значения (граничный случай)
+        $cover13 = new CoverArray(['PHP']);
+        $result13 = $cover13->prepend();
+
+        $this->assertSame(
+            $cover13,
+            $result13,
+            'prepend() without arguments should return $this unchanged'
+        );
+
+        $this->assertSame(
+            ['PHP'],
+            $cover13->getDataAsArray(),
+            'Array should remain unchanged when prepending nothing'
+        );
     }
-
 
     /**
      * Tests the reverse() method (array_reverse equivalent).
@@ -5462,6 +5786,7 @@ class PhpEquivalentMethodsTest extends TestCase
      * This test verifies that the reverse() method correctly returns
      * a new CoverArray with elements in reverse order, with optional
      * key preservation, mirroring PHP's array_reverse() function.
+     * The method should not modify the original CoverArray instance.
      *
      *
      * Тестирование метода reverse() (эквивалент array_reverse).
@@ -5469,19 +5794,135 @@ class PhpEquivalentMethodsTest extends TestCase
      * Этот тест проверяет, что метод reverse() корректно возвращает
      * новый CoverArray с элементами в обратном порядке, с опциональным
      * сохранением ключей, отражая функцию array_reverse() PHP.
+     * Метод не должен изменять исходный экземпляр CoverArray.
      *
      * @see CoverArray::reverse()
      * @see array_reverse()
      */
     public function testReverseMethod(): void
     {
+        // Test 1: Simple numeric array without key preservation (default)
+        // Тест 1: Простой числовой массив без сохранения ключей (по умолчанию)
+        $data1 = ['PHP', 'MySql', 'JavaScript'];
+        $cover1 = new CoverArray($data1);
+
+        $expected1 = array_reverse($data1, false);
+        $result1 = $cover1->reverse();
+
         $this->assertSame(
-            [0 => 'MySql', 1 => 'PHP'],
-            $this->data->get('languages.backend')->reverse()->getDataAsArray()
+            $expected1,
+            $result1->getDataAsArray(),
+            'Simple array should be reversed without key preservation'
         );
+
+        // Test 2: Simple numeric array with key preservation
+        // Тест 2: Простой числовой массив с сохранением ключей
+        $result2 = $cover1->reverse(true);
+        $expected2 = array_reverse($data1, true);
+
         $this->assertSame(
-            [1 => 'MySql', 0 => 'PHP'],
-            $this->data->get('languages.backend')->reverse(true)->getDataAsArray()
+            $expected2,
+            $result2->getDataAsArray(),
+            'Simple array should be reversed with key preservation'
+        );
+
+        // Test 3: Verify original object is not modified
+        // Тест 3: Проверяем, что исходный объект не изменен
+        $this->assertSame(
+            $data1,
+            $cover1->getDataAsArray(),
+            'Original CoverArray should not be modified by reverse()'
+        );
+
+        // Test 4: Associative array (keys should always be preserved)
+        // Тест 4: Ассоциативный массив (ключи всегда должны сохраняться)
+        $data2 = ['first' => 'PHP', 'second' => 'MySql', 'third' => 'JavaScript'];
+        $cover2 = new CoverArray($data2);
+
+        $expected3 = array_reverse($data2, false); // Для ассоциативного массива ключи сохраняются всегда
+        $result3 = $cover2->reverse();
+
+        $this->assertSame(
+            $expected3,
+            $result3->getDataAsArray(),
+            'Associative array keys should be preserved in reverse'
+        );
+
+        // Test 5: Mixed keys (numeric and string)
+        // Тест 5: Смешанные ключи (числовые и строковые)
+        $data3 = [0 => 'PHP', 'lang' => 'MySql', 1 => 'JavaScript', 'db' => 'PostgreSQL'];
+        $cover3 = new CoverArray($data3);
+
+        $expected4 = array_reverse($data3, false);
+        $result4 = $cover3->reverse();
+
+        $this->assertSame(
+            $expected4,
+            $result4->getDataAsArray(),
+            'Mixed key array should be reversed correctly'
+        );
+
+        // Test 6: Empty array
+        // Тест 6: Пустой массив
+        $emptyCover = new CoverArray([]);
+        $emptyResult = $emptyCover->reverse();
+
+        $this->assertSame(
+            [],
+            $emptyResult->getDataAsArray(),
+            'Empty array should remain empty when reversed'
+        );
+
+        // Test 7: Single element array
+        // Тест 7: Массив с одним элементом
+        $singleData = ['only' => 'element'];
+        $singleCover = new CoverArray($singleData);
+        $singleResult = $singleCover->reverse();
+
+        $this->assertSame(
+            $singleData, // Обратный массив из одного элемента равен самому себе
+            $singleResult->getDataAsArray(),
+            'Single element array should be unchanged when reversed'
+        );
+
+        // Test 8: Array with gaps in numeric indices
+        // Тест 8: Массив с пропусками в числовых индексах
+        $data4 = [0 => 'PHP', 2 => 'MySql', 5 => 'JavaScript'];
+        $cover4 = new CoverArray($data4);
+
+        $expected5 = array_reverse($data4, false);
+        $result5 = $cover4->reverse();
+
+        $this->assertSame(
+            $expected5,
+            $result5->getDataAsArray(),
+            'Array with gaps in indices should be reversed correctly'
+        );
+
+        // Test 9: Verify method returns CoverArray instance
+        // Тест 9: Проверяем, что метод возвращает экземпляр CoverArray
+        $this->assertInstanceOf(
+            CoverArray::class,
+            $cover1->reverse(),
+            'reverse() should return a CoverArray instance'
+        );
+
+        // Test 10: Multidimensional array (reverse only top level)
+        // Тест 10: Многомерный массив (обратный порядок только на верхнем уровне)
+        $multiData = [
+            'first' => ['PHP', 'MySql'],
+            'second' => ['HTML', 'CSS'],
+            'third' => ['JavaScript', 'TypeScript']
+        ];
+        $multiCover = new CoverArray($multiData);
+
+        $expected6 = array_reverse($multiData, true);
+        $result6 = $multiCover->reverse(true);
+
+        $this->assertSame(
+            $expected6,
+            $result6->getDataAsArray(),
+            'Multidimensional array should reverse only top level'
         );
     }
 
@@ -5491,6 +5932,7 @@ class PhpEquivalentMethodsTest extends TestCase
      * This test verifies that the unique() method correctly removes
      * duplicate values from the CoverArray, returning a new instance
      * with only unique elements, mirroring PHP's array_unique() function.
+     * The method should not modify the original CoverArray instance.
      *
      *
      * Тестирование метода unique() (эквивалент array_unique).
@@ -5498,24 +5940,178 @@ class PhpEquivalentMethodsTest extends TestCase
      * Этот тест проверяет, что метод unique() корректно удаляет
      * повторяющиеся значения из CoverArray, возвращая новый экземпляр
      * только с уникальными элементами, отражая функцию array_unique() PHP.
+     * Метод не должен изменять исходный экземпляр CoverArray.
      *
      * @see CoverArray::unique()
      * @see array_unique()
      */
     public function testUniqueMethod(): void
     {
-        $this->data->get('languages.backend')->append('PHP');
-        $this->data->get('languages.backend')->append('PHP');
-        $this->data->get('languages.backend')->append('PHP');
+        // Test 1: Simple array with duplicate values
+        // Тест 1: Простой массив с повторяющимися значениями
+        $data1 = ['PHP', 'MySql', 'PHP', 'PHP', 'MySql', 'JavaScript'];
+        $cover1 = new CoverArray($data1);
+
+        $expected1 = array_unique($data1, SORT_STRING);
+        $result1 = $cover1->unique();
 
         $this->assertSame(
-            ['PHP', 'MySql', 'PHP', 'PHP', 'PHP'],
-            $this->data->get('languages.backend')->getDataAsArray()
+            $expected1,
+            $result1->getDataAsArray(),
+            'Duplicate string values should be removed'
         );
 
+        // Test 2: Verify original object is not modified
+        // Тест 2: Проверяем, что исходный объект не изменен
         $this->assertSame(
-            ['PHP', 'MySql'],
-            $this->data->get('languages.backend')->unique()->getDataAsArray()
+            $data1,
+            $cover1->getDataAsArray(),
+            'Original CoverArray should not be modified by unique()'
+        );
+
+        // Test 3: Array with duplicate integers
+        // Тест 3: Массив с повторяющимися целыми числами
+        $data2 = [1, 2, 2, 3, 3, 3, 1, 4];
+        $cover2 = new CoverArray($data2);
+
+        $expected2 = array_unique($data2, SORT_NUMERIC);
+        $result2 = $cover2->unique();
+
+        $this->assertSame(
+            $expected2,
+            $result2->getDataAsArray(),
+            'Duplicate integer values should be removed'
+        );
+
+        // Test 4: Array with mixed types (string and numeric strings)
+        // Тест 4: Массив со смешанными типами (строки и числовые строки)
+        $data3 = ['10', 10, '10', 10.0];
+        $cover3 = new CoverArray($data3);
+
+        $expected3 = array_unique($data3, SORT_REGULAR);
+        $result3 = $cover3->unique();
+
+        $this->assertSame(
+            $expected3,
+            $result3->getDataAsArray(),
+            'Mixed types should be compared according to SORT_REGULAR flag'
+        );
+
+        // Test 5: Associative array with duplicate values
+        // Тест 5: Ассоциативный массив с повторяющимися значениями
+        $data4 = ['a' => 'PHP', 'b' => 'MySql', 'c' => 'PHP', 'd' => 'JavaScript', 'e' => 'MySql'];
+        $cover4 = new CoverArray($data4);
+
+        $expected4 = array_unique($data4, SORT_STRING);
+        $result4 = $cover4->unique();
+
+        $this->assertSame(
+            $expected4,
+            $result4->getDataAsArray(),
+            'Associative array duplicate values should be removed, keys preserved'
+        );
+
+        // Test 6: Empty array
+        // Тест 6: Пустой массив
+        $emptyCover = new CoverArray([]);
+        $emptyResult = $emptyCover->unique();
+
+        $this->assertSame(
+            [],
+            $emptyResult->getDataAsArray(),
+            'Empty array should remain empty when getting unique values'
+        );
+
+        // Test 7: Single element array
+        // Тест 7: Массив с одним элементом
+        $singleData = ['only' => 'element'];
+        $singleCover = new CoverArray($singleData);
+        $singleResult = $singleCover->unique();
+
+        $this->assertSame(
+            $singleData,
+            $singleResult->getDataAsArray(),
+            'Single element array should be unchanged when getting unique values'
+        );
+
+        // Test 8: Array with all unique values
+        // Тест 8: Массив со всеми уникальными значениями
+        $allUniqueData = ['PHP', 'MySql', 'JavaScript', 'Python'];
+        $allUniqueCover = new CoverArray($allUniqueData);
+        $allUniqueResult = $allUniqueCover->unique();
+
+        $this->assertSame(
+            $allUniqueData,
+            $allUniqueResult->getDataAsArray(),
+            'Array with all unique values should remain unchanged'
+        );
+
+        // Test 9: Different sort flags (SORT_STRING, SORT_NUMERIC, SORT_REGULAR, SORT_LOCALE_STRING)
+        // Тест 9: Различные флаги сортировки
+        $data5 = ['10', 10, '20', 20, '10'];
+        $cover5 = new CoverArray($data5);
+
+        // Test with SORT_STRING flag (default)
+        // Тест с флагом SORT_STRING (по умолчанию)
+        $expectedString = array_unique($data5, SORT_STRING);
+        $resultString = $cover5->unique(SORT_STRING);
+        $this->assertSame($expectedString, $resultString->getDataAsArray());
+
+        // Test with SORT_NUMERIC flag
+        // Тест с флагом SORT_NUMERIC
+        $expectedNumeric = array_unique($data5, SORT_NUMERIC);
+        $resultNumeric = $cover5->unique(SORT_NUMERIC);
+        $this->assertSame($expectedNumeric, $resultNumeric->getDataAsArray());
+
+        // Test with SORT_REGULAR flag
+        // Тест с флагом SORT_REGULAR
+        $expectedRegular = array_unique($data5, SORT_REGULAR);
+        $resultRegular = $cover5->unique(SORT_REGULAR);
+        $this->assertSame($expectedRegular, $resultRegular->getDataAsArray());
+
+        // Test 10: Verify method returns CoverArray instance
+        // Тест 10: Проверяем, что метод возвращает экземпляр CoverArray
+        $this->assertInstanceOf(
+            CoverArray::class,
+            $cover1->unique(),
+            'unique() should return a CoverArray instance'
+        );
+
+        // Test 11: Array with boolean and null values (using default SORT_STRING flag)
+        // Тест 11: Массив с булевыми и null значениями (с флагом SORT_STRING по умолчанию)
+        $data6 = [true, false, null, true, false, null, 1, 0];
+        $cover6 = new CoverArray($data6);
+        $expected6 = array_unique($data6, SORT_STRING); // Используем тот же флаг, что и в методе по умолчанию
+        $result6 = $cover6->unique(); // Использует SORT_STRING по умолчанию
+
+        $this->assertSame(
+            $expected6,
+            $result6->getDataAsArray(),
+            'Array with boolean and null values should have duplicates removed with SORT_STRING flag'
+        );
+
+        // Test 12: Array with boolean and null values (using SORT_REGULAR flag)
+        // Тест 12: Массив с булевыми и null значениями (с флагом SORT_REGULAR)
+        $expectedRegularBool = array_unique($data6, SORT_REGULAR);
+        $resultRegularBool = $cover6->unique(SORT_REGULAR);
+        $this->assertSame(
+            $expectedRegularBool,
+            $resultRegularBool->getDataAsArray(),
+            'Array with boolean and null values should have duplicates removed with SORT_REGULAR flag'
+        );
+
+        // Test 13: Case-sensitive string comparison (default behavior)
+        // Тест 13: Регистрозависимое сравнение строк (поведение по умолчанию)
+        $data7 = ['php', 'PHP', 'Php', 'mySql', 'Mysql'];
+        $cover7 = new CoverArray($data7);
+
+        $expected7 = array_unique($data7, SORT_STRING);
+        $result7 = $cover7->unique();
+
+        $this->assertSame(
+            $expected7,
+            $result7->getDataAsArray(),
+            'String comparison should be case-sensitive by default'
         );
     }
 
@@ -5525,6 +6121,7 @@ class PhpEquivalentMethodsTest extends TestCase
      * This test verifies that the in() method correctly checks
      * whether a value exists in the CoverArray, with optional
      * strict type comparison, mirroring PHP's in_array() function.
+     * The method should not modify the original CoverArray instance.
      *
      *
      * Тестирование метода in() (эквивалент in_array).
@@ -5532,16 +6129,219 @@ class PhpEquivalentMethodsTest extends TestCase
      * Этот тест проверяет, что метод in() корректно проверяет,
      * существует ли значение в CoverArray, с опциональным
      * строгим сравнением типов, отражая функцию in_array() PHP.
+     * Метод не должен изменять исходный экземпляр CoverArray.
      *
      * @see CoverArray::in()
      * @see in_array()
      */
     public function testInMethod(): void
     {
-        $this->assertTrue($this->data->get('birthday')->in(1982, true));
-        $this->assertTrue($this->data->get('birthday')->in(1982, false));
+        // Test 1: Basic integer search with strict comparison (true)
+        // Тест 1: Базовый поиск целого числа со строгим сравнением (true)
+        $data1 = [1982, 1990, 2000];
+        $cover1 = new CoverArray($data1);
 
-        $this->assertTrue($this->data->get('birthday')->in('1982', false));
-        $this->assertFalse($this->data->get('birthday')->in('1982', true));
+        $this->assertSame(
+            in_array(1982, $data1, true),
+            $cover1->in(1982, true),
+            'Should find integer 1982 with strict comparison'
+        );
+
+        // Test 2: Basic integer search with non-strict comparison (false)
+        // Тест 2: Базовый поиск целого числа с нестрогим сравнением (false)
+        $this->assertSame(
+            in_array(1982, $data1, false),
+            $cover1->in(1982, false),
+            'Should find integer 1982 with non-strict comparison'
+        );
+
+        // Test 3: String vs integer with non-strict comparison
+        // Тест 3: Строка против целого числа с нестрогим сравнением
+        $this->assertSame(
+            in_array('1982', $data1, false),
+            $cover1->in('1982', false),
+            'Should find string "1982" with non-strict comparison'
+        );
+
+        // Test 4: String vs integer with strict comparison
+        // Тест 4: Строка против целого числа со строгим сравнением
+        $this->assertSame(
+            in_array('1982', $data1, true),
+            $cover1->in('1982', true),
+            'Should NOT find string "1982" with strict comparison'
+        );
+
+        // Test 5: Verify original object is not modified
+        // Тест 5: Проверяем, что исходный объект не изменен
+        $this->assertSame(
+            $data1,
+            $cover1->getDataAsArray(),
+            'Original CoverArray should not be modified by in()'
+        );
+
+        // Test 6: Search for non-existent value
+        // Тест 6: Поиск несуществующего значения
+        $this->assertSame(
+            in_array(9999, $data1, true),
+            $cover1->in(9999, true),
+            'Should NOT find non-existent value 9999'
+        );
+
+        // Test 7: Array with mixed types
+        // Тест 7: Массив со смешанными типами
+        $data2 = [42, '42', 42.0, true, false, null, 'string'];
+        $cover2 = new CoverArray($data2);
+
+        // Test strict comparison for various types
+        // Тест строгого сравнения для различных типов
+        $this->assertSame(
+            in_array(42, $data2, true),
+            $cover2->in(42, true),
+            'Strict comparison: should find int 42'
+        );
+
+        $this->assertSame(
+            in_array('42', $data2, true),
+            $cover2->in('42', true),
+            'Strict comparison: should find string "42"'
+        );
+
+        $this->assertSame(
+            in_array(true, $data2, true),
+            $cover2->in(true, true),
+            'Strict comparison: should find boolean true'
+        );
+
+        $this->assertSame(
+            in_array(null, $data2, true),
+            $cover2->in(null, true),
+            'Strict comparison: should find null'
+        );
+
+        // Test non-strict comparison for various types
+        // Тест нестрогого сравнения для различных типов
+        $this->assertSame(
+            in_array(42, $data2, false),
+            $cover2->in(42, false),
+            'Non-strict comparison: should find int 42'
+        );
+
+        $this->assertSame(
+            in_array('42', $data2, false),
+            $cover2->in('42', false),
+            'Non-strict comparison: should find string "42"'
+        );
+
+        $this->assertSame(
+            in_array(true, $data2, false),
+            $cover2->in(true, false),
+            'Non-strict comparison: should find boolean true'
+        );
+
+        $this->assertSame(
+            in_array(1, $data2, false),
+            $cover2->in(1, false),
+            'Non-strict comparison: should find int 1 (equals true)'
+        );
+
+        // Test 8: Empty array
+        // Тест 8: Пустой массив
+        $emptyCover = new CoverArray([]);
+        $this->assertSame(
+            in_array('anything', [], true),
+            $emptyCover->in('anything', true),
+            'Empty array should not contain any value'
+        );
+
+        // Test 9: Associative array search
+        // Тест 9: Поиск в ассоциативном массиве
+        $data3 = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame(
+            in_array('John', $data3, true),
+            $cover3->in('John', true),
+            'Should find value in associative array'
+        );
+
+        $this->assertSame(
+            in_array(30, $data3, true),
+            $cover3->in(30, true),
+            'Should find numeric value in associative array'
+        );
+
+        // Test 10: Nested array search (in_array does not search recursively)
+        // Тест 10: Поиск во вложенном массиве (in_array не ищет рекурсивно)
+        $data4 = ['top' => ['nested' => 'value'], 'other' => 'test'];
+        $cover4 = new CoverArray($data4);
+
+        $this->assertSame(
+            in_array(['nested' => 'value'], $data4, true),
+            $cover4->in(['nested' => 'value'], true),
+            'Should find nested array as a whole'
+        );
+
+        $this->assertSame(
+            in_array('value', $data4, true),
+            $cover4->in('value', true),
+            'Should NOT find value inside nested array (in_array is not recursive)'
+        );
+
+        // Test 11: Case-sensitive string comparison
+        // Тест 11: Регистрозависимое сравнение строк
+        $data5 = ['PHP', 'MySQL', 'JavaScript'];
+        $cover5 = new CoverArray($data5);
+
+        $this->assertSame(
+            in_array('php', $data5, true),
+            $cover5->in('php', true),
+            'Strict comparison: should NOT find lowercase "php"'
+        );
+
+        $this->assertSame(
+            in_array('PHP', $data5, true),
+            $cover5->in('PHP', true),
+            'Strict comparison: should find uppercase "PHP"'
+        );
+
+        // Test 12: Float comparison
+        // Тест 12: Сравнение чисел с плавающей точкой
+        $data6 = [1.5, 2.0, 3.14159];
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame(
+            in_array(1.5, $data6, true),
+            $cover6->in(1.5, true),
+            'Should find exact float 1.5'
+        );
+
+        $this->assertSame(
+            in_array(2, $data6, false),
+            $cover6->in(2, false),
+            'Non-strict: should find int 2 equals float 2.0'
+        );
+
+        $this->assertSame(
+            in_array(2, $data6, true),
+            $cover6->in(2, true),
+            'Strict: should NOT find int 2 in float array'
+        );
+
+        // Test 13: Default strict parameter (should be false)
+        // Тест 13: Параметр strict по умолчанию (должен быть false)
+        $data7 = ['10', 10, 20];
+        $cover7 = new CoverArray($data7);
+
+        $this->assertSame(
+            in_array(10, $data7, false), // Default behavior of in_array() is false
+            $cover7->in(10), // Should use default strict = false
+            'Default strict parameter should be false'
+        );
+
+        $this->assertSame(
+            in_array('10', $data7, false),
+            $cover7->in('10'),
+            'Default strict parameter should be false for string "10"'
+        );
     }
 }
