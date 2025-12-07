@@ -2,16 +2,15 @@
 
 <h1>Object-Oriented Array for PHP (PHP Collection)</h1>
 
-## 🧪 Test Status
-
-| PHP Version | Status | Coverage |
-|-------------|--------|----------|
-| 8.0 | [![PHP 8.0](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.0&job=test-php80)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php80) | |
-| 8.1 | [![PHP 8.1](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.1&job=test-php81)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php81) | |
-| 8.2 | [![PHP 8.2](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.2&job=test-php82)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php82) | |
-| 8.3 | [![PHP 8.3](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.3&job=test-php83)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php83) | |
-| 8.4 | [![PHP 8.4](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.4&job=test-php84)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php84) | |
-| 8.5 | [![PHP 8.5](https://img.shields.io/github/actions/workflow/status/Vasiliy-Makogon/PHP-Collection/tests.yml?branch=master&label=8.5&job=test-php85)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml?query=branch%3Amaster+job%3Atest-php85) | |
+### Test Status
+| PHP Version | Status                                                                                                                                                                               |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 8.0         | [![PHP 8.0](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php80.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php80.yml) |
+| 8.1         | [![PHP 8.1](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php81.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php81.yml) |
+| 8.2         | [![PHP 8.2](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php82.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php82.yml) |
+| 8.3         | [![PHP 8.3](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php83.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php83.yml) |
+| 8.4         | [![PHP 8.4](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php84.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php84.yml) |
+| 8.5         | [![PHP 8.5](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php85.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/php85.yml) |
 
 [![Tests](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml/badge.svg)](https://github.com/Vasiliy-Makogon/PHP-Collection/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection/branch/master/graph/badge.svg)](https://codecov.io/gh/Vasiliy-Makogon/PHP-Collection)

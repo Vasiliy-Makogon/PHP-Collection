@@ -1,0 +1,13 @@
+name: PHP 8.1 Tests
+on: [push, pull_request]
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        name: PHP 8.1 Tests
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.1'
+            - run: composer install
+            - run: vendor/bin/phpunit
