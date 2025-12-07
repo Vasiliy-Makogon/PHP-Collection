@@ -3124,125 +3124,142 @@ class PhpEquivalentMethodsTest extends TestCase
      */
     public function testIsListMethod(): void
     {
-        // 1. Sequential numeric array starting from 0 (should be a list)
-        $data1 = [0 => 'a', 1 => 'b', 2 => 'c'];
-        $cover1 = new CoverArray($data1);
-        $this->assertTrue($cover1->isList());
+        // Define test cases with expected results
+        // Определяем тестовые случаи с ожидаемыми результатами
+        $testCases = [
+            // Пустые массивы
+            ['data' => [], 'expected' => true],
 
-        // 2. Array with non-sequential keys (should not be a list)
-        $data2 = [0 => 'a', 2 => 'c', 3 => 'd'];
-        $cover2 = new CoverArray($data2);
-        $this->assertFalse($cover2->isList());
+            // Простые списки
+            ['data' => [1, 2, 3], 'expected' => true],
+            ['data' => ['a', 'b', 'c'], 'expected' => true],
+            ['data' => [0 => 'a', 1 => 'b', 2 => 'c'], 'expected' => true],
 
-        // 3. Array starting from non-zero key (should not be a list)
-        $data3 = [1 => 'a', 2 => 'b', 3 => 'c'];
-        $cover3 = new CoverArray($data3);
-        $this->assertFalse($cover3->isList());
+            // Не списки (пропущенные ключи)
+            ['data' => [0 => 'a', 2 => 'b', 3 => 'c'], 'expected' => false],
+            ['data' => [1 => 'a', 2 => 'b', 3 => 'c'], 'expected' => false],
+            ['data' => [0 => 'a', 1 => 'b', 3 => 'c'], 'expected' => false],
 
-        // 4. Associative array (string keys, not a list)
-        $data4 = ['a' => 1, 'b' => 2, 'c' => 3];
-        $cover4 = new CoverArray($data4);
-        $this->assertFalse($cover4->isList());
+            // Не списки (неправильный порядок)
+            ['data' => [2 => 'a', 1 => 'b', 0 => 'c'], 'expected' => false],
+            ['data' => [0 => 'a', 2 => 'b', 1 => 'c'], 'expected' => false],
 
-        // 5. Empty array (empty array is considered a list)
-        $data5 = [];
-        $cover5 = new CoverArray($data5);
-        $this->assertTrue($cover5->isList());
+            // Строковые ключи-числа
+            ['data' => ['0' => 'a', '1' => 'b', '2' => 'c'], 'expected' => true],  // Должен быть списком
+            ['data' => ['1' => 'a', '2' => 'b', '3' => 'c'], 'expected' => false],  // Не список (начинается с 1)
+            ['data' => ['0' => 'a', '2' => 'b', '3' => 'c'], 'expected' => false],  // Не список (пропущен 1)
 
-        // 6. Mixed keys (some numeric, some string, not a list)
-        $data6 = [0 => 'a', 'b' => 2, 2 => 'c'];
-        $cover6 = new CoverArray($data6);
-        $this->assertFalse($cover6->isList());
+            // Строковые ключи с ведущими нулями
+            ['data' => ['00' => 'a', '01' => 'b', '02' => 'c'], 'expected' => false],  // Не список (ведущие нули)
+            ['data' => ['000' => 'a', '001' => 'b'], 'expected' => false],  // Не список
 
-        // 7. Numeric string keys (should be a list in PHP 8.1)
-        $data7 = ['0' => 'a', '1' => 'b', '2' => 'c'];
-        $cover7 = new CoverArray($data7);
-        $this->assertTrue($cover7->isList());
+            // Смешанные ключи
+            ['data' => ['0' => 'a', 1 => 'b', '2' => 'c'], 'expected' => true],  // Должен быть списком
+            ['data' => [0 => 'a', '1' => 'b', 2 => 'c'], 'expected' => true],    // Должен быть списком
 
-        // 8. Keys out of order but sequential (not a list in PHP 8.1)
-        $data8 = [2 => 'c', 0 => 'a', 1 => 'b'];
-        $cover8 = new CoverArray($data8);
-        $this->assertFalse($cover8->isList());
+            // Ассоциативные массивы
+            ['data' => ['a' => 1, 'b' => 2, 'c' => 3], 'expected' => false],
+            ['data' => [0 => 'a', 'foo' => 'b', 2 => 'c'], 'expected' => false],
+            ['data' => ['0' => 'a', 'foo' => 'b', '2' => 'c'], 'expected' => false],
 
-        // 9. List with a gap (not a list)
-        $data9 = [0 => 'a', 1 => 'b', 3 => 'd'];
-        $cover9 = new CoverArray($data9);
-        $this->assertFalse($cover9->isList());
+            // Массивы с одним элементом
+            ['data' => [0 => 'a'], 'expected' => true],
+            ['data' => [1 => 'a'], 'expected' => false],
+            ['data' => ['0' => 'a'], 'expected' => true],
+            ['data' => ['1' => 'a'], 'expected' => false],
+            ['data' => ['foo' => 'a'], 'expected' => false],
 
-        // 10. List with all keys but mixed value types
-        $data10 = [0 => 'a', 1 => 2, 2 => null, 3 => false];
-        $cover10 = new CoverArray($data10);
-        $this->assertTrue($cover10->isList());
+            // Большие массивы
+            ['data' => range(0, 100), 'expected' => true],
+            ['data' => array_fill(0, 100, 'value'), 'expected' => true],
+            ['data' => array_fill(5, 10, 'value'), 'expected' => false],  // Начинается с 5
 
-        // 11. Mixed key types: int and string numeric (should be a list in PHP 8.1)
-        $data11 = [0 => 'a', '1' => 'b', 2 => 'c'];
-        $cover11 = new CoverArray($data11);
-        $this->assertTrue($cover11->isList());
+            // Массивы с отрицательными ключами
+            ['data' => [-1 => 'a', 0 => 'b', 1 => 'c'], 'expected' => false],
+            ['data' => [-5 => 'a', -4 => 'b'], 'expected' => false],
 
-        // 12. Non-sequential numeric string keys (not a list)
-        $data12 = ['0' => 'a', '2' => 'c'];
-        $cover12 = new CoverArray($data12);
-        $this->assertFalse($cover12->isList());
+            // Специальные случаи
+            ['data' => [0 => 'a', '01' => 'b'], 'expected' => false],  // '01' !== 1
+            ['data' => [0 => 'a', '1' => 'b', '02' => 'c'], 'expected' => false],  // '02' !== 2
 
-        // 13. Float keys (they get cast to int, so should be a list)
-        $data13 = [0.0 => 'a', 1.0 => 'b', 2.0 => 'c'];
-        $cover13 = new CoverArray($data13);
-        $this->assertTrue($cover13->isList());
+            // Пустые строки как значения (не влияют на проверку)
+            ['data' => [0 => '', 1 => null, 2 => false], 'expected' => true],
 
-        // 14. Keys with leading zeros (not considered numeric by array_is_list)
-        $data14 = ['00' => 'a', '01' => 'b', '02' => 'c'];
-        $cover14 = new CoverArray($data14);
-        $this->assertFalse($cover14->isList());
+            // Вложенные массивы (не влияют на проверку ключей)
+            ['data' => [0 => [1, 2], 1 => ['a' => 'b']], 'expected' => true],
 
-        // 15. Keys with negative numbers (not a list)
-        $data15 = [-1 => 'a', 0 => 'b', 1 => 'c'];
-        $cover15 = new CoverArray($data15);
-        $this->assertFalse($cover15->isList());
+            // Проблемные случаи с преобразованием типов
+            ['data' => ['0' => 'a', 1 => 'b', '2' => 'c', '3' => 'd'], 'expected' => true],  // Должен быть списком
+            ['data' => [0 => 'a', '1' => 'b', 2 => 'c', '3' => 'd'], 'expected' => true],    // Должен быть списком
 
-        // 16. Keys with spaces (not considered numeric)
-        $data16 = [' 0' => 'a', '1 ' => 'b', ' 2 ' => 'c'];
-        $cover16 = new CoverArray($data16);
-        $this->assertFalse($cover16->isList());
+            // Дополнительные тесты из оригинального теста
+            ['data' => [0.0 => 'a', 1.0 => 'b', 2.0 => 'c'], 'expected' => true],
+            ['data' => [' 0' => 'a', '1 ' => 'b', ' 2 ' => 'c'], 'expected' => false],
+            ['data' => ['+0' => 'a', '+1' => 'b'], 'expected' => false],
+            ['data' => ['0.0' => 'a', '1.0' => 'b'], 'expected' => false],
+            ['data' => ['0x0' => 'a', '0x1' => 'b'], 'expected' => false],
+            ['data' => ['1e0' => 'a', '1e1' => 'b'], 'expected' => false],
+            ['data' => [true => 'a', false => 'b'], 'expected' => false],
+            ['data' => [null => 'a', 1 => 'b'], 'expected' => false],
+        ];
 
-        // 17. Single element with key 0 (should be a list)
-        $data17 = [0 => 'single'];
-        $cover17 = new CoverArray($data17);
-        $this->assertTrue($cover17->isList());
+        foreach ($testCases as $index => $testCase) {
+            $data = $testCase['data'];
+            $expected = $testCase['expected'];
 
-        // 18. Single element with string key '0' (should be a list)
-        $data18 = ['0' => 'single'];
-        $cover18 = new CoverArray($data18);
-        $this->assertTrue($cover18->isList());
+            $cover = new CoverArray($data);
+            $result = $cover->isList();
 
-        // 19. Keys with plus sign (not a list)
-        $data19 = ['+0' => 'a', '+1' => 'b'];
-        $cover19 = new CoverArray($data19);
-        $this->assertFalse($cover19->isList());
+            // If array_is_list function exists, compare with native implementation
+            // Если функция array_is_list существует, сравниваем с нативной реализацией
+            if (function_exists('array_is_list')) {
+                $nativeResult = array_is_list($data);
 
-        // 20. Keys with decimal points (not a list)
-        $data20 = ['0.0' => 'a', '1.0' => 'b'];
-        $cover20 = new CoverArray($data20);
-        $this->assertFalse($cover20->isList());
+                // Check that our implementation matches native implementation
+                // Проверяем, что наша реализация совпадает с нативной
+                $this->assertSame(
+                    $nativeResult,
+                    $result,
+                    sprintf(
+                        "Test case #%d failed: CoverArray::isList() result differs from array_is_list(). " .
+                        "Data: %s, CoverArray::isList: %s, array_is_list: %s",
+                        $index,
+                        var_export($data, true),
+                        var_export($result, true),
+                        var_export($nativeResult, true)
+                    )
+                );
 
-        // 21. Keys that are hex (not a list)
-        $data21 = ['0x0' => 'a', '0x1' => 'b'];
-        $cover21 = new CoverArray($data21);
-        $this->assertFalse($cover21->isList());
-
-        // 22. Keys with scientific notation (not a list)
-        $data22 = ['1e0' => 'a', '1e1' => 'b'];
-        $cover22 = new CoverArray($data22);
-        $this->assertFalse($cover22->isList());
-
-        // 23. Keys that are boolean true/false (not a list)
-        $data23 = [true => 'a', false => 'b'];
-        $cover23 = new CoverArray($data23);
-        $this->assertFalse($cover23->isList());
-
-        // 24. Keys that are NULL (not a list)
-        $data24 = [null => 'a', 1 => 'b'];
-        $cover24 = new CoverArray($data24);
-        $this->assertFalse($cover24->isList());
+                // Also verify that our expected value matches native implementation
+                // Также проверяем, что наше ожидаемое значение совпадает с нативной реализацией
+                $this->assertSame(
+                    $nativeResult,
+                    $expected,
+                    sprintf(
+                        "Test case #%d: Expected value mismatch with array_is_list(). " .
+                        "Data: %s, Expected: %s, array_is_list: %s",
+                        $index,
+                        var_export($data, true),
+                        var_export($expected, true),
+                        var_export($nativeResult, true)
+                    )
+                );
+            } else {
+                // If array_is_list doesn't exist, just check against our expected value
+                // Если array_is_list не существует, просто проверяем по ожидаемому значению
+                $this->assertSame(
+                    $expected,
+                    $result,
+                    sprintf(
+                        "Test case #%d failed: Data: %s, Expected: %s, Got: %s",
+                        $index,
+                        var_export($data, true),
+                        var_export($expected, true),
+                        var_export($result, true)
+                    )
+                );
+            }
+        }
     }
 
     /**

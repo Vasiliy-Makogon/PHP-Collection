@@ -1366,18 +1366,9 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             $keys = array_keys($this->data);
             $i = 0;
             foreach ($keys as $key) {
-                // Check if key is integer or numeric string without leading zeros
-                if (is_int($key)) {
-                    if ($key !== $i) {
-                        return false;
-                    }
-                } elseif (is_string($key)) {
-                    // Check if string is numeric without leading zeros
-                    if (!ctype_digit($key) || (int)$key !== $i || ltrim($key, '0') !== (string)$i) {
-                        return false;
-                    }
-                } else {
-                    // Not int or string, definitely not a list
+                // Для списка ключ должен быть равен i, и если это строка,
+                // она должна быть точным представлением числа i
+                if ($key !== $i) {
                     return false;
                 }
                 $i++;
@@ -1605,6 +1596,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             )
         );
     }
+
 
     /**
      * Applies a callback function to each element (array_walk equivalent for associative arrays).
