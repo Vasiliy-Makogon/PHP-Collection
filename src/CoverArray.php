@@ -1727,12 +1727,493 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return $this->append(...$args);
     }
 
+    /**
+     * Picks one or more random keys from the array (array_rand equivalent).
+     *
+     * Returns a random key (or keys) from the current CoverArray.
+     * If only one entry is requested, returns a single key as a scalar value.
+     * If multiple entries are requested, returns a CoverArray containing the random keys.
+     *
+     * Note: This function does not modify the original array.
+     *
+     *
+     * Выбирает один или несколько случайных ключей из массива (эквивалент array_rand).
+     *
+     * Возвращает случайный ключ (или ключи) из текущего CoverArray.
+     * Если запрошена только одна запись, возвращает отдельный ключ как скалярное значение.
+     * Если запрошено несколько записей, возвращает CoverArray, содержащий случайные ключи.
+     *
+     * Примечание: Эта функция не изменяет исходный массив.
+     *
+     * @param int $num Specifies how many entries should be picked.
+     *                 Определяет, сколько записей должно быть выбрано.
+     * @return int|string|CoverArray Single key if $num is 1, otherwise CoverArray with random keys.
+     *                               Отдельный ключ, если $num равен 1, иначе CoverArray со случайными ключами.
+     * @see array_rand()
+     */
+    final public function rand(int $num = 1): int|string|CoverArray
+    {
+        return $this->array2cover(array_rand($this->data, $num));
+    }
 
+    //////////////////////////////////////////////////////todo
 
+    /**
+     * Reduces the array to a single value using a callback function (array_reduce equivalent).
+     *
+     * Iteratively reduces the array to a single value using a callback function.
+     *
+     * Сводит массив к единственному значению через callback-функцию (эквивалент array_reduce).
+     *
+     * Итеративно сводит массив к единственному значению через callback-функцию.
+     *
+     * @param callable $callback The callback function.
+     *                           Callback-функция.
+     * @param mixed $initial Initial value to carry.
+     *                       Начальное значение для передачи.
+     * @return mixed The resulting value.
+     *               Результирующее значение.
+     * @see array_reduce()
+     */
+    final public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        // TODO: Implement array_reduce equivalent
+        return array_reduce($this->data, $callback, $initial);
+    }
 
+    /**
+     * Replaces elements from passed arrays into the current array (array_replace equivalent).
+     *
+     * Replaces the values of the current array with values from following arrays.
+     *
+     * Заменяет элементы массива элементами других массивов (эквивалент array_replace).
+     *
+     * @param CoverArray|array ...$replacement Arrays from which elements will be extracted.
+     *                                          Массивы, из которых будут извлекаться элементы.
+     * @return static New CoverArray instance with replaced elements.
+     *                Новый экземпляр CoverArray с замененными элементами.
+     * @see array_replace()
+     */
+    final public function replace(CoverArray|array ...$replacement): static
+    {
+        // TODO: Implement array_replace equivalent
+        return new static(
+            array_replace(
+                $this->data,
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $replacement
+                )
+            )
+        );
+    }
 
+    /**
+     * Replaces elements recursively (array_replace_recursive equivalent).
+     *
+     * Recursively replaces elements from passed arrays into the current array.
+     *
+     * Рекурсивно заменяет элементы первого массива элементами других массивов (эквивалент array_replace_recursive).
+     *
+     * @param CoverArray|array ...$replacement Arrays from which elements will be extracted.
+     *                                          Массивы, из которых будут извлекаться элементы.
+     * @return static New CoverArray instance with recursively replaced elements.
+     *                Новый экземпляр CoverArray с рекурсивно замененными элементами.
+     * @see array_replace_recursive()
+     */
+    final public function replaceRecursive(CoverArray|array ...$replacement): static
+    {
+        // TODO: Implement array_replace_recursive equivalent
+        return new static(
+            array_replace_recursive(
+                $this->getDataAsArray(),
+                ...array_map(
+                    [self::class, 'convertToPlainArray'],
+                    $replacement
+                )
+            )
+        );
+    }
 
+    /**
+     * Searches the array for a given value and returns the first corresponding key (array_search equivalent).
+     *
+     * Searches the array for a given value and returns the first corresponding key if successful.
+     *
+     * Ищет значение в массиве и возвращает ключ первого найденного элемента (эквивалент array_search).
+     *
+     * @param mixed $needle The value to search for.
+     *                      Искомое значение.
+     * @param bool $strict If true, uses strict comparison (===).
+     *                     Если true, использует строгое сравнение (===).
+     * @return int|string|false The key for needle if found, false otherwise.
+     *                          Ключ найденного значения или false если не найдено.
+     * @see array_search()
+     */
+    final public function search(mixed $needle, bool $strict = false): int|string|false
+    {
+        // TODO: Implement array_search equivalent
+        return array_search($needle, $this->data, $strict);
+    }
 
+    /**
+     * Shifts the first element off the array (array_shift equivalent).
+     *
+     * Shifts the first value of the array off and returns it.
+     *
+     * Извлекает первый элемент массива (эквивалент array_shift).
+     *
+     * @return mixed The shifted value or null if array is empty.
+     *               Извлеченное значение или null если массив пуст.
+     * @see array_shift()
+     */
+    final public function shift(): mixed
+    {
+        // TODO: Implement array_shift equivalent
+        return array_shift($this->data);
+    }
+
+    /**
+     * Extracts a slice of the array (array_slice equivalent).
+     *
+     * Extracts a slice of the array.
+     *
+     * Выбирает срез массива (эквивалент array_slice).
+     *
+     * @param int $offset Starting offset.
+     *                    Начальное смещение.
+     * @param int|null $length Length of the slice.
+     *                         Длина среза.
+     * @param bool $preserve_keys Whether to preserve keys.
+     *                            Сохранять ли ключи.
+     * @return static New CoverArray instance containing the slice.
+     *                Новый экземпляр CoverArray, содержащий срез.
+     * @see array_slice()
+     */
+    final public function slice(int $offset, ?int $length = null, bool $preserve_keys = false): static
+    {
+        // TODO: Implement array_slice equivalent
+        return new static(
+            array_slice($this->data, $offset, $length, $preserve_keys)
+        );
+    }
+
+    /**
+     * Removes a portion of the array and replaces it with something else (array_splice equivalent).
+     *
+     * Removes a portion of the array and replaces it with something else.
+     *
+     * Удаляет часть массива и заменяет её новыми элементами (эквивалент array_splice).
+     *
+     * @param int $offset Starting position.
+     *                    Начальная позиция.
+     * @param int|null $length Number of elements to remove.
+     *                         Количество элементов для удаления.
+     * @param mixed $replacement Elements to insert.
+     *                           Элементы для вставки.
+     * @return static New CoverArray instance containing the removed elements.
+     *                Новый экземпляр CoverArray, содержащий удаленные элементы.
+     * @see array_splice()
+     */
+    final public function splice(int $offset, ?int $length = null, mixed $replacement = []): static
+    {
+        // TODO: Implement array_splice equivalent
+        $removed = array_splice($this->data, $offset, $length, $replacement);
+        return new static($removed);
+    }
+
+    /**
+     * Calculates the sum of values in the array (array_sum equivalent).
+     *
+     * Calculates the sum of values in the array.
+     *
+     * Вычисляет сумму значений массива (эквивалент array_sum).
+     *
+     * @return int|float Sum of values.
+     *                   Сумма значений.
+     * @see array_sum()
+     */
+    final public function sum(): int|float
+    {
+        // TODO: Implement array_sum equivalent
+        return array_sum($this->data);
+    }
+
+    /**
+     * Computes the difference of arrays using a callback for data comparison (array_udiff equivalent).
+     *
+     * Computes the difference of arrays using a callback function for data comparison.
+     *
+     * Вычисляет расхождение массивов, используя callback-функцию для сравнения (эквивалент array_udiff).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the difference.
+     *                Новый экземпляр CoverArray, содержащий разницу.
+     * @see array_udiff()
+     */
+    final public function udiff(callable $value_compare_func, CoverArray|array ...$arrays): static
+    {
+        // TODO: Implement array_udiff equivalent
+        return new static(
+            array_udiff(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    $value_compare_func
+                )
+            )
+        );
+    }
+
+    /**
+     * Computes the difference of arrays with additional index check using callback for data comparison (array_udiff_assoc equivalent).
+     *
+     * Computes the difference of arrays with additional index check using callback for data comparison.
+     *
+     * Вычисляет расхождение в массивах с дополнительной проверкой индексов, используя callback для сравнения значений (эквивалент array_udiff_assoc).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the difference.
+     *                Новый экземпляр CoverArray, содержащий разницу.
+     * @see array_udiff_assoc()
+     */
+    final public function udiffAssoc(callable $value_compare_func, CoverArray|array ...$arrays): static
+    {
+        // TODO: Implement array_udiff_assoc equivalent
+        return new static(
+            array_udiff_assoc(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    [$value_compare_func]
+                )
+            )
+        );
+    }
+
+    /**
+     * Computes the difference of arrays with additional index check using callbacks for both data and index comparison (array_udiff_uassoc equivalent).
+     *
+     * Computes the difference of arrays with additional index check using callbacks for both data and index comparison.
+     *
+     * Вычисляет расхождение в массивах с дополнительной проверкой индексов, используя callback для сравнения значений и индексов (эквивалент array_udiff_uassoc).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param callable $key_compare_func Callback function for key comparison.
+     *                                   Callback-функция для сравнения ключей.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the difference.
+     *                Новый экземпляр CoverArray, содержащий разницу.
+     * @see array_udiff_uassoc()
+     */
+    final public function udiffUassoc(
+        callable $value_compare_func,
+        callable $key_compare_func,
+        CoverArray|array ...$arrays
+    ): static {
+        // TODO: Implement array_udiff_uassoc equivalent
+        return new static(
+            array_udiff_uassoc(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    $value_compare_func,
+                    $key_compare_func)
+            )
+        );
+    }
+
+    /**
+     * Computes the intersection of arrays using callback for data comparison (array_uintersect equivalent).
+     *
+     * Computes the intersection of arrays using a callback function for data comparison.
+     *
+     * Вычисляет пересечение массивов, используя callback для сравнения значений (эквивалент array_uintersect).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the intersection.
+     *                Новый экземпляр CoverArray, содержащий пересечение.
+     * @see array_uintersect()
+     */
+    final public function uintersect(callable $value_compare_func, CoverArray|array ...$arrays): static
+    {
+        // TODO: Implement array_uintersect equivalent
+        return new static(
+            array_uintersect(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    [$value_compare_func])
+            )
+        );
+    }
+
+    /**
+     * Computes the intersection of arrays with additional index check using callback for data comparison (array_uintersect_assoc equivalent).
+     *
+     * Computes the intersection of arrays with additional index check using callback for data comparison.
+     *
+     * Вычисляет пересечение массивов с дополнительной проверкой индексов, используя callback для сравнения значений (эквивалент array_uintersect_assoc).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the intersection.
+     *                Новый экземпляр CoverArray, содержащий пересечение.
+     * @see array_uintersect_assoc()
+     */
+    final public function uintersectAssoc(callable $value_compare_func, CoverArray|array ...$arrays): static
+    {
+        // TODO: Implement array_uintersect_assoc equivalent
+        return new static(
+            array_uintersect_assoc(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    [$value_compare_func])
+            )
+        );
+    }
+
+    /**
+     * Computes the intersection of arrays with additional index check using callbacks for both data and index comparison (array_uintersect_uassoc equivalent).
+     *
+     * Computes the intersection of arrays with additional index check using callbacks for both data and index comparison.
+     *
+     * Вычисляет пересечение массивов с дополнительной проверкой индекса, используя callback для сравнения индексов и значений (эквивалент array_uintersect_uassoc).
+     *
+     * @param callable $value_compare_func Callback function for value comparison.
+     *                                     Callback-функция для сравнения значений.
+     * @param callable $key_compare_func Callback function for key comparison.
+     *                                   Callback-функция для сравнения ключей.
+     * @param CoverArray|array ...$arrays Arrays to compare against.
+     *                                    Массивы для сравнения.
+     * @return static New CoverArray instance containing the intersection.
+     *                Новый экземпляр CoverArray, содержащий пересечение.
+     * @see array_uintersect_uassoc()
+     */
+    final public function uintersectUassoc(
+        callable $value_compare_func,
+        callable $key_compare_func,
+        CoverArray|array ...$arrays
+    ): static {
+        // TODO: Implement array_uintersect_uassoc equivalent
+        return new static(
+            array_uintersect_uassoc(
+                $this->data,
+                ...array_merge(
+                    array_map(
+                        [self::class, 'convertToPlainArray'],
+                        $arrays
+                    ),
+                    [$value_compare_func],
+                    [$key_compare_func])
+            )
+        );
+    }
+
+    /**
+     * Sorts an array in descending order and maintains index association (arsort equivalent).
+     *
+     * Sorts an array in descending order and maintains index association.
+     *
+     * Сортирует массив в порядке убывания, сохраняя ассоциацию индексов (эквивалент arsort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see arsort()
+     */
+    final public function arsort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement arsort equivalent
+        arsort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Sorts an array in ascending order and maintains index association (asort equivalent).
+     *
+     * Sorts an array in ascending order and maintains index association.
+     *
+     * Сортирует массив в порядке возрастания, сохраняя ассоциацию индексов (эквивалент asort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see asort()
+     */
+    final public function asort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement asort equivalent
+        asort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Creates a CoverArray containing variables and their values (compact equivalent).
+     *
+     * Creates a CoverArray containing variables and their values.
+     *
+     * Создаёт массив с названиями и значениями переменных (эквивалент compact).
+     *
+     * @param mixed ...$vars Variable names.
+     *                       Имена переменных.
+     * @return static New CoverArray instance with variables and values.
+     *                Новый экземпляр CoverArray с переменными и их значениями.
+     * @see compact()
+     */
+    final public static function compact(mixed ...$vars): static
+    {
+        // TODO: Implement compact equivalent
+        return new static(compact(...$vars));
+    }
+
+    /**
+     * Returns the current element in the array (current equivalent).
+     *
+     * Returns the current element in the array.
+     *
+     * Возвращает текущий элемент массива (эквивалент current).
+     *
+     * @return mixed The current element value.
+     *               Текущее значение элемента.
+     * @see current()
+     */
+    final public function current(): mixed
+    {
+        // TODO: Implement current equivalent
+        return current($this->data);
+    }
 
     /**
      * Applies a callback function to each element (array_walk equivalent for associative arrays).
@@ -1766,6 +2247,415 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
+     * Sets the internal pointer to the last element (end equivalent).
+     *
+     * Sets the internal pointer of an array to its last element.
+     *
+     * Устанавливает внутренний указатель массива на последний элемент (эквивалент end).
+     *
+     * @return mixed The value of the last element or false if empty.
+     *               Значение последнего элемента или false если массив пуст.
+     * @see end()
+     */
+    final public function end(): mixed
+    {
+        // TODO: Implement end equivalent
+        return end($this->data);
+    }
+
+    /**
+     * Imports variables from the CoverArray into the current symbol table (extract equivalent).
+     *
+     * Imports variables from the CoverArray into the current symbol table.
+     *
+     * Импортирует переменные массива в текущую таблицу символов (эквивалент extract).
+     *
+     * @param int $flags The way invalid/numeric keys and collisions are treated.
+     *                   Способ обработки недопустимых/числовых ключей и коллизий.
+     * @param string $prefix Prefix for variable names.
+     *                       Префикс для имен переменных.
+     * @return int Number of variables successfully imported.
+     *             Количество успешно импортированных переменных.
+     * @see extract()
+     */
+    final public function extract(int $flags = EXTR_OVERWRITE, string $prefix = ''): int
+    {
+        // TODO: Implement extract equivalent
+        return extract($this->data, $flags, $prefix);
+    }
+
+    /**
+     * Checks if a value exists in an array (in_array equivalent).
+     *
+     * Checks if a value exists in the array using loose comparison by default.
+     * Can use strict comparison if the strict parameter is set to true.
+     *
+     *
+     * Проверяет, содержится ли значение в массиве (эквивалент in_array).
+     *
+     * Проверяет, существует ли значение в массиве, используя нестрогое сравнение по умолчанию.
+     * Может использовать строгое сравнение, если параметр strict установлен в true.
+     *
+     * @param mixed $needle The value to search for.
+     *                      Искомое значение.
+     * @param bool $strict If true, uses strict comparison (===).
+     *                     Если true, использует строгое сравнение (===).
+     * @return bool True if needle is found in the array, false otherwise.
+     *              Возвращает true, если значение найдено в массиве, иначе false.
+     * @see in_array()
+     */
+    final public function in(mixed $needle, bool $strict = false): bool
+    {
+        return in_array($needle, $this->data, $strict);
+    }
+
+    /**
+     * Gets the key of the current array element (key equivalent).
+     *
+     * Gets the key of the current array element.
+     *
+     * Получает ключ массива (эквивалент key).
+     *
+     * @return int|string|null The key of the current array element.
+     *                         Ключ текущего элемента массива.
+     * @see key()
+     */
+    final public function key(): int|string|null
+    {
+        // TODO: Implement key equivalent
+        return key($this->data);
+    }
+
+    /**
+     * Sorts an array by key in descending order (krsort equivalent).
+     *
+     * Sorts an array by key in descending order.
+     *
+     * Сортирует массив по ключу в порядке убывания (эквивалент krsort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see krsort()
+     */
+    final public function krsort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement krsort equivalent
+        krsort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Sorts an array by key in ascending order (ksort equivalent).
+     *
+     * Sorts an array by key in ascending order.
+     *
+     * Сортирует массив по ключу в порядке возрастания (эквивалент ksort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see ksort()
+     */
+    final public function ksort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement ksort equivalent
+        ksort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Assigns variables as if they were an array (list equivalent).
+     *
+     * Assigns variables as if they were an array.
+     *
+     * Присваивает переменным значения как массиву (эквивалент list).
+     *
+     * @param mixed ...$vars Variables to assign.
+     *                       Переменные для присвоения.
+     * @return array Array of assigned values.
+     *               Массив присвоенных значений.
+     * @see list()
+     */
+    final public function list(mixed &...$vars): array
+    {
+        // TODO: Implement list equivalent
+        // Note: This is tricky to implement as a method
+//        return list(...$vars) = $this->data;
+        return [];
+    }
+
+    /**
+     * Sorts an array using natural order case-insensitive algorithm (natcasesort equivalent).
+     *
+     * Sorts an array using a case-insensitive "natural order" algorithm.
+     *
+     * Сортирует массив алгоритмом естественной сортировки без учёта регистра (эквивалент natcasesort).
+     *
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see natcasesort()
+     */
+    final public function natcasesort(): static
+    {
+        // TODO: Implement natcasesort equivalent
+        natcasesort($this->data);
+        return $this;
+    }
+
+    /**
+     * Sorts an array using natural order algorithm (natsort equivalent).
+     *
+     * Sorts an array using a "natural order" algorithm.
+     *
+     * Сортирует массив алгоритмом «естественного упорядочивания» (эквивалент natsort).
+     *
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see natsort()
+     */
+    final public function natsort(): static
+    {
+        // TODO: Implement natsort equivalent
+        natsort($this->data);
+        return $this;
+    }
+
+    /**
+     * Advances the internal array pointer (next equivalent).
+     *
+     * Advances the internal array pointer.
+     *
+     * Сдвигает внутренний указатель массива на одну позицию вперёд (эквивалент next).
+     *
+     * @return mixed The value of the next element or false if no more elements.
+     *               Значение следующего элемента или false если больше нет элементов.
+     * @see next()
+     */
+    final public function next(): mixed
+    {
+        // TODO: Implement next equivalent
+        return next($this->data);
+    }
+
+    /**
+     * Alias of current() (pos equivalent).
+     *
+     * Alias of current() method.
+     *
+     * Псевдоним метода current() (эквивалент pos).
+     *
+     * @return mixed The current element value.
+     *               Текущее значение элемента.
+     * @see pos()
+     * @see CoverArray::current()
+     */
+    final public function pos(): mixed
+    {
+        return $this->current();
+    }
+
+    /**
+     * Rewinds the internal array pointer (prev equivalent).
+     *
+     * Rewinds the internal array pointer.
+     *
+     * Сдвигает внутренний указатель массива на одну позицию назад (эквивалент prev).
+     *
+     * @return mixed The value of the previous element or false if no more elements.
+     *               Значение предыдущего элемента или false если больше нет элементов.
+     * @see prev()
+     */
+    final public function prev(): mixed
+    {
+        // TODO: Implement prev equivalent
+        return prev($this->data);
+    }
+
+    /**
+     * Creates a CoverArray containing a range of elements (range equivalent).
+     *
+     * Creates a CoverArray containing a range of elements.
+     *
+     * Создаёт массив, который содержит диапазон элементов (эквивалент range).
+     *
+     * @param mixed $start First value of the sequence.
+     *                     Начальное значение последовательности.
+     * @param mixed $end End value of the sequence.
+     *                   Конечное значение последовательности.
+     * @param int|float $step Increment between values.
+     *                        Шаг между значениями.
+     * @return static New CoverArray instance containing the range.
+     *                Новый экземпляр CoverArray, содержащий диапазон.
+     * @see range()
+     */
+    final public static function range(mixed $start, mixed $end, int|float $step = 1): static
+    {
+        // TODO: Implement range equivalent
+        return new static(range($start, $end, $step));
+    }
+
+    /**
+     * Resets the internal pointer to the first element (reset equivalent).
+     *
+     * Sets the internal pointer of an array to its first element.
+     *
+     * Устанавливает внутренний указатель массива на первый элемент (эквивалент reset).
+     *
+     * @return mixed The value of the first element or false if empty.
+     *               Значение первого элемента или false если массив пуст.
+     * @see reset()
+     */
+    final public function reset(): mixed
+    {
+        // TODO: Implement reset equivalent
+        return reset($this->data);
+    }
+
+    /**
+     * Sorts an array in descending order (rsort equivalent).
+     *
+     * Sorts an array in descending order.
+     *
+     * Сортирует массив в порядке убывания (эквивалент rsort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see rsort()
+     */
+    final public function rsort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement rsort equivalent
+        rsort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Shuffles the array (shuffle equivalent).
+     *
+     * Shuffles (randomizes the order of) the elements in the array.
+     *
+     * Перемешивает массив (эквивалент shuffle).
+     *
+     * @return static Current CoverArray instance (shuffled in place).
+     *                Текущий экземпляр CoverArray (перемешанный на месте).
+     * @see shuffle()
+     */
+    final public function shuffle(): static
+    {
+        // TODO: Implement shuffle equivalent
+        shuffle($this->data);
+        return $this;
+    }
+
+    /**
+     * Sorts an array in ascending order (sort equivalent).
+     *
+     * Sorts an array in ascending order.
+     *
+     * Сортирует массив по возрастанию (эквивалент sort).
+     *
+     * @param int $flags Sorting flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE).
+     *                   Флаги сортировки.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see sort()
+     */
+    final public function sort(int $flags = SORT_REGULAR): static
+    {
+        // TODO: Implement sort equivalent
+        sort($this->data, $flags);
+        return $this;
+    }
+
+    /**
+     * Sorts an array with a user-defined comparison function and maintains index association (uasort equivalent).
+     *
+     * Sorts an array with a user-defined comparison function and maintains index association.
+     *
+     * Сортирует массив пользовательской функцией сравнения, сохраняя ассоциацию индексов (эквивалент uasort).
+     *
+     * @param callable $callback The comparison function.
+     *                           Функция сравнения.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see uasort()
+     */
+    final public function uasort(callable $callback): static
+    {
+        // TODO: Implement uasort equivalent
+        uasort($this->data, $callback);
+        return $this;
+    }
+
+    /**
+     * Sorts an array by keys using a user-defined comparison function (uksort equivalent).
+     *
+     * Sorts an array by keys using a user-defined comparison function.
+     *
+     * Сортирует массив по ключам пользовательской функцией сравнения (эквивалент uksort).
+     *
+     * @param callable $callback The comparison function.
+     *                           Функция сравнения.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see uksort()
+     */
+    final public function uksort(callable $callback): static
+    {
+        // TODO: Implement uksort equivalent
+        uksort($this->data, $callback);
+        return $this;
+    }
+
+    /**
+     * Sorts an array by values using a user-defined comparison function (usort equivalent).
+     *
+     * Sorts an array by values using a user-defined comparison function.
+     *
+     * Сортирует массив по значениям через пользовательскую функцию сравнения (эквивалент usort).
+     *
+     * @param callable $callback The comparison function.
+     *                           Функция сравнения.
+     * @return static Current CoverArray instance (sorted in place).
+     *                Текущий экземпляр CoverArray (сортируется на месте).
+     * @see usort()
+     */
+    final public function usort(callable $callback): static
+    {
+        // TODO: Implement usort equivalent
+        usort($this->data, $callback);
+        return $this;
+    }
+
+    /**
+     * Alias of count() (sizeof equivalent).
+     *
+     * Alias of count() method.
+     *
+     * Псевдоним метода count() (эквивалент sizeof).
+     *
+     * @return int Number of elements in the array.
+     *             Количество элементов в массиве.
+     * @see sizeof()
+     * @see CoverArray::count()
+     */
+    final public function sizeof(): int
+    {
+        return $this->count();
+    }
+
+
+
+    /////////////////////////
+
+
+
+    /**
      * Recursively applies a callback function to all elements (array_walk_recursive equivalent).
      *
      * Applies a user-defined callback function to every element in a multidimensional array recursively.
@@ -1792,31 +2682,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
             return $arr;
         })($callback, $this->getDataAsArray()));
-    }
-
-    /**
-     * Checks if a value exists in an array (in_array equivalent).
-     *
-     * Checks if a value exists in the array using loose comparison by default.
-     * Can use strict comparison if the strict parameter is set to true.
-     *
-     *
-     * Проверяет, содержится ли значение в массиве (эквивалент in_array).
-     *
-     * Проверяет, существует ли значение в массиве, используя нестрогое сравнение по умолчанию.
-     * Может использовать строгое сравнение, если параметр strict установлен в true.
-     *
-     * @param mixed $needle The value to search for.
-     *                      Искомое значение.
-     * @param bool $strict If true, uses strict comparison (===).
-     *                     Если true, использует строгое сравнение (===).
-     * @return bool True if needle is found in the array, false otherwise.
-     *              Возвращает true, если значение найдено в массиве, иначе false.
-     * @see in_array()
-     */
-    final public function in(mixed $needle, bool $strict = false): bool
-    {
-        return in_array($needle, $this->data, $strict);
     }
 
     /**
