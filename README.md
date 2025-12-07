@@ -1,6 +1,7 @@
 ![Cover Array](logo.jpg)
 
 <h1>Object-Oriented Array for PHP (PHP Collection)</h1>
+<p>Release 2025</p>
 
 ### Test Status
 | PHP Version | Status                                                                                                                                                                               |

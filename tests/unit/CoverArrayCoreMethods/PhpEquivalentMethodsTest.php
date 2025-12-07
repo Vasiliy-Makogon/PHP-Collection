@@ -4825,12 +4825,14 @@ class PhpEquivalentMethodsTest extends TestCase
      *
      * This test verifies edge cases for the product() method, including
      * boolean conversions, null values, and scientific notation strings.
+     * Uses PHP's native array_product() function as a reference for expected values.
      *
      *
      * Тестирование граничных случаев метода product() (эквивалент array_product).
      *
      * Этот тест проверяет граничные случаи метода product(), включая
      * преобразования булевых значений, null значений и строк в научной нотации.
+     * Использует нативную функцию PHP array_product() как эталон для ожидаемых значений.
      *
      * @see CoverArray::product()
      * @see array_product()
@@ -4839,26 +4841,97 @@ class PhpEquivalentMethodsTest extends TestCase
     {
         // Test: Product with all null values - all nulls become 0
         // Тест: Произведение всех null значений - все null становятся 0
-        $this->assertSame(0, (new CoverArray([null, null, null]))->product());
+        $this->assertSame(
+            array_product([null, null, null]),
+            (new CoverArray([null, null, null]))->product()
+        );
 
         // Test: Product with all false values - all false become 0
         // Тест: Произведение всех false значений - все false становятся 0
-        $this->assertSame(0, (new CoverArray([false, false, false]))->product());
+        $this->assertSame(
+            array_product([false, false, false]),
+            (new CoverArray([false, false, false]))->product()
+        );
 
         // Test: Product with all true values - all true become 1
         // Тест: Произведение всех true значений - все true становятся 1
-        $this->assertSame(1, (new CoverArray([true, true, true]))->product());
+        $this->assertSame(
+            array_product([true, true, true]),
+            (new CoverArray([true, true, true]))->product()
+        );
 
         // Test: Product with mixed null and false - both become 0
         // Тест: Произведение с mixed null и false - оба становятся 0
-        $this->assertSame(0, (new CoverArray([null, false, 5]))->product()); // 0 * 0 * 5 = 0
+        $this->assertSame(
+            array_product([null, false, 5]),
+            (new CoverArray([null, false, 5]))->product()
+        );
 
         // Test: Product with scientific notation strings
         // Тест: Произведение со строками в научной нотации
         $this->assertSame(
-            array_product(['1.2e3', '5e0']), // Используем array_product как эталон
+            array_product(['1.2e3', '5e0']),
             (new CoverArray(['1.2e3', '5e0']))->product()
         );
+
+        // Test: Product with hexadecimal strings
+        // Тест: Произведение со строками в шестнадцатеричном формате
+        $this->assertSame(
+            array_product(['0x10', '0x2']), // 16 * 2 = 32
+            (new CoverArray(['0x10', '0x2']))->product()
+        );
+
+        // Test: Product with octal strings
+        // Тест: Произведение со строками в восьмеричном формате
+        $this->assertSame(
+            array_product(['010', '02']), // 8 * 2 = 16 (в PHP 8.0+ '010' = 10, в более ранних = 8)
+            (new CoverArray(['010', '02']))->product()
+        );
+
+        // Test: Product with INF and NAN - requires special handling
+        // Тест: Произведение с INF и NAN - требует особой обработки
+        $infNanData = [INF, 2, NAN];
+        $expectedInfNan = array_product($infNanData);
+        $actualInfNan = (new CoverArray($infNanData))->product();
+
+        // NAN is never equal to itself, so we need special handling
+        // NAN никогда не равен самому себе, поэтому нужна особая обработка
+        if (is_nan($expectedInfNan)) {
+            $this->assertNan($actualInfNan, 'Expected NAN for product with NAN in array');
+        } else {
+            $this->assertSame($expectedInfNan, $actualInfNan);
+        }
+
+        // Test: Product with very large float that may overflow to INF
+        // Тест: Произведение с очень большим float, которое может переполниться до INF
+        $this->assertSame(
+            array_product([1e308, 1e308]),
+            (new CoverArray([1e308, 1e308]))->product()
+        );
+
+        // Test: Product with INF * 0 (should be NAN)
+        // Тест: Произведение INF * 0 (должно быть NAN)
+        $infZeroData = [INF, 0];
+        $expectedInfZero = array_product($infZeroData);
+        $actualInfZero = (new CoverArray($infZeroData))->product();
+
+        if (is_nan($expectedInfZero)) {
+            $this->assertNan($actualInfZero, 'Expected NAN for INF * 0');
+        } else {
+            $this->assertSame($expectedInfZero, $actualInfZero);
+        }
+
+        // Test: Product with NAN only
+        // Тест: Произведение только с NAN
+        $nanOnlyData = [NAN];
+        $expectedNanOnly = array_product($nanOnlyData);
+        $actualNanOnly = (new CoverArray($nanOnlyData))->product();
+
+        if (is_nan($expectedNanOnly)) {
+            $this->assertNan($actualNanOnly, 'Expected NAN for array with only NAN');
+        } else {
+            $this->assertSame($expectedNanOnly, $actualNanOnly);
+        }
     }
 
     /**
