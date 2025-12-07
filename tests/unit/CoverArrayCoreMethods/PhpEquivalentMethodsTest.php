@@ -4441,7 +4441,702 @@ class PhpEquivalentMethodsTest extends TestCase
         );
     }
 
+    /**
+     * Tests the pad() method (array_pad equivalent).
+     *
+     * This test verifies that the pad() method correctly pads
+     * the CoverArray to the specified length with a given value,
+     * mirroring PHP's array_pad() function behavior.
+     *
+     *
+     * Тестирование метода pad() (эквивалент array_pad).
+     *
+     * Этот тест проверяет, что метод pad() корректно дополняет
+     * CoverArray до указанной длины заданным значением,
+     * отражая поведение функции array_pad() PHP.
+     *
+     * @see CoverArray::pad()
+     * @see array_pad()
+     */
+    public function testPadMethod(): void
+    {
+        // Test padding to the right (positive length)
+        // Тест дополнения справа (положительная длина)
+        $data1 = [1, 2, 3];
+        $expected1 = array_pad($data1, 5, 0);
 
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame($expected1, $cover1->pad(5, 0)->getDataAsArray());
+
+        // Test padding to the left (negative length)
+        // Тест дополнения слева (отрицательная длина)
+        $data2 = [1, 2, 3];
+        $expected2 = array_pad($data2, -5, 0);
+
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame($expected2, $cover2->pad(-5, 0)->getDataAsArray());
+
+        // Test with length smaller than array size (no padding)
+        // Тест с длиной меньше размера массива (без дополнения)
+        $data3 = [1, 2, 3, 4, 5];
+        $expected3 = array_pad($data3, 3, 0);
+
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame($expected3, $cover3->pad(3, 0)->getDataAsArray());
+
+        // Test with negative length smaller than array size (no padding)
+        // Тест с отрицательной длиной меньше размера массива (без дополнения)
+        $data4 = [1, 2, 3, 4, 5];
+        $expected4 = array_pad($data4, -3, 0);
+
+        $cover4 = new CoverArray($data4);
+
+        $this->assertSame($expected4, $cover4->pad(-3, 0)->getDataAsArray());
+
+        // Test with string values
+        // Тест со строковыми значениями
+        $data5 = ['a', 'b', 'c'];
+        $expected5 = array_pad($data5, 5, 'default');
+
+        $cover5 = new CoverArray($data5);
+
+        $this->assertSame($expected5, $cover5->pad(5, 'default')->getDataAsArray());
+
+        // Test with array as padding value
+        // Тест с массивом в качестве значения для дополнения
+        $data6 = [1, 2];
+        $padValue = ['nested' => 'value'];
+        $expected6 = array_pad($data6, 4, $padValue);
+
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame($expected6, $cover6->pad(4, $padValue)->getDataAsArray());
+
+        // Test with null as padding value
+        // Тест с null в качестве значения для дополнения
+        $data7 = ['a', 'b'];
+        $expected7 = array_pad($data7, 4, null);
+
+        $cover7 = new CoverArray($data7);
+
+        $this->assertSame($expected7, $cover7->pad(4, null)->getDataAsArray());
+
+        // Test with empty array
+        // Тест с пустым массивом
+        $data8 = [];
+        $expected8 = array_pad($data8, 3, 'fill');
+
+        $cover8 = new CoverArray($data8);
+
+        $this->assertSame($expected8, $cover8->pad(3, 'fill')->getDataAsArray());
+
+        // Test with length 0
+        // Тест с длиной 0
+        $data9 = [1, 2, 3];
+        $expected9 = array_pad($data9, 0, 0);
+
+        $cover9 = new CoverArray($data9);
+
+        $this->assertSame($expected9, $cover9->pad(0, 0)->getDataAsArray());
+
+        // Test with associative array (keys are reindexed)
+        // Тест с ассоциативным массивом (ключи переиндексируются)
+        $data10 = ['a' => 1, 'b' => 2];
+        $expected10 = array_pad($data10, 4, 0);
+
+        $cover10 = new CoverArray($data10);
+
+        $this->assertSame($expected10, $cover10->pad(4, 0)->getDataAsArray());
+
+        // Test with mixed padding (left and right with same value)
+        // Тест со смешанным дополнением (слева и справа одинаковым значением)
+        $data11 = [1, 2, 3];
+        $expected11 = array_pad($data11, 7, 'x');
+
+        $cover11 = new CoverArray($data11);
+
+        $this->assertSame($expected11, $cover11->pad(7, 'x')->getDataAsArray());
+    }
+
+    /**
+     * Tests the pop() method (array_pop equivalent).
+     *
+     * This test verifies that the pop() method correctly removes
+     * and returns the last element of the CoverArray, shortening
+     * the array by one element, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() (эквивалент array_pop).
+     *
+     * Этот тест проверяет, что метод pop() корректно удаляет
+     * и возвращает последний элемент CoverArray, уменьшая
+     * массив на один элемент, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopMethod(): void
+    {
+        // Test popping from a sequential array
+        // Тест извлечения из последовательного массива
+        $data1 = [1, 2, 3];
+        $expectedArray1 = $data1;
+        $expectedValue1 = array_pop($expectedArray1);
+
+        $cover1 = new CoverArray($data1);
+        $actualValue1 = $cover1->pop();
+
+        $this->assertSame($expectedValue1, $actualValue1);
+        $this->assertSame($expectedArray1, $cover1->getDataAsArray());
+
+        // Test popping from an associative array
+        // Тест извлечения из ассоциативного массива
+        $data2 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $expectedArray2 = $data2;
+        $expectedValue2 = array_pop($expectedArray2);
+
+        $cover2 = new CoverArray($data2);
+        $actualValue2 = $cover2->pop();
+
+        $this->assertSame($expectedValue2, $actualValue2);
+        $this->assertSame($expectedArray2, $cover2->getDataAsArray());
+
+        // Test popping from an empty array (should return null)
+        // Тест извлечения из пустого массива (должен вернуть null)
+        $data3 = [];
+        $expectedArray3 = $data3;
+        $expectedValue3 = array_pop($expectedArray3);
+
+        $cover3 = new CoverArray($data3);
+        $actualValue3 = $cover3->pop();
+
+        $this->assertSame($expectedValue3, $actualValue3);
+        $this->assertSame($expectedArray3, $cover3->getDataAsArray());
+
+        // Test popping from an array with one element
+        // Тест извлечения из массива с одним элементом
+        $data4 = ['single'];
+        $expectedArray4 = $data4;
+        $expectedValue4 = array_pop($expectedArray4);
+
+        $cover4 = new CoverArray($data4);
+        $actualValue4 = $cover4->pop();
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expectedValue4, $actualValue4);
+        $this->assertSame($expectedArray4, $cover4->getDataAsArray());
+
+        // Test popping with mixed value types
+        // Тест извлечения со смешанными типами значений
+        $data5 = ['string', 123, null, false];
+        $expectedArray5 = $data5;
+        $expectedValue5 = array_pop($expectedArray5);
+
+        $cover5 = new CoverArray($data5);
+        $actualValue5 = $cover5->pop();
+
+        $this->assertSame($expectedValue5, $actualValue5);
+        $this->assertSame($expectedArray5, $cover5->getDataAsArray());
+
+        // Test popping array value (CoverArray should convert it to CoverArray)
+        // Тест извлечения значения-массива (CoverArray должен преобразовать его в CoverArray)
+        $data6 = [1, 2, ['nested' => 'value']];
+        $expectedArray6 = $data6;
+        $expectedValue6 = array_pop($expectedArray6);
+
+        $cover6 = new CoverArray($data6);
+        $actualValue6 = $cover6->pop();
+
+        // Проверяем, что возвращенный объект является CoverArray и содержит правильные данные
+        $this->assertInstanceOf(CoverArray::class, $actualValue6);
+        $this->assertSame($expectedValue6, $actualValue6->getDataAsArray());
+        $this->assertSame($expectedArray6, $cover6->getDataAsArray());
+
+        // Test that pop() modifies the original array
+        // Тест, что pop() изменяет исходный массив
+        $data7 = [10, 20, 30, 40];
+        $cover7 = new CoverArray($data7);
+
+        // Первый pop
+        $firstPop = $cover7->pop();
+        $this->assertSame(40, $firstPop);
+        $this->assertSame([10, 20, 30], $cover7->getDataAsArray());
+
+        // Второй pop
+        $secondPop = $cover7->pop();
+        $this->assertSame(30, $secondPop);
+        $this->assertSame([10, 20], $cover7->getDataAsArray());
+
+        // Третий pop
+        $thirdPop = $cover7->pop();
+        $this->assertSame(20, $thirdPop);
+        $this->assertSame([10], $cover7->getDataAsArray());
+
+        // Четвертый pop
+        $fourthPop = $cover7->pop();
+        $this->assertSame(10, $fourthPop);
+        $this->assertSame([], $cover7->getDataAsArray());
+
+        // Пятый pop (из пустого массива)
+        $fifthPop = $cover7->pop();
+        $this->assertNull($fifthPop);
+        $this->assertSame([], $cover7->getDataAsArray());
+
+        // Test popping from array with numeric string keys
+        // Тест извлечения из массива с числовыми строковыми ключами
+        $data8 = ['0' => 'a', '1' => 'b', '2' => 'c'];
+        $expectedArray8 = $data8;
+        $expectedValue8 = array_pop($expectedArray8);
+
+        $cover8 = new CoverArray($data8);
+        $actualValue8 = $cover8->pop();
+
+        $this->assertSame($expectedValue8, $actualValue8);
+        $this->assertSame($expectedArray8, $cover8->getDataAsArray());
+    }
+
+    /**
+     * Tests the product() method (array_product equivalent).
+     *
+     * This test verifies that the product() method correctly calculates
+     * the product of all values in the CoverArray, mirroring PHP's
+     * array_product() function behavior.
+     *
+     *
+     * Тестирование метода product() (эквивалент array_product).
+     *
+     * Этот тест проверяет, что метод product() корректно вычисляет
+     * произведение всех значений в CoverArray, отражая поведение
+     * функции array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductMethod(): void
+    {
+        // Test with integers
+        // Тест с целыми числами
+        $data1 = [2, 3, 4];
+        $expected1 = array_product($data1);
+
+        $cover1 = new CoverArray($data1);
+
+        $this->assertSame($expected1, $cover1->product());
+
+        // Test with floats
+        // Тест с числами с плавающей точкой
+        $data2 = [1.5, 2.5, 2.0];
+        $expected2 = array_product($data2);
+
+        $cover2 = new CoverArray($data2);
+
+        $this->assertSame($expected2, $cover2->product());
+
+        // Test with empty array (should return 0)
+        // Тест с пустым массивом (должен вернуть 0)
+        $data3 = [];
+        $expected3 = array_product($data3);
+
+        $cover3 = new CoverArray($data3);
+
+        $this->assertSame($expected3, $cover3->product());
+
+        // Test with single element
+        // Тест с одним элементом
+        $data4 = [5];
+        $expected4 = array_product($data4);
+
+        $cover4 = new CoverArray($data4);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected4, $cover4->product());
+
+        // Test with negative numbers
+        // Тест с отрицательными числами
+        $data5 = [-2, 3, -4];
+        $expected5 = array_product($data5);
+
+        $cover5 = new CoverArray($data5);
+
+        // original function
+        // оригинальная функция
+        $this->assertSame($expected5, $cover5->product());
+
+        // Test with zero value (product should be 0)
+        // Тест с нулевым значением (произведение должно быть 0)
+        $data6 = [2, 3, 0, 5];
+        $expected6 = array_product($data6);
+
+        $cover6 = new CoverArray($data6);
+
+        $this->assertSame($expected6, $cover6->product());
+
+        // Test with string numbers (should be converted)
+        // Тест с числовыми строками (должны преобразоваться)
+        $data7 = ['2', '3', '4'];
+        $expected7 = array_product($data7);
+
+        $cover7 = new CoverArray($data7);
+
+        $this->assertSame($expected7, $cover7->product());
+
+        // Test with mixed numeric strings and numbers
+        // Тест со смешанными числовыми строками и числами
+        $data8 = ['2.5', 3, 4];
+        $expected8 = array_product($data8);
+
+        $cover8 = new CoverArray($data8);
+
+        $this->assertSame($expected8, $cover8->product());
+
+        // Test with non-numeric strings (treated as 0, so product is 0)
+        // Тест с нечисловыми строками (обрабатываются как 0, поэтому произведение 0)
+        $data9 = [2, 3, 'abc', 4];
+        $expected9 = array_product($data9);
+
+        $cover9 = new CoverArray($data9);
+
+        $this->assertSame($expected9, $cover9->product());
+
+        // Test with boolean values (true=1, false=0)
+        // Тест с булевыми значениями (true=1, false=0)
+        $data10 = [2, true, 3, false, 4];
+        $expected10 = array_product($data10);
+
+        $cover10 = new CoverArray($data10);
+
+        $this->assertSame($expected10, $cover10->product());
+
+        // Test with null values (treated as 0)
+        // Тест с null значениями (обрабатываются как 0)
+        $data11 = [2, 3, null, 4];
+        $expected11 = array_product($data11);
+
+        $cover11 = new CoverArray($data11);
+
+        $this->assertSame($expected11, $cover11->product());
+
+        // Test with large numbers
+        // Тест с большими числами
+        $data12 = [1000, 1000, 1000];
+        $expected12 = array_product($data12);
+
+        $cover12 = new CoverArray($data12);
+
+        $this->assertSame($expected12, $cover12->product());
+
+        // Test with associative array (only values are considered)
+        // Тест с ассоциативным массивом (учитываются только значения)
+        $data13 = ['a' => 2, 'b' => 3, 'c' => 4];
+        $expected13 = array_product($data13);
+
+        $cover13 = new CoverArray($data13);
+
+        $this->assertSame($expected13, $cover13->product());
+
+        // Test with numeric string with leading zeros
+        // Тест с числовой строкой с ведущими нулями
+        $data14 = ['02', '03'];
+        $expected14 = array_product($data14);
+
+        $cover14 = new CoverArray($data14);
+
+        $this->assertSame($expected14, $cover14->product());
+
+        // Test with very small float numbers
+        // Тест с очень маленькими числами с плавающей точкой
+        $data15 = [0.1, 0.2, 0.3];
+        $expected15 = array_product($data15);
+
+        $cover15 = new CoverArray($data15);
+
+        $this->assertSame($expected15, $cover15->product());
+
+        // Test that original array is not modified
+        // Тест, что исходный массив не изменяется
+        $data16 = [2, 3, 4];
+        $expected16 = array_product($data16);
+
+        $cover16 = new CoverArray($data16);
+        $result = $cover16->product();
+
+        $this->assertSame($expected16, $result);
+        $this->assertSame([2, 3, 4], $cover16->getDataAsArray(), 'Original array should not be modified');
+    }
+
+    /**
+     * Tests the append() method (array_push equivalent).
+     *
+     * This test verifies that the append() method correctly adds
+     * one or more elements to the end of the CoverArray, mirroring
+     * PHP's array_push() function behavior.
+     *
+     *
+     * Тестирование метода append() (эквивалент array_push).
+     *
+     * Этот тест проверяет, что метод append() корректно добавляет
+     * один или несколько элементов в конец CoverArray, отражая
+     * поведение функции array_push() PHP.
+     *
+     * @see CoverArray::append()
+     * @see array_push()
+     */
+    public function testAppendMethod(): void
+    {
+        // Test appending single element
+        // Тест добавления одного элемента
+        $data1 = [1, 2, 3];
+        $expected1 = $data1;
+        array_push($expected1, 4);
+
+        $cover1 = new CoverArray($data1);
+        $cover1->append(4);
+
+        $this->assertSame($expected1, $cover1->getDataAsArray());
+
+        // Test appending multiple elements
+        // Тест добавления нескольких элементов
+        $data2 = [1, 2, 3];
+        $expected2 = $data2;
+        array_push($expected2, 4, 5, 6);
+
+        $cover2 = new CoverArray($data2);
+        $cover2->append(4, 5, 6);
+
+        $this->assertSame($expected2, $cover2->getDataAsArray());
+
+        // Test appending with different types
+        // Тест добавления с разными типами
+        $data3 = ['a', 'b'];
+        $expected3 = $data3;
+        array_push($expected3, 'c', 1, true, null);
+
+        $cover3 = new CoverArray($data3);
+        $cover3->append('c', 1, true, null);
+
+        $this->assertSame($expected3, $cover3->getDataAsArray());
+
+        // Test appending array (should be converted to CoverArray)
+        // Тест добавления массива (должен быть преобразован в CoverArray)
+        $data4 = [1, 2];
+        $arrayValue = ['nested' => 'value'];
+
+        // Используем array_push для получения ожидаемого результата
+        // но будем проверять поэлементно, так как array_push не преобразует вложенные массивы
+        $expected4 = $data4;
+        array_push($expected4, $arrayValue);
+
+        $cover4 = new CoverArray($data4);
+        $cover4->append($arrayValue);
+
+        // Проверяем первые два элемента
+        $this->assertSame($expected4[0], $cover4->item(0));
+        $this->assertSame($expected4[1], $cover4->item(1));
+
+        // Проверяем, что третий элемент является CoverArray и содержит правильные данные
+        $thirdElement = $cover4->item(2);
+        $this->assertInstanceOf(CoverArray::class, $thirdElement);
+        $this->assertSame($arrayValue, $thirdElement->getDataAsArray());
+
+        // Test appending to empty array
+        // Тест добавления в пустой массив
+        $data5 = [];
+        $expected5 = $data5;
+        array_push($expected5, 'first', 'second');
+
+        $cover5 = new CoverArray($data5);
+        $cover5->append('first', 'second');
+
+        $this->assertSame($expected5, $cover5->getDataAsArray());
+
+        // Test appending with numeric string keys
+        // Тест добавления с числовыми строковыми ключами
+        $data6 = [0 => 'zero', 1 => 'one'];
+        $expected6 = $data6;
+        array_push($expected6, 'two', 'three');
+
+        $cover6 = new CoverArray($data6);
+        $cover6->append('two', 'three');
+
+        $this->assertSame($expected6, $cover6->getDataAsArray());
+
+        // Test that method returns same instance (for chaining)
+        // Тест, что метод возвращает тот же экземпляр (для цепочки вызовов)
+        $data7 = [1, 2];
+        $cover7 = new CoverArray($data7);
+
+        $returned = $cover7->append(3);
+        $this->assertSame($cover7, $returned);
+
+        // Test chaining append calls
+        // Тест цепочки вызовов append
+        $data8 = [1];
+        $expected8 = $data8;
+        array_push($expected8, 2, 3, 4, 5);
+
+        $cover8 = new CoverArray($data8);
+        $cover8->append(2)->append(3, 4)->append(5);
+
+        $this->assertSame($expected8, $cover8->getDataAsArray());
+
+        // Test appending with associative array (push reindexes numeric keys)
+        // Тест добавления с ассоциативным массивом (push переиндексирует числовые ключи)
+        $data9 = ['a' => 1, 'b' => 2];
+        $expected9 = $data9;
+        array_push($expected9, 3, 4);
+
+        $cover9 = new CoverArray($data9);
+        $cover9->append(3, 4);
+
+        $this->assertSame($expected9, $cover9->getDataAsArray());
+
+        // Test appending with false, 0, empty string
+        // Тест добавления с false, 0, пустой строкой
+        $data10 = ['first'];
+        $expected10 = $data10;
+        array_push($expected10, false, 0, '');
+
+        $cover10 = new CoverArray($data10);
+        $cover10->append(false, 0, '');
+
+        $this->assertSame($expected10, $cover10->getDataAsArray());
+    }
+
+    /**
+     * Tests the push() method (array_push equivalent, alias for append()).
+     *
+     * This test verifies that the push() method correctly adds
+     * one or more elements to the end of the CoverArray, mirroring
+     * PHP's array_push() function behavior. This is an alias for append().
+     *
+     *
+     * Тестирование метода push() (эквивалент array_push, псевдоним для append()).
+     *
+     * Этот тест проверяет, что метод push() корректно добавляет
+     * один или несколько элементов в конец CoverArray, отражая
+     * поведение функции array_push() PHP. Это псевдоним для append().
+     *
+     * @see CoverArray::push()
+     * @see CoverArray::append()
+     * @see array_push()
+     */
+    public function testPushMethod(): void
+    {
+        // Test pushing single element
+        // Тест добавления одного элемента
+        $data1 = [1, 2, 3];
+        $expected1 = $data1;
+        array_push($expected1, 4);
+
+        $cover1 = new CoverArray($data1);
+        $cover1->push(4);
+
+        $this->assertSame($expected1, $cover1->getDataAsArray());
+
+        // Test pushing multiple elements
+        // Тест добавления нескольких элементов
+        $data2 = [1, 2, 3];
+        $expected2 = $data2;
+        array_push($expected2, 4, 5, 6);
+
+        $cover2 = new CoverArray($data2);
+        $cover2->push(4, 5, 6);
+
+        $this->assertSame($expected2, $cover2->getDataAsArray());
+
+        // Test that push is an alias for append (same behavior)
+        // Тест, что push является псевдонимом для append (одинаковое поведение)
+        $data3 = ['a', 'b', 'c'];
+        $expected3 = $data3;
+        array_push($expected3, 'd', 'e');
+
+        $cover3a = new CoverArray($data3);
+        $cover3b = new CoverArray($data3);
+
+        $cover3a->append('d', 'e');
+        $cover3b->push('d', 'e');
+
+        $this->assertSame($expected3, $cover3a->getDataAsArray());
+        $this->assertSame($expected3, $cover3b->getDataAsArray());
+        $this->assertSame($cover3a->getDataAsArray(), $cover3b->getDataAsArray());
+
+        // Test pushing with different types
+        // Тест добавления с разными типами
+        $data4 = [1];
+        $expected4 = $data4;
+        array_push($expected4, 'string', 2.5, null, false);
+
+        $cover4 = new CoverArray($data4);
+        $cover4->push('string', 2.5, null, false);
+
+        $this->assertSame($expected4, $cover4->getDataAsArray());
+
+        // Test pushing array (should be converted to CoverArray)
+        // Тест добавления массива (должен быть преобразован в CoverArray)
+        $data5 = ['first'];
+        $arrayValue = ['nested' => ['key' => 'value']];
+
+        // Используем array_push для получения ожидаемого результата
+        $expected5 = $data5;
+        array_push($expected5, $arrayValue);
+
+        $cover5 = new CoverArray($data5);
+        $cover5->push($arrayValue);
+
+        // Проверяем первый элемент
+        $this->assertSame($expected5[0], $cover5->item(0));
+
+        // Проверяем, что второй элемент является CoverArray и содержит правильные данные
+        $secondElement = $cover5->item(1);
+        $this->assertInstanceOf(CoverArray::class, $secondElement);
+        $this->assertSame($arrayValue, $secondElement->getDataAsArray());
+
+        // Test pushing to empty array
+        // Тест добавления в пустой массив
+        $data6 = [];
+        $expected6 = $data6;
+        array_push($expected6, 'apple', 'banana', 'cherry');
+
+        $cover6 = new CoverArray($data6);
+        $cover6->push('apple', 'banana', 'cherry');
+
+        $this->assertSame($expected6, $cover6->getDataAsArray());
+
+        // Test that method returns same instance (for chaining)
+        // Тест, что метод возвращает тот же экземпляр (для цепочки вызовов)
+        $data7 = [10, 20];
+        $cover7 = new CoverArray($data7);
+
+        $returned = $cover7->push(30);
+        $this->assertSame($cover7, $returned);
+
+        // Test chaining push calls
+        // Тест цепочки вызовов push
+        $data8 = ['start'];
+        $expected8 = $data8;
+        array_push($expected8, 'middle1', 'middle2', 'end1', 'end2');
+
+        $cover8 = new CoverArray($data8);
+        $cover8->push('middle1', 'middle2')->push('end1', 'end2');
+
+        $this->assertSame($expected8, $cover8->getDataAsArray());
+
+        // Test pushing with associative array (keys are preserved for string keys, numeric reindexed)
+        // Тест добавления с ассоциативным массивом (строковые ключи сохраняются, числовые переиндексируются)
+        $data9 = ['a' => 'apple', 'b' => 'banana'];
+        $expected9 = $data9;
+        array_push($expected9, 'cherry', 'date');
+
+        $cover9 = new CoverArray($data9);
+        $cover9->push('cherry', 'date');
+
+        $this->assertSame($expected9, $cover9->getDataAsArray());
+    }
 
 
 
@@ -4510,35 +5205,7 @@ class PhpEquivalentMethodsTest extends TestCase
         $this->assertSame('C#', $this->data->get('languages.backend')->first());
     }
 
-    /**
-     * Tests the append() and push() methods (array_push equivalent).
-     *
-     * This test verifies that the append() method (and its push() alias)
-     * correctly adds one or more elements to the end of the CoverArray,
-     * maintaining existing indices, mirroring PHP's array_push() function.
-     *
-     *
-     * Тестирование методов append() и push() (эквивалент array_push).
-     *
-     * Этот тест проверяет, что метод append() (и его псевдоним push())
-     * корректно добавляет один или несколько элементов в конец CoverArray,
-     * сохраняя существующие индексы, отражая функцию array_push() PHP.
-     *
-     * @see CoverArray::append()
-     * @see CoverArray::push()
-     * @see array_push()
-     */
-    public function testAppendMethod(): void
-    {
-        $this->data->get('languages.backend')->append('C++');
-        $this->assertSame('C++', $this->data->get('languages.backend')->last());
 
-        $this->data->get('languages.backend')->append(['Python', 'Ruby']);
-        $this->assertSame(['Python', 'Ruby'], $this->data->get('languages.backend')->last()->getDataAsArray());
-
-        $this->data->get('languages.backend')->push('Java', 'C#');
-        $this->assertSame('C#', $this->data->get('languages.backend')->last());
-    }
 
     /**
      * Tests the reverse() method (array_reverse equivalent).

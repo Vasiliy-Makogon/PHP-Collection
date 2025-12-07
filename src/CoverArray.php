@@ -779,8 +779,8 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         return new static(
             array_combine(
-                self::convertToPlainArray($keys),
-                self::convertToPlainArray($values)
+                static::convertToPlainArray($keys),
+                static::convertToPlainArray($values)
             )
         );
     }
@@ -1020,7 +1020,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         return new static(
             array_fill_keys(
-                self::convertToPlainArray($keys),
+                static::convertToPlainArray($keys),
                 $value
             )
         );
@@ -1597,6 +1597,142 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         );
     }
 
+    // array_multisort now is empty
+
+    /**
+     * Pad array to the specified length with a value (array_pad equivalent).
+     *
+     * Returns a new CoverArray padded to the specified length with the given value.
+     * If length is positive, the array is padded on the right; if negative, on the left.
+     * If the absolute value of length is less than or equal to the length of the array,
+     * the array is returned unchanged.
+     *
+     *
+     * Дополняет массив до указанной длины значением (эквивалент array_pad).
+     *
+     * Возвращает новый CoverArray, дополненный до указанной длины заданным значением.
+     * Если длина положительная, массив дополняется справа; если отрицательная - слева.
+     * Если абсолютное значение длины меньше или равно длине массива,
+     * массив возвращается без изменений.
+     *
+     * @param int $length The new size of the array.
+     *                    Новый размер массива.
+     * @param mixed $value Value to pad if the array needs to be expanded.
+     *                     Значение для дополнения, если массив нужно расширить.
+     * @return static New CoverArray instance padded to the given length.
+     *                Новый экземпляр CoverArray, дополненный до заданной длины.
+     * @see array_pad()
+     */
+    final public function pad(int $length, mixed $value): static
+    {
+        return new static(
+            array_pad($this->data, $length, $value)
+        );
+    }
+
+    /**
+     * Pop the element off the end of the array (array_pop equivalent).
+     *
+     * Removes and returns the last element of the current CoverArray,
+     * shortening the array by one element. Returns null if the array is empty.
+     *
+     * Note: This method modifies the current CoverArray instance.
+     *
+     *
+     * Извлекает последний элемент массива (эквивалент array_pop).
+     *
+     * Удаляет и возвращает последний элемент текущего CoverArray,
+     * уменьшая массив на один элемент. Возвращает null, если массив пуст.
+     *
+     * Примечание: Этот метод изменяет текущий экземпляр CoverArray.
+     *
+     * @return mixed The last element of the array or null if empty.
+     *               Последний элемент массива или null, если массив пуст.
+     * @see array_pop()
+     */
+    final public function pop(): mixed
+    {
+        return array_pop($this->data);
+    }
+
+    /**
+     * Calculate the product of values in an array (array_product equivalent).
+     *
+     * Returns the product of all values in the CoverArray as an integer or float.
+     * If the array is empty, returns 0 (matching array_product behavior).
+     * Note: Non-numeric values are converted to numbers (0 for non-numeric strings).
+     *
+     *
+     * Вычисляет произведение значений массива (эквивалент array_product).
+     *
+     * Возвращает произведение всех значений в CoverArray в виде целого числа или числа с плавающей точкой.
+     * Если массив пуст, возвращает 0 (соответствует поведению array_product).
+     * Примечание: Нечисловые значения преобразуются в числа (0 для нечисловых строк).
+     *
+     * @return int|float The product of array values as an integer or float.
+     *                   Произведение значений массива в виде целого числа или числа с плавающей точкой.
+     * @see array_product()
+     */
+    final public function product(): int|float
+    {
+        return array_product($this->data);
+    }
+
+    /**
+     * Appends one or more elements to the end of an array (array_push equivalent).
+     *
+     * Adds one or more elements to the end of the array and returns the instance.
+     *
+     *
+     * Добавляет один или несколько элементов в конец массива (эквивалент array_push).
+     *
+     * Добавляет один или несколько элементов в конец массива и возвращает экземпляр.
+     *
+     * @param mixed ...$args Elements to append to the array.
+     *                       Элементы для добавления в конец массива.
+     * @return static Current CoverArray instance with appended elements.
+     *                Текущий экземпляр CoverArray с добавленными в конец элементами.
+     * @see array_push()
+     */
+    final public function append(mixed ...$args): static
+    {
+        foreach ($args as $value) {
+            $this->data[] = $this->array2cover($value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Appends one or more elements to the end of an array (append() alias).
+     *
+     * Alias for the append() method. Adds elements to the end of the array.
+     * This method provides compatibility with PHP's array_push function name.
+     *
+     *
+     * Добавляет один или несколько элементов в конец массива (псевдоним append()).
+     *
+     * Псевдоним метода append(). Добавляет элементы в конец массива.
+     * Этот метод обеспечивает совместимость с именем функции PHP array_push.
+     *
+     * @param mixed ...$args Elements to append to the array.
+     *                       Элементы для добавления в конец массива.
+     * @return static Current CoverArray instance with appended elements.
+     *                Текущий экземпляр CoverArray с добавленными в конец элементами.
+     * @see CoverArray::append()
+     * @see array_push()
+     */
+    final public function push(mixed ...$args): static
+    {
+        return $this->append(...$args);
+    }
+
+
+
+
+
+
+
 
     /**
      * Applies a callback function to each element (array_walk equivalent for associative arrays).
@@ -1807,55 +1943,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     final public function unshift(mixed ...$args): static
     {
         return $this->prepend(...$args);
-    }
-
-    /**
-     * Appends one or more elements to the end of an array (array_push equivalent).
-     *
-     * Adds one or more elements to the end of the array and returns the instance.
-     *
-     *
-     * Добавляет один или несколько элементов в конец массива (эквивалент array_push).
-     *
-     * Добавляет один или несколько элементов в конец массива и возвращает экземпляр.
-     *
-     * @param mixed ...$args Elements to append to the array.
-     *                       Элементы для добавления в конец массива.
-     * @return static Current CoverArray instance with appended elements.
-     *                Текущий экземпляр CoverArray с добавленными в конец элементами.
-     * @see array_push()
-     */
-    final public function append(mixed ...$args): static
-    {
-        foreach ($args as $value) {
-            $this->data[] = $this->array2cover($value);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Appends one or more elements to the end of an array (append() alias).
-     *
-     * Alias for the append() method. Adds elements to the end of the array.
-     * This method provides compatibility with PHP's array_push function name.
-     *
-     *
-     * Добавляет один или несколько элементов в конец массива (псевдоним append()).
-     *
-     * Псевдоним метода append(). Добавляет элементы в конец массива.
-     * Этот метод обеспечивает совместимость с именем функции PHP array_push.
-     *
-     * @param mixed ...$args Elements to append to the array.
-     *                       Элементы для добавления в конец массива.
-     * @return static Current CoverArray instance with appended elements.
-     *                Текущий экземпляр CoverArray с добавленными в конец элементами.
-     * @see CoverArray::append()
-     * @see array_push()
-     */
-    final public function push(mixed ...$args): static
-    {
-        return $this->append(...$args);
     }
 
     /**
