@@ -392,48 +392,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Returns data by keys of the current object using dot notation.
-     *
-     * Allows accessing nested array elements using dot notation (e.g., 'user.profile.name').
-     * Returns the value at the specified path or null if any segment doesn't exist.
-     *
-     *
-     * Возвращает данные по ключам текущего объекта с использованием точечной нотации.
-     *
-     * Позволяет получать доступ к вложенным элементам массива с использованием точечной нотации
-     * (например, 'user.profile.name'). Возвращает значение по указанному пути или null,
-     * если любой сегмент не существует.
-     *
-     * @param string $path Dot-notation path to the desired value.
-     *                     Путь в точечной нотации к желаемому значению.
-     * @return mixed|static The value at the specified path or null.
-     *                      Значение по указанному пути или null.
-     * @throws InvalidArgumentException If the path is empty.
-     *                                  Если путь пуст.
-     */
-    final public function get(string $path): mixed
-    {
-        if ($path === '') {
-            throw new InvalidArgumentException('Path cannot be empty');
-        }
-
-        [0 => $key, 1 => $other] = array_pad(explode('.', $path, 2), 2, null);
-
-        $actual_data = $this->data[$key] ?? null;
-
-        // The keys in the chain of succession have run out.
-        if ($other === null) {
-            return $actual_data;
-        }
-
-        if (!($actual_data instanceof self) || !method_exists($actual_data, 'get')) {
-            return null;
-        }
-
-        return $this->data[$key]->get($other);
-    }
-
-    /**
      * Specifies data which should be serialized to JSON.
      *
      * Returns data in a format that can be serialized to JSON.
@@ -483,6 +441,82 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         int $flags = JSON_THROW_ON_ERROR
     ): static {
         return new static(json_decode($json, true, $depth, $flags));
+    }
+
+    /**
+     * Returns data by keys of the current object using dot notation.
+     *
+     * Allows accessing nested array elements using dot notation (e.g., 'user.profile.name').
+     * Returns the value at the specified path or processes it through a callback function if provided.
+     * If any segment doesn't exist and no callback is provided, returns null.
+     *
+     * The callback function receives the found value as its only parameter and can transform it.
+     * This allows for elegant data transformation pipelines and handling of missing data.
+     *
+     *
+     * Возвращает данные по ключам текущего объекта с использованием точечной нотации.
+     *
+     * Позволяет получать доступ к вложенным элементам массива с использованием точечной нотации
+     * (например, 'user.profile.name'). Возвращает значение по указанному пути или обрабатывает его
+     * через callback-функцию, если она предоставлена.
+     * Если любой сегмент не существует и callback не предоставлен, возвращает null.
+     *
+     * Callback-функция получает найденное значение в качестве единственного параметра и может преобразовать его.
+     * Это позволяет создавать элегантные конвейеры преобразования данных и обрабатывать отсутствующие данные.
+     *
+     * @param string $path Dot-notation path to the desired value.
+     *                     Путь в точечной нотации к желаемому значению.
+     * @param callable|null $callback Optional callback function to process the found value.
+     *                                Callback signature: `function(mixed $value): mixed`
+     *                                Optionalный callback для обработки найденного значения.
+     *                                Сигнатура: `function(mixed $value): mixed`
+     * @return mixed The value at the specified path, callback result if provided, or null if path doesn't exist.
+     *               Значение по указанному пути, результат callback если предоставлен, или null если путь не существует.
+     * @throws InvalidArgumentException If the path is empty.
+     *                                  Если путь пуст.
+     *
+     * @example
+     *  // Basic usage
+     *  $data->get('user.profile.name'); // Returns the name or null
+     *
+     *  // With callback for transformation
+     *  $response = CoverArray::fromJson($apiResponse)
+     *      ->get('data.users', function (mixed $users): array {
+     *          if ($users === null) {
+     *              return [];
+     *          }
+     *
+     *          /** @var CoverArray $users *\/
+     *          return $users->filter(fn($u) => $u['active'] == '1')
+     *              ->column('name')
+     *              ->getDataAsArray();
+     *      });
+     *
+     *  // With callback for missing data
+     *  $data->get('non.existent.path', function($value) {
+     *      return $value ?? 'default value';
+     *  });
+     */
+    final public function get(string $path, ?callable $callback = null): mixed
+    {
+        if ($path === '') {
+            throw new InvalidArgumentException('Path cannot be empty');
+        }
+
+        [0 => $key, 1 => $other] = array_pad(explode('.', $path, 2), 2, null);
+
+        $actual_data = $this->data[$key] ?? null;
+
+        // The keys in the chain of succession have run out.
+        if ($other === null) {
+            return is_callable($callback) ? $callback($actual_data) : $actual_data;
+        }
+
+        if (!($actual_data instanceof self) || !method_exists($actual_data, 'get')) {
+            return is_callable($callback) ? $callback($actual_data) : null;
+        }
+
+        return $this->data[$key]->get($other, $callback);
     }
 
     /**
@@ -1484,23 +1518,72 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      *
      * Returns a new array containing the results of applying the callback function
      * to the corresponding elements of the current array and additional arrays.
-     * Note: For associative arrays, consider using the each() method instead.
+     * The callback function can receive one parameter per array being processed.
+     *
+     * When $callback is null, this method behaves like array_map(null, ...),
+     * returning an array of arrays (or tuples) containing elements from all input arrays
+     * at corresponding positions.
+     *
+     * Note: For associative arrays where you need both key and value, consider using
+     * the each() method instead. The map() method only passes values to the callback,
+     * not keys.
      *
      *
      * Применяет callback-функцию к элементам массивов (эквивалент array_map).
      *
      * Возвращает новый массив, содержащий результаты применения callback-функции
      * к соответствующим элементам текущего массива и дополнительных массивов.
-     * Примечание: Для ассоциативных массивов рассмотрите использование метода each().
+     * Callback-функция может принимать по одному параметру для каждого обрабатываемого массива.
      *
-     * @param callable|null $callback Callback function to apply.
-     *                                Callback-функция для применения.
+     * Если $callback равен null, метод ведет себя как array_map(null, ...),
+     * возвращая массив массивов (или кортежей), содержащих элементы из всех входных массивов
+     * на соответствующих позициях.
+     *
+     * Примечание: Для ассоциативных массивов, где нужны и ключ, и значение, рассмотрите
+     * использование метода each() вместо этого. Метод map() передает в callback только
+     * значения, а не ключи.
+     *
+     * @param callable|null $callback Callback function to apply. Signature depends on
+     *                                number of arrays: for 1 array: `fn($value)`,
+     *                                for 2 arrays: `fn($value1, $value2)`, etc.
+     *                                If null, returns an array of arrays/tuples.
+     *                                Callback-функция для применения. Сигнатура зависит от
+     *                                количества массивов: для 1 массива: `fn($value)`,
+     *                                для 2 массивов: `fn($value1, $value2)` и т.д.
+     *                                Если null, возвращает массив массивов/кортежей.
      * @param CoverArray|array ...$arrays Additional arrays to process.
      *                                    Дополнительные массивы для обработки.
      * @return static New CoverArray instance with mapped values.
      *                Новый экземпляр CoverArray с преобразованными значениями.
      * @see array_map()
      * @see CoverArray::each()
+     *
+     * @example
+     * // Basic usage with one array
+     * $arr = CoverArray::fromArray([1, 2, 3]);
+     * $result = $arr->map(fn($x) => $x * 2); // [2, 4, 6]
+     *
+     * @example
+     * // With multiple arrays
+     * $arr1 = CoverArray::fromArray([1, 2, 3]);
+     * $arr2 = CoverArray::fromArray([4, 5, 6]);
+     * $result = $arr1->map(fn($a, $b) => $a + $b, $arr2); // [5, 7, 9]
+     *
+     * @example
+     * // With null callback (creates tuples)
+     * $arr1 = CoverArray::fromArray([1, 2, 3]);
+     * $arr2 = CoverArray::fromArray(['a', 'b', 'c']);
+     * $result = $arr1->map(null, $arr2); // [[1, 'a'], [2, 'b'], [3, 'c']]
+     *
+     * @example
+     * // Using array as callback parameter
+     * $arr = CoverArray::fromArray([1, 2, 3, 4]);
+     * $result = $arr->map('strval'); // ['1', '2', '3', '4']
+     *
+     * @example
+     * // Using class method as callback
+     * $arr = CoverArray::fromArray(['hello', 'world']);
+     * $result = $arr->map([$someObject, 'methodName']);
      */
     final public function map(null|callable $callback, CoverArray|array ...$arrays): static
     {

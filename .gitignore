@@ -4,3 +4,5 @@
 /.phpunit.cache
 /html-coverage
 /src/test.php
+/src/SplitTests/TestFileSplitter.php
+/tests/unit/CoverArrayCoreMethods/PhpEquivalentMethodsTestBackup.php
