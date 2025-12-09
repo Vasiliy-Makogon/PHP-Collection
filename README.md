@@ -1,7 +1,7 @@
 ![Cover Array](logo.jpg)
 
 # CoverArray: Object-Oriented Array Wrapper for PHP (PHP Collection)
-<p>Release 2025</p>
+<p>Created by a human, verified and tested by an LLM. Release 2026</p>
 
 ## Why CoverArray Was Created
 

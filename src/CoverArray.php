@@ -1772,6 +1772,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @return static Current CoverArray instance with appended elements.
      *                Текущий экземпляр CoverArray с добавленными в конец элементами.
      * @see array_push()
+     * @see CoverArray::push()
      */
     final public function append(mixed ...$args): static
     {
