@@ -12,6 +12,32 @@ use PHPUnit\Framework\TestCase;
 class AllTest extends TestCase
 {
     /**
+     * Helper method to assert all() behavior with both approaches.
+     *
+     * Вспомогательный метод для проверки поведения all() двумя подходами.
+     */
+    private function assertAllCase(array $data, callable $callback, bool $expected): void
+    {
+        $cover = new CoverArray($data);
+        $result = $cover->all($callback);
+
+        if (function_exists('array_all')) {
+            $nativeResult = array_all($data, $callback);
+            $this->assertSame(
+                $nativeResult,
+                $result,
+                "CoverArray::all() should match array_all() for data: " . var_export($data, true)
+            );
+        } else {
+            $this->assertSame(
+                $expected,
+                $result,
+                "CoverArray::all() returned unexpected result for data: " . var_export($data, true)
+            );
+        }
+    }
+
+    /**
      * Tests the all() method with all elements satisfying condition.
      *
      * This test verifies that the all() method returns true when
@@ -27,16 +53,12 @@ class AllTest extends TestCase
      */
     public function testAllWithAllElementsSatisfyingCondition(): void
     {
-        // Test with array where all elements satisfy condition
-        // Тест с массивом, где все элементы удовлетворяют условию
         $data = [2, 4, 6, 8, 10];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value % 2 === 0; // все числа четные
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAllCase($data, $callback, true);
     }
 
     /**
@@ -55,16 +77,12 @@ class AllTest extends TestCase
      */
     public function testAllWithNotAllElementsSatisfyingCondition(): void
     {
-        // Test with array where not all elements satisfy condition
-        // Тест с массивом, где не все элементы удовлетворяют условию
         $data = [2, 4, 5, 8, 10];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value % 2 === 0; // 5 не четное
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAllCase($data, $callback, false);
     }
 
     /**
@@ -85,16 +103,12 @@ class AllTest extends TestCase
      */
     public function testAllWithArrayOfStringsAllSatisfying(): void
     {
-        // Test with array of strings where all satisfy condition
-        // Тест с массивом строк, где все удовлетворяют условию
         $data = ['apple', 'apricot', 'avocado'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return str_starts_with($value, 'a');
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAllCase($data, $callback, true);
     }
 
     /**
@@ -115,16 +129,12 @@ class AllTest extends TestCase
      */
     public function testAllWithArrayOfStringsNotAllSatisfying(): void
     {
-        // Test with array of strings where not all satisfy condition
-        // Тест с массивом строк, где не все удовлетворяют условию
         $data = ['apple', 'banana', 'apricot'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return str_starts_with($value, 'a');
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAllCase($data, $callback, false);
     }
 
     /**
@@ -145,16 +155,12 @@ class AllTest extends TestCase
      */
     public function testAllWithAssociativeArrayAllSatisfying(): void
     {
-        // Test with associative array where all satisfy condition
-        // Тест с ассоциативным массивом, где все удовлетворяют условию
         $data = ['a' => 1, 'b' => 2, 'c' => 3];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return is_string($key) && is_int($value);
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAllCase($data, $callback, true);
     }
 
     /**
@@ -175,16 +181,12 @@ class AllTest extends TestCase
      */
     public function testAllWithEmptyArray(): void
     {
-        // Test with empty array (should return true)
-        // Тест с пустым массивом (должен вернуть true)
         $data = [];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 10; // для пустого массива всегда true
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAllCase($data, $callback, true);
     }
 
     /**
@@ -205,16 +207,12 @@ class AllTest extends TestCase
      */
     public function testAllWithCallbackCheckingValueAndKey(): void
     {
-        // Test with callback that checks both value and key
-        // Тест с callback, который проверяет и значение, и ключ
         $data = [0 => 'zero', 1 => 'one', 2 => 'two'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return is_int($key) && is_string($value);
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAllCase($data, $callback, true);
     }
 
     /**
@@ -235,15 +233,11 @@ class AllTest extends TestCase
      */
     public function testAllWithMixedTypesInArray(): void
     {
-        // Test with array of mixed types
-        // Тест с массивом смешанных типов
         $data = [0 => 'zero', 1 => 1, 2 => 'two'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->all(function ($value, $key) {
+        $callback = function ($value, $key) {
             return is_string($value);
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAllCase($data, $callback, false);
     }
 }
