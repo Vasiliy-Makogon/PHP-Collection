@@ -12,6 +12,32 @@ use PHPUnit\Framework\TestCase;
 class AnyTest extends TestCase
 {
     /**
+     * Helper method to assert any() behavior with both approaches.
+     *
+     * Вспомогательный метод для проверки поведения any() двумя подходами.
+     */
+    private function assertAnyCase(array $data, callable $callback, bool $expected): void
+    {
+        $cover = new CoverArray($data);
+        $result = $cover->any($callback);
+
+        if (function_exists('array_any')) {
+            $nativeResult = array_any($data, $callback);
+            $this->assertSame(
+                $nativeResult,
+                $result,
+                "CoverArray::any() should match array_any() for data: " . var_export($data, true)
+            );
+        } else {
+            $this->assertSame(
+                $expected,
+                $result,
+                "CoverArray::any() returned unexpected result for data: " . var_export($data, true)
+            );
+        }
+    }
+
+    /**
      * Tests the any() method with array of numbers where condition is satisfied.
      *
      * This test verifies that the any() method returns true when at least
@@ -27,16 +53,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithArrayOfNumbersConditionSatisfied(): void
     {
-        // Test with array of numbers where condition is satisfied
-        // Тест с массивом чисел, где условие выполняется
         $data = [1, 2, 3, 4, 5];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 3;
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAnyCase($data, $callback, true);
     }
 
     /**
@@ -55,16 +77,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithArrayOfNumbersConditionNotSatisfied(): void
     {
-        // Test with array of numbers where condition is not satisfied
-        // Тест с массивом чисел, где условие не выполняется
         $data = [1, 2, 3, 4, 5];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 10;
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAnyCase($data, $callback, false);
     }
 
     /**
@@ -83,16 +101,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithArrayOfStringsConditionSatisfied(): void
     {
-        // Test with array of strings where condition is satisfied
-        // Тест с массивом строк, где условие выполняется
         $data = ['apple', 'banana', 'cherry'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value === 'banana';
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAnyCase($data, $callback, true);
     }
 
     /**
@@ -111,16 +125,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithArrayOfStringsConditionNotSatisfied(): void
     {
-        // Test with array of strings where condition is not satisfied
-        // Тест с массивом строк, где условие не выполняется
         $data = ['apple', 'banana', 'cherry'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value === 'orange';
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAnyCase($data, $callback, false);
     }
 
     /**
@@ -139,16 +149,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithAssociativeArrayConditionSatisfied(): void
     {
-        // Test with associative array where condition is satisfied
-        // Тест с ассоциативным массивом, где условие выполняется
         $data = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key === 'age' && $value === 30;
-        });
+        };
 
-        $this->assertTrue($result);
+        $this->assertAnyCase($data, $callback, true);
     }
 
     /**
@@ -167,16 +173,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithAssociativeArrayConditionNotSatisfied(): void
     {
-        // Test with associative array where condition is not satisfied
-        // Тест с ассоциативным массивом, где условие не выполняется
         $data = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key === 'country' && $value === 'USA';
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAnyCase($data, $callback, false);
     }
 
     /**
@@ -197,16 +199,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithEmptyArray(): void
     {
-        // Test with empty array
-        // Тест с пустым массивом
         $data = [];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value === 'anything';
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAnyCase($data, $callback, false);
     }
 
     /**
@@ -227,16 +225,12 @@ class AnyTest extends TestCase
      */
     public function testAnyWithCallbackUsingValueAndKey(): void
     {
-        // Test with callback that uses both value and key
-        // Тест с callback, который использует и значение, и ключ
         $data = [10 => 'ten', 20 => 'twenty', 30 => 'thirty'];
-        $cover = new CoverArray($data);
+        $callback = function ($value, $key) {
+            return $key > 15 && str_starts_with($value, 'tw');
+        };
 
-        $result = $cover->any(function ($value, $key) {
-            return $key > 15 && strpos($value, 'tw') === 0;
-        });
-
-        $this->assertTrue($result);
+        $this->assertAnyCase($data, $callback, true);
     }
 
     /**
@@ -255,15 +249,11 @@ class AnyTest extends TestCase
      */
     public function testAnyWithCallbackUsingValueAndKeyConditionNotSatisfied(): void
     {
-        // Test with callback that uses both value and key where condition is not satisfied
-        // Тест с callback, который использует и значение, и ключ, где условие не выполняется
         $data = [10 => 'ten', 20 => 'twenty', 30 => 'thirty'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->any(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key > 40 || $value === 'forty';
-        });
+        };
 
-        $this->assertFalse($result);
+        $this->assertAnyCase($data, $callback, false);
     }
 }

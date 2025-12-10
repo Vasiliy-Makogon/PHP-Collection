@@ -12,6 +12,32 @@ use PHPUnit\Framework\TestCase;
 class FindTest extends TestCase
 {
     /**
+     * Helper method to assert find() behavior with both approaches.
+     *
+     * Вспомогательный метод для проверки поведения find() двумя подходами.
+     */
+    private function assertFindCase(array $data, callable $callback, mixed $expected): void
+    {
+        $cover = new CoverArray($data);
+        $result = $cover->find($callback);
+
+        if (function_exists('array_find')) {
+            $nativeResult = array_find($data, $callback);
+            $this->assertSame(
+                $nativeResult,
+                $result,
+                "CoverArray::find() should match array_find() for data: " . var_export($data, true)
+            );
+        } else {
+            $this->assertSame(
+                $expected,
+                $result,
+                "CoverArray::find() returned unexpected result for data: " . var_export($data, true)
+            );
+        }
+    }
+
+    /**
      * Tests the find() method with array of numbers (element found).
      *
      * This test verifies that the find() method correctly returns the first
@@ -27,16 +53,12 @@ class FindTest extends TestCase
      */
     public function testFindWithArrayOfNumbersFound(): void
     {
-        // Test finding an element in array of numbers
-        // Тест поиска элемента в массиве чисел
         $data = [1, 3, 5, 7, 9];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 4 && $key === 2;
-        });
+        };
 
-        $this->assertSame(5, $result);
+        $this->assertFindCase($data, $callback, 5);
     }
 
     /**
@@ -55,16 +77,12 @@ class FindTest extends TestCase
      */
     public function testFindWithArrayOfNumbersNotFound(): void
     {
-        // Test finding an element in array of numbers (not found)
-        // Тест поиска элемента в массиве чисел (не найден)
         $data = [1, 3, 5, 7, 9];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 10;
-        });
+        };
 
-        $this->assertNull($result);
+        $this->assertFindCase($data, $callback, null);
     }
 
     /**
@@ -83,16 +101,12 @@ class FindTest extends TestCase
      */
     public function testFindWithArrayOfStringsFound(): void
     {
-        // Test finding an element in array of strings
-        // Тест поиска элемента в массиве строк
         $data = ['apple', 'banana', 'cherry', 'date'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return str_starts_with($value, 'c');
-        });
+        };
 
-        $this->assertSame('cherry', $result);
+        $this->assertFindCase($data, $callback, 'cherry');
     }
 
     /**
@@ -111,16 +125,12 @@ class FindTest extends TestCase
      */
     public function testFindWithArrayOfStringsNotFound(): void
     {
-        // Test finding an element in array of strings (not found)
-        // Тест поиска элемента в массиве строк (не найден)
         $data = ['apple', 'banana', 'cherry', 'date'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return str_starts_with($value, 'z');
-        });
+        };
 
-        $this->assertNull($result);
+        $this->assertFindCase($data, $callback, null);
     }
 
     /**
@@ -139,16 +149,12 @@ class FindTest extends TestCase
      */
     public function testFindWithAssociativeArrayFound(): void
     {
-        // Test finding an element in associative array
-        // Тест поиска элемента в ассоциативном массиве
         $data = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key === 'age' && $value > 20;
-        });
+        };
 
-        $this->assertSame(30, $result);
+        $this->assertFindCase($data, $callback, 30);
     }
 
     /**
@@ -167,16 +173,12 @@ class FindTest extends TestCase
      */
     public function testFindWithAssociativeArrayNotFound(): void
     {
-        // Test finding an element in associative array (not found)
-        // Тест поиска элемента в ассоциативном массиве (не найден)
         $data = ['name' => 'John', 'age' => 30, 'city' => 'New York'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key === 'country';
-        });
+        };
 
-        $this->assertNull($result);
+        $this->assertFindCase($data, $callback, null);
     }
 
     /**
@@ -195,16 +197,12 @@ class FindTest extends TestCase
      */
     public function testFindWithEmptyArray(): void
     {
-        // Test with empty array
-        // Тест с пустым массивом
         $data = [];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value === 'anything';
-        });
+        };
 
-        $this->assertNull($result);
+        $this->assertFindCase($data, $callback, null);
     }
 
     /**
@@ -223,16 +221,12 @@ class FindTest extends TestCase
      */
     public function testFindFirstWhenMultipleElementsSatisfyCondition(): void
     {
-        // Test finding first element when multiple elements satisfy condition
-        // Тест поиска первого элемента, когда несколько элементов удовлетворяют условию
         $data = [10, 20, 30, 40, 50];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value >= 30;
-        });
+        };
 
-        $this->assertSame(30, $result);
+        $this->assertFindCase($data, $callback, 30);
     }
 
     /**
@@ -251,16 +245,12 @@ class FindTest extends TestCase
      */
     public function testFindWithCallbackUsingValueAndKey(): void
     {
-        // Test with callback that uses both value and key
-        // Тест с callback, который использует и значение, и ключ
         $data = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $key === 2 && strlen($value) === 3;
-        });
+        };
 
-        $this->assertSame('two', $result);
+        $this->assertFindCase($data, $callback, 'two');
     }
 
     /**
@@ -279,16 +269,12 @@ class FindTest extends TestCase
      */
     public function testFindWithMultipleConditionsFound(): void
     {
-        // Test finding element that matches multiple conditions
-        // Тест поиска элемента, соответствующего нескольким условиям
         $data = ['a' => 5, 'b' => 10, 'c' => 15, 'd' => 20];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value % 5 === 0 && $value % 3 === 0;
-        });
+        };
 
-        $this->assertSame(15, $result);
+        $this->assertFindCase($data, $callback, 15);
     }
 
     /**
@@ -307,16 +293,12 @@ class FindTest extends TestCase
      */
     public function testFindWithMultipleConditionsNotFound(): void
     {
-        // Test finding element that matches multiple conditions (not found)
-        // Тест поиска элемента, соответствующего нескольким условиям (не найден)
         $data = ['a' => 5, 'b' => 10, 'c' => 15, 'd' => 20];
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value > 100;
-        });
+        };
 
-        $this->assertNull($result);
+        $this->assertFindCase($data, $callback, null);
     }
 
     /**
@@ -337,8 +319,6 @@ class FindTest extends TestCase
      */
     public function testFindWithCoverArrayValues(): void
     {
-        // Test with CoverArray as element values
-        // Тест со значениями элементов типа CoverArray
         $innerCover1 = new CoverArray(['id' => 1, 'active' => true]);
         $innerCover2 = new CoverArray(['id' => 2, 'active' => false]);
         $innerCover3 = new CoverArray(['id' => 3, 'active' => true]);
@@ -349,12 +329,10 @@ class FindTest extends TestCase
             'user3' => $innerCover3
         ];
 
-        $cover = new CoverArray($data);
-
-        $result = $cover->find(function ($value, $key) {
+        $callback = function ($value, $key) {
             return $value instanceof CoverArray && $value['id'] === 3;
-        });
+        };
 
-        $this->assertSame($innerCover3, $result);
+        $this->assertFindCase($data, $callback, $innerCover3);
     }
 }
