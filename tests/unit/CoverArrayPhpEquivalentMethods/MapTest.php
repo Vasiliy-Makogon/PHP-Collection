@@ -450,4 +450,43 @@ class MapTest extends TestCase
 
         $this->assertSame($expected, $result->getDataAsArray());
     }
+
+    /**
+     * Tests the map() method with CoverArray objects in the array.
+     *
+     * This test verifies that the map() method correctly handles
+     * arrays containing CoverArray objects, applying the callback
+     * to each CoverArray element, mirroring PHP's array_map() function.
+     *
+     *
+     * Тестирование метода map() с объектами CoverArray в массиве.
+     *
+     * Этот тест проверяет, что метод map() корректно обрабатывает
+     * массивы, содержащие объекты CoverArray, применяя callback
+     * к каждому элементу CoverArray, отражая функцию array_map() PHP.
+     *
+     * @see CoverArray::map()
+     * @see array_map()
+     */
+    public function testMapWithCoverArrayObjectsInArray(): void
+    {
+        // Test with CoverArray objects in the array
+        // Тест с объектами CoverArray в массиве
+        $data = [
+            new CoverArray(['a' => 1]),
+            new CoverArray(['b' => 2]),
+            new CoverArray(['c' => 3])
+        ];
+
+        $callback = function ($coverArray) {
+            return $coverArray->getDataAsArray();
+        };
+
+        $expected = array_map($callback, $data);
+
+        $cover = new CoverArray($data);
+        $result = $cover->map($callback);
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 }

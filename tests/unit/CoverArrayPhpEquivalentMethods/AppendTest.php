@@ -145,6 +145,39 @@ class AppendTest extends TestCase
     }
 
     /**
+     * Tests the append() method with CoverArray object as element.
+     *
+     * This test verifies that the append() method correctly handles
+     * CoverArray objects as elements, preserving the same object instance,
+     * mirroring the behavior when arrays are converted to CoverArray.
+     *
+     *
+     * Тестирование метода append() с объектом CoverArray в качестве элемента.
+     *
+     * Этот тест проверяет, что метод append() корректно обрабатывает
+     * объекты CoverArray как элементы, сохраняя тот же экземпляр объекта,
+     * отражая поведение при преобразовании массивов в CoverArray.
+     *
+     * @see CoverArray::append()
+     */
+    public function testAppendWithCoverArrayObject(): void
+    {
+        // Test appending CoverArray object (should keep the same object)
+        // Тест добавления объекта CoverArray (должен сохранить тот же объект)
+        $data = [1, 2];
+        $coverValue = new CoverArray(['nested' => 'value']);
+
+        $cover = new CoverArray($data);
+        $cover->append($coverValue);
+
+        // Проверяем, что третий элемент является тем же CoverArray (не клонированным)
+        $thirdElement = $cover->item(2);
+        $this->assertInstanceOf(CoverArray::class, $thirdElement);
+        $this->assertSame($coverValue, $thirdElement); // Проверяем, что это тот же объект
+        $this->assertSame(['nested' => 'value'], $thirdElement->getDataAsArray());
+    }
+
+    /**
      * Tests the append() method with empty array.
      *
      * This test verifies that the append() method correctly adds

@@ -186,6 +186,41 @@ class FillTest extends TestCase
     }
 
     /**
+     * Tests the fill() method with CoverArray value.
+     *
+     * This test verifies that the fill() static method correctly handles
+     * CoverArray objects as values, preserving them without conversion.
+     *
+     *
+     * Тестирование метода fill() со значением типа CoverArray.
+     *
+     * Этот тест проверяет, что статический метод fill() корректно обрабатывает
+     * объекты CoverArray как значения, сохраняя их без преобразования.
+     *
+     * @see CoverArray::fill()
+     * @see array_fill()
+     */
+    public function testFillWithCoverArrayValue(): void
+    {
+        // Test with CoverArray value
+        // Тест со значением типа CoverArray
+        $coverArrayValue = new CoverArray(['x' => 1, 'y' => 2]);
+        $expected = array_fill(0, 3, $coverArrayValue);
+
+        $result = CoverArray::fill(0, 3, $coverArrayValue);
+
+        $this->assertCount(3, $result);
+
+        // Проверяем, что все элементы являются тем же объектом CoverArray
+        $this->assertSame($coverArrayValue, $result[0]);
+        $this->assertSame($coverArrayValue, $result[1]);
+        $this->assertSame($coverArrayValue, $result[2]);
+
+        // Проверяем, что это именно CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result[0]);
+    }
+
+    /**
      * Tests the fill() method with null value.
      *
      * This test verifies that the fill() static method correctly creates
