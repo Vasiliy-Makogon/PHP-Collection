@@ -12,147 +12,351 @@ use PHPUnit\Framework\TestCase;
 class DiffTest extends TestCase
 {
     /**
-     * Tests the diff() method (array_diff equivalent).
+     * Tests the diff() method with simple arrays.
      *
      * This test verifies that the diff() method correctly computes
-     * the difference of arrays, comparing values across multiple
-     * CoverArray or array arguments, mirroring PHP's array_diff() function.
+     * the difference of arrays for simple indexed arrays,
+     * comparing values across multiple arrays, mirroring PHP's array_diff() function.
      *
      *
-     * Тестирование метода diff() (эквивалент array_diff).
+     * Тестирование метода diff() с простыми массивами.
      *
      * Этот тест проверяет, что метод diff() корректно вычисляет
-     * расхождение массивов, сравнивая значения через несколько
-     * аргументов CoverArray или массивов, отражая функцию array_diff() PHP.
+     * расхождение массивов для простых индексных массивов,
+     * сравнивая значения через несколько массивов, отражая функцию array_diff() PHP.
      *
      * @see CoverArray::diff()
      * @see array_diff()
      */
-    public function testDiffMethod(): void
+    public function testDiffWithSimpleArrays(): void
     {
         // Test with simple arrays
         // Тест с простыми массивами
-        $data1 = [1, 2, 3, 4, 5];
+        $data = [1, 2, 3, 4, 5];
         $diff1 = [2, 4];
         $diff2 = [3];
 
-        $expected1 = array_diff($data1, $diff1, $diff2);
+        $expected = array_diff($data, $diff1, $diff2);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->diff($diff1, $diff2)->getDataAsArray()
+            $expected,
+            $cover->diff($diff1, $diff2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->diff(
+            $expected,
+            $cover->diff(
                 new CoverArray($diff1),
                 new CoverArray($diff2)
             )->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diff() method with associative arrays.
+     *
+     * This test verifies that the diff() method correctly computes
+     * the difference of associative arrays, comparing values (not keys)
+     * across arrays, mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() с ассоциативными массивами.
+     *
+     * Этот тест проверяет, что метод diff() корректно вычисляет
+     * расхождение ассоциативных массивов, сравнивая значения (не ключи)
+     * через массивы, отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithAssociativeArrays(): void
+    {
         // Test with associative arrays (compares values, not keys)
         // Тест с ассоциативными массивами (сравнивает значения, не ключи)
-        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
-        $diff3 = ['banana', 'date'];
+        $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
+        $diff = ['banana', 'date'];
 
-        $expected2 = array_diff($data2, $diff3);
+        $expected = array_diff($data, $diff);
 
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->diff($diff3)->getDataAsArray()
+            $expected,
+            $cover->diff($diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->diff(new CoverArray($diff3))->getDataAsArray()
+            $expected,
+            $cover->diff(new CoverArray($diff))->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diff() method with mixed types.
+     *
+     * This test verifies that the diff() method correctly computes
+     * the difference of arrays with mixed types (integers and strings),
+     * comparing values with strict type comparison, mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() со смешанными типами.
+     *
+     * Этот тест проверяет, что метод diff() корректно вычисляет
+     * расхождение массивов со смешанными типами (целые числа и строки),
+     * сравнивая значения со строгим сравнением типов, отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithMixedTypes(): void
+    {
         // Test with mixed types
         // Тест со смешанными типами
-        $data3 = [1, '1', 2, '2', 3];
-        $diff4 = [1, '2'];
+        $data = [1, '1', 2, '2', 3];
+        $diff = [1, '2'];
 
-        $expected3 = array_diff($data3, $diff4);
+        $expected = array_diff($data, $diff);
 
-        $cover3 = new CoverArray($data3);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->diff($diff4)->getDataAsArray()
+            $expected,
+            $cover->diff($diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->diff(new CoverArray($diff4))->getDataAsArray()
+            $expected,
+            $cover->diff(new CoverArray($diff))->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diff() method with empty diff array.
+     *
+     * This test verifies that the diff() method correctly handles
+     * empty diff arrays, returning the entire original array,
+     * mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() с пустым массивом для сравнения.
+     *
+     * Этот тест проверяет, что метод diff() корректно обрабатывает
+     * пустые массивы для сравнения, возвращая весь исходный массив,
+     * отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithEmptyDiffArray(): void
+    {
         // Test with empty diff array
         // Тест с пустым массивом для сравнения
-        $data4 = ['a', 'b', 'c'];
-        $diff5 = [];
+        $data = ['a', 'b', 'c'];
+        $diff = [];
 
-        $expected4 = array_diff($data4, $diff5);
+        $expected = array_diff($data, $diff);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->diff($diff5)->getDataAsArray()
+            $expected,
+            $cover->diff($diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->diff(new CoverArray($diff5))->getDataAsArray()
+            $expected,
+            $cover->diff(new CoverArray($diff))->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diff() method with multiple diff arrays.
+     *
+     * This test verifies that the diff() method correctly computes
+     * the difference of arrays with multiple comparison arrays,
+     * comparing values across all arrays, mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() с несколькими массивами для сравнения.
+     *
+     * Этот тест проверяет, что метод diff() корректно вычисляет
+     * расхождение массивов с несколькими массивами для сравнения,
+     * сравнивая значения через все массивы, отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithMultipleDiffArrays(): void
+    {
         // Test with multiple diff arrays
         // Тест с несколькими массивами для сравнения
-        $data5 = ['red', 'green', 'blue', 'yellow', 'purple'];
-        $diff6 = ['green', 'yellow'];
-        $diff7 = ['red'];
-        $diff8 = ['blue'];
+        $data = ['red', 'green', 'blue', 'yellow', 'purple'];
+        $diff1 = ['green', 'yellow'];
+        $diff2 = ['red'];
+        $diff3 = ['blue'];
 
-        $expected5 = array_diff($data5, $diff6, $diff7, $diff8);
+        $expected = array_diff($data, $diff1, $diff2, $diff3);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->diff($diff6, $diff7, $diff8)->getDataAsArray()
+            $expected,
+            $cover->diff($diff1, $diff2, $diff3)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->diff(
-                new CoverArray($diff6),
-                new CoverArray($diff7),
-                new CoverArray($diff8)
+            $expected,
+            $cover->diff(
+                new CoverArray($diff1),
+                new CoverArray($diff2),
+                new CoverArray($diff3)
             )->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the diff() method with three diff arrays of different types.
+     *
+     * This test verifies that the diff() method correctly computes
+     * the difference of arrays with three comparison arrays of mixed argument types,
+     * comparing values across all arrays, mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() с тремя массивами для сравнения разных типов.
+     *
+     * Этот тест проверяет, что метод diff() корректно вычисляет
+     * расхождение массивов с тремя массивами для сравнения смешанных типов аргументов,
+     * сравнивая значения через все массивы, отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithThreeDiffArraysMixedTypes(): void
+    {
+        // Test with three diff arrays of different types
+        // Тест с тремя массивами для сравнения разных типов
+        $data = [1, 2, 3, 4, 5, 6, 7];
+        $diff1 = [2, 4];
+        $diff2 = new CoverArray([3, 5]);
+        $diff3 = [6];
+
+        $expected = array_diff($data, [2, 4], [3, 5], [6]);
+
+        $cover = new CoverArray($data);
+
+        $result = $cover->diff($diff1, $diff2, $diff3);
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the diff() method with all values present in diff arrays.
+     *
+     * This test verifies that the diff() method correctly returns
+     * an empty array when all values are present in the diff arrays,
+     * mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff(), когда все значения присутствуют в массивах сравнения.
+     *
+     * Этот тест проверяет, что метод diff() корректно возвращает
+     * пустой массив, когда все значения присутствуют в массивах сравнения,
+     * отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithAllValuesInDiffArrays(): void
+    {
+        // Test with all values present in diff arrays
+        // Тест, когда все значения присутствуют в массивах сравнения
+        $data = ['a', 'b', 'c'];
+        $diff1 = ['a', 'b'];
+        $diff2 = ['c'];
+
+        $expected = array_diff($data, $diff1, $diff2);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->diff($diff1, $diff2)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->diff(
+                new CoverArray($diff1),
+                new CoverArray($diff2)
+            )->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the diff() method with duplicate values.
+     *
+     * This test verifies that the diff() method correctly handles
+     * duplicate values in the original array, removing all occurrences
+     * of values found in diff arrays, mirroring PHP's array_diff() function.
+     *
+     *
+     * Тестирование метода diff() с дублирующимися значениями.
+     *
+     * Этот тест проверяет, что метод diff() корректно обрабатывает
+     * дублирующиеся значения в исходном массиве, удаляя все вхождения
+     * значений, найденных в массивах сравнения, отражая функцию array_diff() PHP.
+     *
+     * @see CoverArray::diff()
+     * @see array_diff()
+     */
+    public function testDiffWithDuplicateValues(): void
+    {
+        // Test with duplicate values
+        // Тест с дублирующимися значениями
+        $data = ['a', 'b', 'a', 'c', 'b', 'd'];
+        $diff = ['a', 'b'];
+
+        $expected = array_diff($data, $diff);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->diff($diff)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->diff(new CoverArray($diff))->getDataAsArray()
         );
     }
 }

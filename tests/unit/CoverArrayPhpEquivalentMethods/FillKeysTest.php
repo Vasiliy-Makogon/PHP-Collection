@@ -174,6 +174,58 @@ class FillKeysTest extends TestCase
     }
 
     /**
+     * Tests the fillKeys() method with CoverArray value.
+     *
+     * This test verifies that the fillKeys() static method correctly handles
+     * CoverArray objects as values, converting them appropriately,
+     * mirroring PHP's array_fill_keys() function behavior.
+     *
+     *
+     * Тестирование метода fillKeys() со значением CoverArray.
+     *
+     * Этот тест проверяет, что статический метод fillKeys() корректно обрабатывает
+     * объекты CoverArray как значения, преобразуя их соответствующим образом,
+     * отражая поведение функции array_fill_keys() PHP.
+     *
+     * @see CoverArray::fillKeys()
+     * @see array_fill_keys()
+     */
+    public function testFillKeysWithCoverArrayValue(): void
+    {
+        // Test with CoverArray as value
+        // Тест с CoverArray как значением
+        $keys = ['a', 'b', 'c'];
+        $value = new CoverArray(['nested' => 'value']);
+
+        // array_fill_keys будет создавать массив с объектами CoverArray
+        $expected = array_fill_keys($keys, $value);
+
+        // arguments as array
+        // аргументы как массив
+        $result = CoverArray::fillKeys($keys, $value);
+
+        // Проверяем, что результат - CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result);
+
+        // Проверяем, что каждый элемент является CoverArray
+        foreach ($result as $item) {
+            $this->assertInstanceOf(CoverArray::class, $item);
+        }
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $result = CoverArray::fillKeys(new CoverArray($keys), $value);
+
+        // Проверяем, что результат - CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result);
+
+        // Проверяем, что каждый элемент является CoverArray
+        foreach ($result as $item) {
+            $this->assertInstanceOf(CoverArray::class, $item);
+        }
+    }
+
+    /**
      * Tests the fillKeys() method with null value.
      *
      * This test verifies that the fillKeys() static method correctly creates
@@ -318,8 +370,19 @@ class FillKeysTest extends TestCase
 
         $expected = array_fill_keys($keys, $value);
 
-        $result = CoverArray::fillKeys($keys, $value);
-        $this->assertSame($expected, $result->getDataAsArray());
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            CoverArray::fillKeys($keys, $value)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            CoverArray::fillKeys(new CoverArray($keys), $value)->getDataAsArray()
+        );
     }
 
     /**
@@ -359,5 +422,59 @@ class FillKeysTest extends TestCase
             $expected,
             CoverArray::fillKeys(new CoverArray($keys), $value)->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the fillKeys() method with CoverArray value containing nested arrays.
+     *
+     * This test verifies that the fillKeys() static method correctly handles
+     * CoverArray objects containing nested arrays as values, converting them
+     * appropriately, mirroring PHP's array_fill_keys() function behavior.
+     *
+     *
+     * Тестирование метода fillKeys() со значением CoverArray, содержащим вложенные массивы.
+     *
+     * Этот тест проверяет, что статический метод fillKeys() корректно обрабатывает
+     * объекты CoverArray, содержащие вложенные массивы, как значения, преобразуя их
+     * соответствующим образом, отражая поведение функции array_fill_keys() PHP.
+     *
+     * @see CoverArray::fillKeys()
+     * @see array_fill_keys()
+     */
+    public function testFillKeysWithNestedCoverArrayValue(): void
+    {
+        // Test with CoverArray containing nested arrays as value
+        // Тест с CoverArray, содержащим вложенные массивы, как значение
+        $keys = ['key1', 'key2', 'key3'];
+        $value = new CoverArray([
+            'nested' => ['a' => 1, 'b' => 2],
+            'another' => 'value'
+        ]);
+
+        // arguments as array
+        // аргументы как массив
+        $result = CoverArray::fillKeys($keys, $value);
+
+        // Проверяем, что результат - CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result);
+
+        // Проверяем, что каждый элемент является CoverArray и содержит правильные данные
+        foreach ($result as $item) {
+            $this->assertInstanceOf(CoverArray::class, $item);
+            $this->assertSame(['nested' => ['a' => 1, 'b' => 2], 'another' => 'value'], $item->getDataAsArray());
+        }
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $result = CoverArray::fillKeys(new CoverArray($keys), $value);
+
+        // Проверяем, что результат - CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result);
+
+        // Проверяем, что каждый элемент является CoverArray и содержит правильные данные
+        foreach ($result as $item) {
+            $this->assertInstanceOf(CoverArray::class, $item);
+            $this->assertSame(['nested' => ['a' => 1, 'b' => 2], 'another' => 'value'], $item->getDataAsArray());
+        }
     }
 }

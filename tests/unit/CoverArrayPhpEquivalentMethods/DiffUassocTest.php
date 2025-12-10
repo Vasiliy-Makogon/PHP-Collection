@@ -12,132 +12,225 @@ use PHPUnit\Framework\TestCase;
 class DiffUassocTest extends TestCase
 {
     /**
-     * Tests the diffUassoc() method (array_diff_uassoc equivalent).
-     *
-     * This test verifies that the diffUassoc() method correctly computes
-     * the difference of arrays with additional index check using a user-defined
-     * callback function for key comparison, mirroring PHP's array_diff_uassoc().
-     *
-     *
-     * Тестирование метода diffUassoc() (эквивалент array_diff_uassoc).
-     *
-     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
-     * расхождение массивов с дополнительной проверкой индекса с использованием
-     * пользовательской callback-функции для сравнения ключей, отражая array_diff_uassoc() PHP.
-     *
-     * @see CoverArray::diffUassoc()
-     * @see array_diff_uassoc()
+     * Standard comparison callback function.
+     * Стандартная callback-функция сравнения.
      */
-    public function testDiffUassocMethod(): void
+    private function getStandardCallback(): callable
     {
-        $callback = function ($a, $b) {
+        return function ($a, $b) {
             if ($a === $b) {
                 return 0;
             }
             return $a <=> $b;
         };
+    }
+
+    /**
+     * Tests the diffUassoc() method with string keys using standard callback.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays with string keys using a user-defined
+     * callback function for key comparison, mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() со строковыми ключами с использованием стандартного callback.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов со строковыми ключами с использованием
+     * пользовательской callback-функции для сравнения ключей, отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithStringKeys(): void
+    {
+        $callback = $this->getStandardCallback();
 
         // Test with string keys using callback
         // Тест со строковыми ключами с использованием callback
-        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
-        $diff1 = ['a' => 1, 'b' => 20];
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $diff = ['a' => 1, 'b' => 20];
 
-        $expected1 = array_diff_uassoc($data1, $diff1, $callback);
+        $expected = array_diff_uassoc($data, $diff, $callback);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->diffUassoc($callback, $diff1)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, $diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->diffUassoc($callback, new CoverArray($diff1))->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, new CoverArray($diff))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the diffUassoc() method with numeric keys using standard callback.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays with numeric keys using a user-defined
+     * callback function for key comparison, mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() с числовыми ключами с использованием стандартного callback.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов с числовыми ключами с использованием
+     * пользовательской callback-функции для сравнения ключей, отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithNumericKeys(): void
+    {
+        $callback = $this->getStandardCallback();
 
         // Test with numeric keys using callback
         // Тест с числовыми ключами с использованием callback
-        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
-        $diff2 = [0 => 'zero', 1 => 'ONE'];
+        $data = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $diff = [0 => 'zero', 1 => 'ONE'];
 
-        $expected2 = array_diff_uassoc($data2, $diff2, $callback);
+        $expected = array_diff_uassoc($data, $diff, $callback);
 
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->diffUassoc($callback, $diff2)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, $diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->diffUassoc($callback, new CoverArray($diff2))->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, new CoverArray($diff))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the diffUassoc() method with multiple diff arrays.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays with multiple diff arrays using a user-defined
+     * callback function for key comparison, mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() с несколькими массивами для сравнения.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов с несколькими массивами для сравнения с использованием
+     * пользовательской callback-функции для сравнения ключей, отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithMultipleDiffArrays(): void
+    {
+        $callback = $this->getStandardCallback();
 
         // Test with multiple diff arrays
         // Тест с несколькими массивами для сравнения
-        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $diff3 = ['a' => 1, 'b' => 20];
-        $diff4 = ['c' => 30, 'd' => 4];
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $diff1 = ['a' => 1, 'b' => 20];
+        $diff2 = ['c' => 30, 'd' => 4];
 
-        $expected3 = array_diff_uassoc($data3, $diff3, $diff4, $callback);
+        $expected = array_diff_uassoc($data, $diff1, $diff2, $callback);
 
-        $cover3 = new CoverArray($data3);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->diffUassoc($callback, $diff3, $diff4)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, $diff1, $diff2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->diffUassoc(
+            $expected,
+            $cover->diffUassoc(
                 $callback,
-                new CoverArray($diff3),
-                new CoverArray($diff4)
+                new CoverArray($diff1),
+                new CoverArray($diff2)
             )->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diffUassoc() method with case-insensitive comparison callback.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays using a case-insensitive callback function
+     * for key comparison, mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() с callback для сравнения без учета регистра.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов с использованием callback-функции без учета регистра
+     * для сравнения ключей, отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithCaseInsensitiveCallback(): void
+    {
         // Test with case-insensitive comparison callback
         // Тест с callback для сравнения без учета регистра
         $caseInsensitiveCallback = function ($a, $b) {
             return strcasecmp((string) $a, (string) $b);
         };
 
-        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
-        $diff5 = ['a' => 'apple', 'b' => 'banana'];
+        $data = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $diff = ['a' => 'apple', 'b' => 'banana'];
 
-        $expected4 = array_diff_uassoc($data4, $diff5, $caseInsensitiveCallback);
+        $expected = array_diff_uassoc($data, $diff, $caseInsensitiveCallback);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->diffUassoc($caseInsensitiveCallback, $diff5)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($caseInsensitiveCallback, $diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->diffUassoc($caseInsensitiveCallback, new CoverArray($diff5))->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($caseInsensitiveCallback, new CoverArray($diff))->getDataAsArray()
         );
+    }
 
+    /**
+     * Tests the diffUassoc() method with custom key comparison logic.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays using custom key comparison logic
+     * (comparing by key length), mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() с пользовательской логикой сравнения ключей.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов с использованием пользовательской логики сравнения ключей
+     * (сравнение по длине ключа), отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithCustomKeyComparisonLogic(): void
+    {
         // Test with custom key comparison logic
         // Тест с пользовательской логикой сравнения ключей
         $customCallback = function ($a, $b) {
@@ -154,48 +247,155 @@ class DiffUassocTest extends TestCase
             return $lenA <=> $lenB;
         };
 
-        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
-        $diff6 = ['aa' => 10, 'ccc' => 3];
+        $data = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $diff = ['aa' => 10, 'ccc' => 3];
 
-        $expected5 = array_diff_uassoc($data5, $diff6, $customCallback);
+        $expected = array_diff_uassoc($data, $diff, $customCallback);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->diffUassoc($customCallback, $diff6)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($customCallback, $diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->diffUassoc($customCallback, new CoverArray($diff6))->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($customCallback, new CoverArray($diff))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the diffUassoc() method with empty diff array.
+     *
+     * This test verifies that the diffUassoc() method correctly handles
+     * empty diff arrays, returning the entire original array,
+     * mirroring PHP's array_diff_uassoc() function.
+     *
+     *
+     * Тестирование метода diffUassoc() с пустым массивом для сравнения.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно обрабатывает
+     * пустые массивы для сравнения, возвращая весь исходный массив,
+     * отражая функцию array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithEmptyDiffArray(): void
+    {
+        $callback = $this->getStandardCallback();
 
         // Test with empty diff array
         // Тест с пустым массивом для сравнения
-        $data6 = ['x' => 10, 'y' => 20];
-        $diff7 = [];
+        $data = ['x' => 10, 'y' => 20];
+        $diff = [];
 
-        $expected6 = array_diff_uassoc($data6, $diff7, $callback);
+        $expected = array_diff_uassoc($data, $diff, $callback);
 
-        $cover6 = new CoverArray($data6);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected6,
-            $cover6->diffUassoc($callback, $diff7)->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, $diff)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected6,
-            $cover6->diffUassoc($callback, new CoverArray($diff7))->getDataAsArray()
+            $expected,
+            $cover->diffUassoc($callback, new CoverArray($diff))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the diffUassoc() method with mixed key types.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays with mixed key types (strings, integers, numeric strings)
+     * using a user-defined callback function for key comparison,
+     * mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() со смешанными типами ключей.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов со смешанными типами ключей (строки, целые числа, числовые строки)
+     * с использованием пользовательской callback-функции для сравнения ключей,
+     * отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithMixedKeyTypes(): void
+    {
+        $callback = $this->getStandardCallback();
+
+        // Test with mixed key types
+        // Тест со смешанными типами ключей
+        $data = ['a' => 'apple', 0 => 'zero', '1' => 'one', 2 => 'two'];
+        $diff = ['a' => 'apricot', 0 => 'zero', '1' => 'ONE'];
+
+        $expected = array_diff_uassoc($data, $diff, $callback);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->diffUassoc($callback, $diff)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->diffUassoc($callback, new CoverArray($diff))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the diffUassoc() method with three diff arrays of mixed argument types.
+     *
+     * This test verifies that the diffUassoc() method correctly computes
+     * the difference of arrays with three diff arrays of mixed argument types
+     * (array and CoverArray) using a user-defined callback function for key comparison,
+     * mirroring PHP's array_diff_uassoc().
+     *
+     *
+     * Тестирование метода diffUassoc() с тремя массивами для сравнения смешанных типов аргументов.
+     *
+     * Этот тест проверяет, что метод diffUassoc() корректно вычисляет
+     * расхождение массивов с тремя массивами для сравнения смешанных типов аргументов
+     * (массив и CoverArray) с использованием пользовательской callback-функции для сравнения ключей,
+     * отражая array_diff_uassoc() PHP.
+     *
+     * @see CoverArray::diffUassoc()
+     * @see array_diff_uassoc()
+     */
+    public function testDiffUassocWithThreeDiffArraysMixedTypes(): void
+    {
+        $callback = $this->getStandardCallback();
+
+        // Test with three diff arrays of mixed types
+        // Тест с тремя массивами для сравнения смешанных типов
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+        $diff1 = ['a' => 10];
+        $diff2 = new CoverArray(['b' => 20, 'c' => 30]);
+        $diff3 = ['d' => 40];
+
+        $expected = array_diff_uassoc($data, ['a' => 10], ['b' => 20, 'c' => 30], ['d' => 40], $callback);
+
+        $cover = new CoverArray($data);
+
+        $result = $cover->diffUassoc($callback, $diff1, $diff2, $diff3);
+        $this->assertSame($expected, $result->getDataAsArray());
     }
 }

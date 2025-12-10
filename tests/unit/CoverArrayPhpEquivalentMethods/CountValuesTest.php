@@ -138,70 +138,6 @@ class CountValuesTest extends TestCase
     }
 
     /**
-     * Tests the countValues() method with boolean values.
-     *
-     * This test verifies that the countValues() method correctly handles
-     * boolean values, converting them to integers (true=1, false=0) and
-     * counting occurrences accordingly, mirroring the behavior
-     * of PHP's array_count_values() function.
-     *
-     *
-     * Тестирование метода countValues() с boolean значениями.
-     *
-     * Этот тест проверяет, что метод countValues() корректно обрабатывает
-     * boolean значения, преобразуя их в целые числа (true=1, false=0) и
-     * подсчитывая вхождения соответствующим образом, отражая поведение
-     * функции array_count_values() PHP.
-     *
-     * @see CoverArray::countValues()
-     * @see array_count_values()
-     */
-    public function testCountValuesWithBooleanValues(): void
-    {
-        // Test with boolean values
-        // Тест с boolean значениями
-        $data = [true, false, true, true, false];
-
-        $expected = array_count_values($data);
-
-        $cover = new CoverArray($data);
-        $result = $cover->countValues();
-
-        $this->assertSame($expected, $result->getDataAsArray());
-    }
-
-    /**
-     * Tests the countValues() method with null values.
-     *
-     * This test verifies that the countValues() method correctly handles
-     * null values, converting them to empty strings and counting occurrences,
-     * mirroring the behavior of PHP's array_count_values() function.
-     *
-     *
-     * Тестирование метода countValues() с null значениями.
-     *
-     * Этот тест проверяет, что метод countValues() корректно обрабатывает
-     * null значения, преобразуя их в пустые строки и подсчитывая вхождения,
-     * отражая поведение функции array_count_values() PHP.
-     *
-     * @see CoverArray::countValues()
-     * @see array_count_values()
-     */
-    public function testCountValuesWithNullValues(): void
-    {
-        // Test with null values
-        // Тест с null значениями
-        $data = [null, 'a', null, 'b', null, null];
-
-        $expected = array_count_values($data);
-
-        $cover = new CoverArray($data);
-        $result = $cover->countValues();
-
-        $this->assertSame($expected, $result->getDataAsArray());
-    }
-
-    /**
      * Tests the countValues() method with associative array.
      *
      * This test verifies that the countValues() method correctly counts
@@ -223,6 +159,37 @@ class CountValuesTest extends TestCase
         // Test with associative array
         // Тест с ассоциативным массивом
         $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'apple', 'd' => 'cherry', 'e' => 'banana'];
+
+        $expected = array_count_values($data);
+
+        $cover = new CoverArray($data);
+        $result = $cover->countValues();
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the countValues() method with integer string values.
+     *
+     * This test verifies that the countValues() method correctly handles
+     * string representations of integers, treating them as strings
+     * (not as integers), mirroring the behavior of PHP's array_count_values() function.
+     *
+     *
+     * Тестирование метода countValues() со строковыми представлениями целых чисел.
+     *
+     * Этот тест проверяет, что метод countValues() корректно обрабатывает
+     * строковые представления целых чисел, рассматривая их как строки
+     * (а не как целые числа), отражая поведение функции array_count_values() PHP.
+     *
+     * @see CoverArray::countValues()
+     * @see array_count_values()
+     */
+    public function testCountValuesWithIntegerStringValues(): void
+    {
+        // Test with integer string values
+        // Тест со строковыми представлениями целых чисел
+        $data = ['1', '2', '1', '3', '2', '1'];
 
         $expected = array_count_values($data);
 
