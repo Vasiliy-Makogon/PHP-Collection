@@ -12,26 +12,24 @@ use PHPUnit\Framework\TestCase;
 class IntersectUkeyTest extends TestCase
 {
     /**
-     * Tests the intersectUkey() method (array_intersect_ukey equivalent).
+     * Tests the intersectUkey() method with string keys.
      *
      * This test verifies that the intersectUkey() method correctly computes
-     * the intersection of arrays using a user-defined callback function
-     * for key comparison, mirroring PHP's array_intersect_ukey() function.
+     * the intersection of arrays with string keys using a user-defined
+     * callback function for key comparison, mirroring PHP's array_intersect_ukey() function.
      *
      *
-     * Тестирование метода intersectUkey() (эквивалент array_intersect_ukey).
+     * Тестирование метода intersectUkey() со строковыми ключами.
      *
      * Этот тест проверяет, что метод intersectUkey() корректно вычисляет
-     * пересечение массивов с использованием пользовательской callback-функции
-     * для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     * пересечение массивов со строковыми ключами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
      *
      * @see CoverArray::intersectUkey()
      * @see array_intersect_ukey()
      */
-    public function testIntersectUkeyMethod(): void
+    public function testIntersectUkeyWithStringKeys(): void
     {
-        // Define a callback that works with mixed key types
-        // Определяем callback, который работает со смешанными типами ключей
         $callback = function ($a, $b) {
             if ($a === $b) {
                 return 0;
@@ -39,109 +37,193 @@ class IntersectUkeyTest extends TestCase
             return $a <=> $b;
         };
 
-        // Test with string keys
-        // Тест со строковыми ключами
-        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
-        $intersect1 = ['a' => 10, 'b' => 20, 'd' => 40];
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect = ['a' => 10, 'b' => 20, 'd' => 40];
 
-        $expected1 = array_intersect_ukey($data1, $intersect1, $callback);
+        $expected = array_intersect_ukey($data, $intersect, $callback);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->intersectUkey($callback, $intersect1)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->intersectUkey($callback, new CoverArray($intersect1))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with numeric keys
-        // Тест с числовыми ключами
-        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
-        $intersect2 = [1 => 'ONE', 2 => 'TWO', 3 => 'three'];
+    /**
+     * Tests the intersectUkey() method with numeric keys.
+     *
+     * This test verifies that the intersectUkey() method correctly computes
+     * the intersection of arrays with numeric keys using a user-defined
+     * callback function for key comparison, mirroring PHP's array_intersect_ukey() function.
+     *
+     *
+     * Тестирование метода intersectUkey() с числовыми ключами.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно вычисляет
+     * пересечение массивов с числовыми ключами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithNumericKeys(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
 
-        $expected2 = array_intersect_ukey($data2, $intersect2, $callback);
+        $data = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $intersect = [1 => 'ONE', 2 => 'TWO', 3 => 'three'];
 
-        $cover2 = new CoverArray($data2);
+        $expected = array_intersect_ukey($data, $intersect, $callback);
+
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->intersectUkey($callback, $intersect2)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->intersectUkey($callback, new CoverArray($intersect2))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with multiple arrays
-        // Тест с несколькими массивами
-        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $intersect3 = ['a' => 10, 'b' => 20];
-        $intersect4 = ['c' => 30, 'd' => 40];
+    /**
+     * Tests the intersectUkey() method with multiple arrays.
+     *
+     * This test verifies that the intersectUkey() method correctly computes
+     * the intersection of arrays with multiple arrays using a user-defined
+     * callback function for key comparison, mirroring PHP's array_intersect_ukey() function.
+     *
+     *
+     * Тестирование метода intersectUkey() с несколькими массивами.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно вычисляет
+     * пересечение массивов с несколькими массивами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithMultipleArrays(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
 
-        $expected3 = array_intersect_ukey($data3, $intersect3, $intersect4, $callback);
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect1 = ['a' => 10, 'b' => 20];
+        $intersect2 = ['c' => 30, 'd' => 40];
 
-        $cover3 = new CoverArray($data3);
+        $expected = array_intersect_ukey($data, $intersect1, $intersect2, $callback);
+
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->intersectUkey($callback, $intersect3, $intersect4)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, $intersect1, $intersect2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->intersectUkey(
+            $expected,
+            $cover->intersectUkey(
                 $callback,
-                new CoverArray($intersect3),
-                new CoverArray($intersect4)
+                new CoverArray($intersect1),
+                new CoverArray($intersect2)
             )->getDataAsArray()
         );
+    }
 
-        // Test with case-insensitive comparison callback
-        // Тест с callback для сравнения без учета регистра
+    /**
+     * Tests the intersectUkey() method with case-insensitive comparison.
+     *
+     * This test verifies that the intersectUkey() method correctly computes
+     * the intersection of arrays using a case-insensitive callback function
+     * for key comparison, mirroring PHP's array_intersect_ukey() function.
+     *
+     *
+     * Тестирование метода intersectUkey() с сравнением без учета регистра.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно вычисляет
+     * пересечение массивов с использованием callback-функции без учета регистра
+     * для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithCaseInsensitiveComparison(): void
+    {
         $caseInsensitiveCallback = function ($a, $b) {
             return strcasecmp((string) $a, (string) $b);
         };
 
-        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
-        $intersect5 = ['a' => 'apricot', 'b' => 'blueberry'];
+        $data = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $intersect = ['a' => 'apricot', 'b' => 'blueberry'];
 
-        $expected4 = array_intersect_ukey($data4, $intersect5, $caseInsensitiveCallback);
+        $expected = array_intersect_ukey($data, $intersect, $caseInsensitiveCallback);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->intersectUkey($caseInsensitiveCallback, $intersect5)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($caseInsensitiveCallback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->intersectUkey($caseInsensitiveCallback, new CoverArray($intersect5))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($caseInsensitiveCallback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with custom key comparison logic
-        // Тест с пользовательской логикой сравнения ключей
+    /**
+     * Tests the intersectUkey() method with custom key comparison logic.
+     *
+     * This test verifies that the intersectUkey() method correctly computes
+     * the intersection of arrays using a custom callback function that
+     * implements specific key comparison logic, mirroring PHP's array_intersect_ukey() function.
+     *
+     *
+     * Тестирование метода intersectUkey() с пользовательской логикой сравнения ключей.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно вычисляет
+     * пересечение массивов с использованием пользовательской callback-функции,
+     * реализующей специфическую логику сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithCustomKeyComparisonLogic(): void
+    {
         $customCallback = function ($a, $b) {
             if ($a === $b) {
                 return 0;
@@ -157,71 +239,216 @@ class IntersectUkeyTest extends TestCase
             return $lenA <=> $lenB;
         };
 
-        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
-        $intersect6 = ['aa' => 10, 'ccc' => 30];
+        $data = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $intersect = ['aa' => 10, 'ccc' => 30];
 
-        $expected5 = array_intersect_ukey($data5, $intersect6, $customCallback);
+        $expected = array_intersect_ukey($data, $intersect, $customCallback);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->intersectUkey($customCallback, $intersect6)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($customCallback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->intersectUkey($customCallback, new CoverArray($intersect6))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($customCallback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with empty intersection array
-        // Тест с пустым массивом для пересечения
-        $data6 = ['x' => 10, 'y' => 20];
-        $intersect7 = [];
+    /**
+     * Tests the intersectUkey() method with empty intersection array.
+     *
+     * This test verifies that the intersectUkey() method correctly handles
+     * empty intersection arrays, returning an empty result, mirroring
+     * PHP's array_intersect_ukey() function behavior.
+     *
+     *
+     * Тестирование метода intersectUkey() с пустым массивом для пересечения.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно обрабатывает
+     * пустые массивы для пересечения, возвращая пустой результат, отражая
+     * поведение функции array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithEmptyIntersectionArray(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
 
-        $expected6 = array_intersect_ukey($data6, $intersect7, $callback);
+        $data = ['x' => 10, 'y' => 20];
+        $intersect = [];
 
-        $cover6 = new CoverArray($data6);
+        $expected = array_intersect_ukey($data, $intersect, $callback);
+
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected6,
-            $cover6->intersectUkey($callback, $intersect7)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected6,
-            $cover6->intersectUkey($callback, new CoverArray($intersect7))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with no common keys
-        // Тест без общих ключей
-        $data7 = ['a' => 1, 'b' => 2];
-        $intersect8 = ['c' => 3, 'd' => 4];
+    /**
+     * Tests the intersectUkey() method with no common keys.
+     *
+     * This test verifies that the intersectUkey() method correctly handles
+     * arrays with no common keys, returning an empty result, mirroring
+     * PHP's array_intersect_ukey() function behavior.
+     *
+     *
+     * Тестирование метода intersectUkey() без общих ключей.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно обрабатывает
+     * массивы без общих ключей, возвращая пустой результат, отражая
+     * поведение функции array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithNoCommonKeys(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
 
-        $expected7 = array_intersect_ukey($data7, $intersect8, $callback);
+        $data = ['a' => 1, 'b' => 2];
+        $intersect = ['c' => 3, 'd' => 4];
 
-        $cover7 = new CoverArray($data7);
+        $expected = array_intersect_ukey($data, $intersect, $callback);
+
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected7,
-            $cover7->intersectUkey($callback, $intersect8)->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected7,
-            $cover7->intersectUkey($callback, new CoverArray($intersect8))->getDataAsArray()
+            $expected,
+            $cover->intersectUkey($callback, new CoverArray($intersect))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the intersectUkey() method with empty data array.
+     *
+     * This test verifies that the intersectUkey() method correctly handles
+     * empty data arrays, returning an empty result, mirroring
+     * PHP's array_intersect_ukey() function behavior.
+     *
+     *
+     * Тестирование метода intersectUkey() с пустым исходным массивом.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно обрабатывает
+     * пустые исходные массивы, возвращая пустой результат, отражая
+     * поведение функции array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithEmptyDataArray(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
+
+        $data = [];
+        $intersect = ['a' => 1, 'b' => 2];
+
+        $expected = array_intersect_ukey($data, $intersect, $callback);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectUkey($callback, $intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectUkey($callback, new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectUkey() method with mixed array and CoverArray arguments.
+     *
+     * This test verifies that the intersectUkey() method correctly handles
+     * a mix of array and CoverArray arguments, using a user-defined callback
+     * function for key comparison, mirroring PHP's array_intersect_ukey() function.
+     *
+     *
+     * Тестирование метода intersectUkey() со смешанными аргументами массив и CoverArray.
+     *
+     * Этот тест проверяет, что метод intersectUkey() корректно обрабатывает
+     * смесь аргументов массива и CoverArray, используя пользовательскую callback-функцию
+     * для сравнения ключей, отражая функцию array_intersect_ukey() PHP.
+     *
+     * @see CoverArray::intersectUkey()
+     * @see array_intersect_ukey()
+     */
+    public function testIntersectUkeyWithMixedArrayAndCoverArrayArguments(): void
+    {
+        $callback = function ($a, $b) {
+            if ($a === $b) {
+                return 0;
+            }
+            return $a <=> $b;
+        };
+
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect1 = ['a' => 10, 'b' => 20];
+        $intersect2 = ['c' => 30];
+        $intersect3 = ['d' => 40];
+
+        $expected = array_intersect_ukey($data, $intersect1, $intersect2, $intersect3, $callback);
+
+        $cover = new CoverArray($data);
+
+        // Mix of array and CoverArray arguments
+        // Смесь аргументов массив и CoverArray
+        $result = $cover->intersectUkey(
+            $callback,
+            $intersect1,
+            new CoverArray($intersect2),
+            $intersect3
+        );
+
+        $this->assertSame($expected, $result->getDataAsArray());
     }
 }

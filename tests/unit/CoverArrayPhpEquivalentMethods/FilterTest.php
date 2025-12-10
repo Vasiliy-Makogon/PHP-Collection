@@ -12,148 +12,374 @@ use PHPUnit\Framework\TestCase;
 class FilterTest extends TestCase
 {
     /**
-     * Tests the filter() method (array_filter equivalent).
+     * Tests the filter() method with callback that filters by value.
      *
      * This test verifies that the filter() method correctly filters elements
-     * of the CoverArray using a callback function with different filtering modes,
-     * mirroring PHP's array_filter() function behavior.
+     * by their values using a callback function, mirroring PHP's array_filter()
+     * function behavior with default mode (0).
      *
      *
-     * Тестирование метода filter() (эквивалент array_filter).
+     * Тестирование метода filter() с callback, который фильтрует по значению.
      *
      * Этот тест проверяет, что метод filter() корректно фильтрует элементы
-     * CoverArray с использованием callback-функции с различными режимами фильтрации,
-     * отражая поведение функции array_filter() PHP.
+     * по их значениям с использованием callback-функции, отражая поведение
+     * функции array_filter() PHP с режимом по умолчанию (0).
      *
      * @see CoverArray::filter()
      * @see array_filter()
      */
-    public function testFilterMethod(): void
+    public function testFilterWithValueCallback(): void
     {
-        // Test with callback that filters by value
-        // Тест с callback, который фильтрует по значению
-        $data1 = [1, 2, 3, 4, 5];
-        $callback1 = function ($value) {
+        $data = [1, 2, 3, 4, 5];
+        $callback = function ($value) {
             return $value % 2 === 0; // только четные числа
         };
 
-        $expected1 = array_filter($data1, $callback1);
+        $expected = array_filter($data, $callback);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected1,
-            $cover1->filter($callback1)->getDataAsArray()
+            $expected,
+            $cover->filter($callback)->getDataAsArray()
         );
+    }
 
-        // Test with callback that filters by key (ARRAY_FILTER_USE_KEY)
-        // Тест с callback, который фильтрует по ключу (ARRAY_FILTER_USE_KEY)
-        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $callback2 = function ($key) {
+    /**
+     * Tests the filter() method with callback that filters by key.
+     *
+     * This test verifies that the filter() method correctly filters elements
+     * by their keys using a callback function, mirroring PHP's array_filter()
+     * function behavior with ARRAY_FILTER_USE_KEY mode.
+     *
+     *
+     * Тестирование метода filter() с callback, который фильтрует по ключу.
+     *
+     * Этот тест проверяет, что метод filter() корректно фильтрует элементы
+     * по их ключам с использованием callback-функции, отражая поведение
+     * функции array_filter() PHP с режимом ARRAY_FILTER_USE_KEY.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithKeyCallback(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $callback = function ($key) {
             return in_array($key, ['a', 'c']); // только ключи 'a' и 'c'
         };
 
-        $expected2 = array_filter($data2, $callback2, ARRAY_FILTER_USE_KEY);
+        $expected = array_filter($data, $callback, ARRAY_FILTER_USE_KEY);
 
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected2,
-            $cover2->filter($callback2, ARRAY_FILTER_USE_KEY)->getDataAsArray()
+            $expected,
+            $cover->filter($callback, ARRAY_FILTER_USE_KEY)->getDataAsArray()
         );
+    }
 
-        // Test with callback that filters by both value and key (ARRAY_FILTER_USE_BOTH)
-        // Тест с callback, который фильтрует и по значению, и по ключу (ARRAY_FILTER_USE_BOTH)
-        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $callback3 = function ($value, $key) {
+    /**
+     * Tests the filter() method with callback that filters by both value and key.
+     *
+     * This test verifies that the filter() method correctly filters elements
+     * by both values and keys using a callback function, mirroring PHP's array_filter()
+     * function behavior with ARRAY_FILTER_USE_BOTH mode.
+     *
+     *
+     * Тестирование метода filter() с callback, который фильтрует и по значению, и по ключу.
+     *
+     * Этот тест проверяет, что метод filter() корректно фильтрует элементы
+     * и по значениям, и по ключам с использованием callback-функции, отражая поведение
+     * функции array_filter() PHP с режимом ARRAY_FILTER_USE_BOTH.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithValueAndKeyCallback(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $callback = function ($value, $key) {
             return $value > 1 && $key !== 'c'; // значение > 1 и ключ не 'c'
         };
 
-        $expected3 = array_filter($data3, $callback3, ARRAY_FILTER_USE_BOTH);
+        $expected = array_filter($data, $callback, ARRAY_FILTER_USE_BOTH);
 
-        $cover3 = new CoverArray($data3);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected3,
-            $cover3->filter($callback3, ARRAY_FILTER_USE_BOTH)->getDataAsArray()
+            $expected,
+            $cover->filter($callback, ARRAY_FILTER_USE_BOTH)->getDataAsArray()
         );
+    }
 
-        // Test without callback (removes empty values) - excluding empty array to avoid PHP version differences
-        // Тест без callback (удаляет пустые значения) - исключаем пустой массив, чтобы избежать различий между версиями PHP
-        $data4 = [0 => 'a', 1 => false, 2 => null, 3 => '', 4 => 'b'];
+    /**
+     * Tests the filter() method without callback.
+     *
+     * This test verifies that the filter() method correctly removes empty values
+     * when no callback is provided, mirroring PHP's array_filter() function behavior
+     * without a callback.
+     *
+     *
+     * Тестирование метода filter() без callback.
+     *
+     * Этот тест проверяет, что метод filter() корректно удаляет пустые значения
+     * когда callback не предоставлен, отражая поведение функции array_filter() PHP
+     * без callback.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithoutCallback(): void
+    {
+        $data = [0 => 'a', 1 => false, 2 => null, 3 => '', 4 => 'b'];
 
-        $expected4 = array_filter($data4);
+        $expected = array_filter($data);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected4,
-            $cover4->filter()->getDataAsArray()
+            $expected,
+            $cover->filter()->getDataAsArray()
         );
+    }
 
-        // Test with callback that always returns false
-        // Тест с callback, который всегда возвращает false
-        $data5 = ['x' => 1, 'y' => 2, 'z' => 3];
-        $callback5 = function ($value) {
+    /**
+     * Tests the filter() method with callback that always returns false.
+     *
+     * This test verifies that the filter() method correctly returns an empty array
+     * when the callback always returns false, mirroring PHP's array_filter() function behavior.
+     *
+     *
+     * Тестирование метода filter() с callback, который всегда возвращает false.
+     *
+     * Этот тест проверяет, что метод filter() корректно возвращает пустой массив
+     * когда callback всегда возвращает false, отражая поведение функции array_filter() PHP.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithCallbackAlwaysFalse(): void
+    {
+        $data = ['x' => 1, 'y' => 2, 'z' => 3];
+        $callback = function ($value) {
             return false;
         };
 
-        $expected5 = array_filter($data5, $callback5);
+        $expected = array_filter($data, $callback);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected5,
-            $cover5->filter($callback5)->getDataAsArray()
+            $expected,
+            $cover->filter($callback)->getDataAsArray()
         );
+    }
 
-        // Test with callback that always returns true
-        // Тест с callback, который всегда возвращает true
-        $data6 = ['x' => 1, 'y' => 2, 'z' => 3];
-        $callback6 = function ($value) {
+    /**
+     * Tests the filter() method with callback that always returns true.
+     *
+     * This test verifies that the filter() method correctly returns the entire array
+     * when the callback always returns true, mirroring PHP's array_filter() function behavior.
+     *
+     *
+     * Тестирование метода filter() с callback, который всегда возвращает true.
+     *
+     * Этот тест проверяет, что метод filter() корректно возвращает весь массив
+     * когда callback всегда возвращает true, отражая поведение функции array_filter() PHP.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithCallbackAlwaysTrue(): void
+    {
+        $data = ['x' => 1, 'y' => 2, 'z' => 3];
+        $callback = function ($value) {
             return true;
         };
 
-        $expected6 = array_filter($data6, $callback6);
+        $expected = array_filter($data, $callback);
 
-        $cover6 = new CoverArray($data6);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected6,
-            $cover6->filter($callback6)->getDataAsArray()
+            $expected,
+            $cover->filter($callback)->getDataAsArray()
         );
+    }
 
-        // Test with empty array
-        // Тест с пустым массивом
-        $data7 = [];
+    /**
+     * Tests the filter() method with empty array.
+     *
+     * This test verifies that the filter() method correctly handles empty arrays,
+     * returning an empty array without errors, mirroring PHP's array_filter() function behavior.
+     *
+     *
+     * Тестирование метода filter() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод filter() корректно обрабатывает пустые массивы,
+     * возвращая пустой массив без ошибок, отражая поведение функции array_filter() PHP.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithEmptyArray(): void
+    {
+        $data = [];
 
-        $expected7 = array_filter($data7);
+        $expected = array_filter($data);
 
-        $cover7 = new CoverArray($data7);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected7,
-            $cover7->filter()->getDataAsArray()
+            $expected,
+            $cover->filter()->getDataAsArray()
         );
+    }
 
-        // Test with array containing only falsey values (excluding empty array)
-        // Тест с массивом, содержащим только ложные значения (исключая пустой массив)
-        $data8 = [0, false, null, ''];
+    /**
+     * Tests the filter() method with array containing only falsey values.
+     *
+     * This test verifies that the filter() method correctly removes all falsey values
+     * when called without a callback, mirroring PHP's array_filter() function behavior.
+     *
+     *
+     * Тестирование метода filter() с массивом, содержащим только ложные значения.
+     *
+     * Этот тест проверяет, что метод filter() корректно удаляет все ложные значения
+     * при вызове без callback, отражая поведение функции array_filter() PHP.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithOnlyFalseyValues(): void
+    {
+        $data = [0, false, null, ''];
 
-        $expected8 = array_filter($data8);
+        $expected = array_filter($data);
 
-        $cover8 = new CoverArray($data8);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected8,
-            $cover8->filter()->getDataAsArray()
+            $expected,
+            $cover->filter()->getDataAsArray()
         );
+    }
 
-        // Test with callback that uses only value (default mode)
-        // Тест с callback, который использует только значение (режим по умолчанию)
-        $data9 = [10, 20, 30, 40, 50];
-        $callback9 = function ($value) {
+    /**
+     * Tests the filter() method with callback that filters numeric values.
+     *
+     * This test verifies that the filter() method correctly filters numeric values
+     * using a simple comparison callback, mirroring PHP's array_filter() function behavior.
+     *
+     *
+     * Тестирование метода filter() с callback, который фильтрует числовые значения.
+     *
+     * Этот тест проверяет, что метод filter() корректно фильтрует числовые значения
+     * с использованием простого callback сравнения, отражая поведение функции array_filter() PHP.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithNumericComparison(): void
+    {
+        $data = [10, 20, 30, 40, 50];
+        $callback = function ($value) {
             return $value > 25;
         };
 
-        $expected9 = array_filter($data9, $callback9);
+        $expected = array_filter($data, $callback);
 
-        $cover9 = new CoverArray($data9);
+        $cover = new CoverArray($data);
         $this->assertSame(
-            $expected9,
-            $cover9->filter($callback9)->getDataAsArray()
+            $expected,
+            $cover->filter($callback)->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the filter() method with CoverArray as element.
+     *
+     * This test verifies that the filter() method correctly handles CoverArray
+     * objects as array elements, applying the callback to the CoverArray instances.
+     *
+     *
+     * Тестирование метода filter() с CoverArray как элементом.
+     *
+     * Этот тест проверяет, что метод filter() корректно обрабатывает объекты
+     * CoverArray как элементы массива, применяя callback к экземплярам CoverArray.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithCoverArrayElements(): void
+    {
+        $innerCover1 = new CoverArray(['active' => true, 'value' => 10]);
+        $innerCover2 = new CoverArray(['active' => false, 'value' => 20]);
+        $innerCover3 = new CoverArray(['active' => true, 'value' => 30]);
+
+        $data = [
+            'first' => $innerCover1,
+            'second' => $innerCover2,
+            'third' => $innerCover3,
+            'scalar' => 40
+        ];
+
+        $callback = function ($value, $key) {
+            if ($value instanceof CoverArray) {
+                return $value['active'] === true;
+            }
+            return $value > 25;
+        };
+
+        $cover = new CoverArray($data);
+        $result = $cover->filter($callback, ARRAY_FILTER_USE_BOTH);
+
+        // Проверяем, что отфильтрованы правильные элементы
+        $this->assertCount(3, $result);
+        $this->assertArrayHasKey('first', $result->getDataAsArray());
+        $this->assertArrayHasKey('third', $result->getDataAsArray());
+        $this->assertArrayNotHasKey('second', $result->getDataAsArray());
+        $this->assertSame($data['scalar'], $result->last());
+
+        // Проверяем, что объекты CoverArray сохранились
+        $this->assertSame($innerCover1, $result['first']);
+        $this->assertSame($innerCover3, $result['third']);
+    }
+
+    /**
+     * Tests the filter() method with nested arrays that become CoverArray instances.
+     *
+     * This test verifies that the filter() method correctly handles nested arrays
+     * that are automatically converted to CoverArray instances, and the callback
+     * receives these CoverArray instances for filtering.
+     *
+     *
+     * Тестирование метода filter() с вложенными массивами, которые становятся экземплярами CoverArray.
+     *
+     * Этот тест проверяет, что метод filter() корректно обрабатывает вложенные массивы,
+     * которые автоматически преобразуются в экземпляры CoverArray, и callback
+     * получает эти экземпляры CoverArray для фильтрации.
+     *
+     * @see CoverArray::filter()
+     * @see array_filter()
+     */
+    public function testFilterWithNestedArraysAsCoverArray(): void
+    {
+        $data = [
+            'item1' => ['enabled' => true, 'name' => 'First'],
+            'item2' => ['enabled' => false, 'name' => 'Second'],
+            'item3' => ['enabled' => true, 'name' => 'Third']
+        ];
+
+        $callback = function ($value, $key) {
+            // $value будет экземпляром CoverArray из-за автоматического преобразования
+            return $value instanceof CoverArray && $value['enabled'] === true;
+        };
+
+        $cover = new CoverArray($data);
+        $result = $cover->filter($callback, ARRAY_FILTER_USE_BOTH);
+
+        // Проверяем результат
+        $this->assertCount(2, $result);
+        $this->assertArrayHasKey('item1', $result->getDataAsArray());
+        $this->assertArrayHasKey('item3', $result->getDataAsArray());
+        $this->assertArrayNotHasKey('item2', $result->getDataAsArray());
+
+        // Проверяем, что элементы являются CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result['item1']);
+        $this->assertInstanceOf(CoverArray::class, $result['item3']);
     }
 }

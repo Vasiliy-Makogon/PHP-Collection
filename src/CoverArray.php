@@ -2386,10 +2386,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function in(mixed $needle, bool $strict = false): bool
     {
-        return in_array(
-            static::convertToPlain($needle), $this->getDataAsArray(),
-            $strict
-        );
+        return in_array($needle, $this->data, $strict);
     }
 
     /**

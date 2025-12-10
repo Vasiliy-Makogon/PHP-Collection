@@ -12,193 +12,417 @@ use PHPUnit\Framework\TestCase;
 class IntersectUassocTest extends TestCase
 {
     /**
-     * Tests the intersectUassoc() method (array_intersect_uassoc equivalent).
+     * Callback for mixed key types comparison.
+     *
+     * Callback для сравнения смешанных типов ключей.
+     */
+    public function mixedKeyCallback($a, $b): int
+    {
+        if ($a === $b) {
+            return 0;
+        }
+        return $a <=> $b;
+    }
+
+    /**
+     * Case-insensitive comparison callback.
+     *
+     * Callback для сравнения без учета регистра.
+     */
+    public function caseInsensitiveCallback($a, $b): int
+    {
+        return strcasecmp((string) $a, (string) $b);
+    }
+
+    /**
+     * Custom key comparison by string length.
+     *
+     * Пользовательское сравнение ключей по длине строки.
+     */
+    public function lengthThenStringCallback($a, $b): int
+    {
+        if ($a === $b) {
+            return 0;
+        }
+        // Compare by string length first
+        // Сначала сравниваем по длине строки
+        $lenA = strlen((string) $a);
+        $lenB = strlen((string) $b);
+
+        if ($lenA === $lenB) {
+            return strcmp((string) $a, (string) $b);
+        }
+        return $lenA <=> $lenB;
+    }
+
+    /**
+     * Tests the intersectUassoc() method with string keys.
      *
      * This test verifies that the intersectUassoc() method correctly computes
-     * the intersection of arrays with additional index check using a user-defined
-     * callback function for key comparison, mirroring PHP's array_intersect_uassoc().
+     * the intersection with string keys using a user-defined callback function
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
      *
      *
-     * Тестирование метода intersectUassoc() (эквивалент array_intersect_uassoc).
+     * Тестирование метода intersectUassoc() со строковыми ключами.
      *
      * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
-     * пересечение массивов с дополнительной проверкой индекса с использованием
-     * пользовательской callback-функции для сравнения ключей, отражая array_intersect_uassoc() PHP.
+     * пересечение со строковыми ключами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая поведение функции array_intersect_uassoc() PHP.
      *
      * @see CoverArray::intersectUassoc()
      * @see array_intersect_uassoc()
      */
-    public function testIntersectUassocMethod(): void
+    public function testIntersectUassocWithStringKeys(): void
     {
-        // Define a callback that works with mixed key types
-        // Определяем callback, который работает со смешанными типами ключей
-        $callback = function ($a, $b) {
-            if ($a === $b) {
-                return 0;
-            }
-            return $a <=> $b;
-        };
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect = ['a' => 1, 'b' => 20];
 
-        // Test with string keys
-        // Тест со строковыми ключами
-        $data1 = ['a' => 1, 'b' => 2, 'c' => 3];
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'mixedKeyCallback']);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectUassoc() method with numeric keys.
+     *
+     * This test verifies that the intersectUassoc() method correctly computes
+     * the intersection with numeric keys using a user-defined callback function
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с числовыми ключами.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
+     * пересечение с числовыми ключами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithNumericKeys(): void
+    {
+        $data = [0 => 'zero', 1 => 'one', 2 => 'two'];
+        $intersect = [0 => 'zero', 1 => 'ONE'];
+
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'mixedKeyCallback']);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectUassoc() method with multiple arrays.
+     *
+     * This test verifies that the intersectUassoc() method correctly computes
+     * the intersection with multiple arrays using a user-defined callback function
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с несколькими массивами.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
+     * пересечение с несколькими массивами с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithMultipleArrays(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
         $intersect1 = ['a' => 1, 'b' => 20];
+        $intersect2 = ['c' => 30, 'd' => 4];
 
-        $expected1 = array_intersect_uassoc($data1, $intersect1, $callback);
+        $expected = array_intersect_uassoc($data, $intersect1, $intersect2, [$this, 'mixedKeyCallback']);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->intersectUassoc($callback, $intersect1)->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect1, $intersect2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->intersectUassoc($callback, new CoverArray($intersect1))->getDataAsArray()
-        );
-
-        // Test with numeric keys
-        // Тест с числовыми ключами
-        $data2 = [0 => 'zero', 1 => 'one', 2 => 'two'];
-        $intersect2 = [0 => 'zero', 1 => 'ONE'];
-
-        $expected2 = array_intersect_uassoc($data2, $intersect2, $callback);
-
-        $cover2 = new CoverArray($data2);
-
-        // arguments as array
-        // аргументы как массив
-        $this->assertSame(
-            $expected2,
-            $cover2->intersectUassoc($callback, $intersect2)->getDataAsArray()
-        );
-
-        // arguments as CoverArray
-        // аргументы как CoverArray
-        $this->assertSame(
-            $expected2,
-            $cover2->intersectUassoc($callback, new CoverArray($intersect2))->getDataAsArray()
-        );
-
-        // Test with multiple arrays
-        // Тест с несколькими массивами
-        $data3 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $intersect3 = ['a' => 1, 'b' => 20];
-        $intersect4 = ['c' => 30, 'd' => 4];
-
-        $expected3 = array_intersect_uassoc($data3, $intersect3, $intersect4, $callback);
-
-        $cover3 = new CoverArray($data3);
-
-        // arguments as array
-        // аргументы как массив
-        $this->assertSame(
-            $expected3,
-            $cover3->intersectUassoc($callback, $intersect3, $intersect4)->getDataAsArray()
-        );
-
-        // arguments as CoverArray
-        // аргументы как CoverArray
-        $this->assertSame(
-            $expected3,
-            $cover3->intersectUassoc(
-                $callback,
-                new CoverArray($intersect3),
-                new CoverArray($intersect4)
+            $expected,
+            $cover->intersectUassoc(
+                [$this, 'mixedKeyCallback'],
+                new CoverArray($intersect1),
+                new CoverArray($intersect2)
             )->getDataAsArray()
         );
+    }
 
-        // Test with case-insensitive comparison callback
-        // Тест с callback для сравнения без учета регистра
-        $caseInsensitiveCallback = function ($a, $b) {
-            return strcasecmp((string) $a, (string) $b);
-        };
+    /**
+     * Tests the intersectUassoc() method with case-insensitive comparison.
+     *
+     * This test verifies that the intersectUassoc() method correctly computes
+     * the intersection using a case-insensitive comparison callback function
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с сравнением без учета регистра.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
+     * пересечение с использованием callback-функции для сравнения без учета регистра,
+     * отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithCaseInsensitiveComparison(): void
+    {
+        $data = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
+        $intersect = ['a' => 'apple', 'b' => 'banana'];
 
-        $data4 = ['A' => 'apple', 'B' => 'banana', 'c' => 'cherry'];
-        $intersect5 = ['a' => 'apple', 'b' => 'banana'];
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'caseInsensitiveCallback']);
 
-        $expected4 = array_intersect_uassoc($data4, $intersect5, $caseInsensitiveCallback);
-
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->intersectUassoc($caseInsensitiveCallback, $intersect5)->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'caseInsensitiveCallback'], $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->intersectUassoc($caseInsensitiveCallback, new CoverArray($intersect5))->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'caseInsensitiveCallback'], new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with custom key comparison logic
-        // Тест с пользовательской логикой сравнения ключей
-        $customCallback = function ($a, $b) {
-            if ($a === $b) {
-                return 0;
-            }
-            // Compare by string length first
-            // Сначала сравниваем по длине строки
-            $lenA = strlen((string) $a);
-            $lenB = strlen((string) $b);
+    /**
+     * Tests the intersectUassoc() method with custom key comparison logic.
+     *
+     * This test verifies that the intersectUassoc() method correctly computes
+     * the intersection using a custom callback function that compares keys
+     * by string length first, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с пользовательской логикой сравнения ключей.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
+     * пересечение с использованием пользовательской callback-функции, которая сравнивает
+     * ключи сначала по длине строки, отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithCustomKeyComparison(): void
+    {
+        $data = ['aa' => 1, 'b' => 2, 'ccc' => 3];
+        $intersect = ['aa' => 10, 'ccc' => 3];
 
-            if ($lenA === $lenB) {
-                return strcmp((string) $a, (string) $b);
-            }
-            return $lenA <=> $lenB;
-        };
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'lengthThenStringCallback']);
 
-        $data5 = ['aa' => 1, 'b' => 2, 'ccc' => 3];
-        $intersect6 = ['aa' => 10, 'ccc' => 3];
-
-        $expected5 = array_intersect_uassoc($data5, $intersect6, $customCallback);
-
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->intersectUassoc($customCallback, $intersect6)->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'lengthThenStringCallback'], $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->intersectUassoc($customCallback, new CoverArray($intersect6))->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'lengthThenStringCallback'], new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with empty intersection array
-        // Тест с пустым массивом для пересечения
-        $data6 = ['x' => 10, 'y' => 20];
-        $intersect7 = [];
+    /**
+     * Tests the intersectUassoc() method with empty intersection array.
+     *
+     * This test verifies that the intersectUassoc() method correctly handles
+     * empty intersection arrays, returning an empty result, mirroring
+     * PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с пустым массивом для пересечения.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно обрабатывает
+     * пустые массивы для пересечения, возвращая пустой результат,
+     * отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithEmptyIntersectionArray(): void
+    {
+        $data = ['x' => 10, 'y' => 20];
+        $intersect = [];
 
-        $expected6 = array_intersect_uassoc($data6, $intersect7, $callback);
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'mixedKeyCallback']);
 
-        $cover6 = new CoverArray($data6);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected6,
-            $cover6->intersectUassoc($callback, $intersect7)->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected6,
-            $cover6->intersectUassoc($callback, new CoverArray($intersect7))->getDataAsArray()
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectUassoc() method with empty data array.
+     *
+     * This test verifies that the intersectUassoc() method correctly handles
+     * empty data arrays, returning an empty result, mirroring
+     * PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с пустым исходным массивом.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно обрабатывает
+     * пустые исходные массивы, возвращая пустой результат,
+     * отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithEmptyDataArray(): void
+    {
+        $data = [];
+        $intersect = ['a' => 1, 'b' => 2];
+
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'mixedKeyCallback']);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectUassoc() method with mixed array and CoverArray arguments.
+     *
+     * This test verifies that the intersectUassoc() method correctly handles
+     * a mix of array and CoverArray arguments using a user-defined callback
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() со смешанными аргументами массив и CoverArray.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно обрабатывает
+     * смесь аргументов массива и CoverArray с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithMixedArrayAndCoverArrayArguments(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect1 = ['b' => 2];
+        $intersect2 = ['c' => 3];
+
+        $expected = array_intersect_uassoc($data, $intersect1, $intersect2, [$this, 'mixedKeyCallback']);
+
+        $cover = new CoverArray($data);
+
+        // Mix of array and CoverArray arguments
+        // Смесь аргументов массив и CoverArray
+        $result = $cover->intersectUassoc(
+            [$this, 'mixedKeyCallback'],
+            $intersect1,
+            new CoverArray($intersect2)
+        );
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the intersectUassoc() method with single intersection array.
+     *
+     * This test verifies that the intersectUassoc() method correctly computes
+     * the intersection with a single array using a user-defined callback function
+     * for key comparison, mirroring PHP's array_intersect_uassoc() function behavior.
+     *
+     *
+     * Тестирование метода intersectUassoc() с одним массивом для пересечения.
+     *
+     * Этот тест проверяет, что метод intersectUassoc() корректно вычисляет
+     * пересечение с одним массивом с использованием пользовательской
+     * callback-функции для сравнения ключей, отражая поведение функции array_intersect_uassoc() PHP.
+     *
+     * @see CoverArray::intersectUassoc()
+     * @see array_intersect_uassoc()
+     */
+    public function testIntersectUassocWithSingleIntersectionArray(): void
+    {
+        $data = ['x' => 10, 'y' => 20, 'z' => 30];
+        $intersect = ['x' => 10, 'y' => 25];
+
+        $expected = array_intersect_uassoc($data, $intersect, [$this, 'mixedKeyCallback']);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], $intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectUassoc([$this, 'mixedKeyCallback'], new CoverArray($intersect))->getDataAsArray()
         );
     }
 }

@@ -12,147 +12,336 @@ use PHPUnit\Framework\TestCase;
 class IntersectTest extends TestCase
 {
     /**
-     * Tests the intersect() method (array_intersect equivalent).
+     * Tests the intersect() method with simple arrays.
      *
      * This test verifies that the intersect() method correctly computes
-     * the intersection of arrays based on values, returning elements
-     * present in all provided arrays, mirroring PHP's array_intersect().
+     * the intersection of simple arrays based on values, returning elements
+     * present in all provided arrays, mirroring PHP's array_intersect() function.
      *
      *
-     * Тестирование метода intersect() (эквивалент array_intersect).
+     * Тестирование метода intersect() с простыми массивами.
      *
      * Этот тест проверяет, что метод intersect() корректно вычисляет
-     * пересечение массивов на основе значений, возвращая элементы,
-     * присутствующие во всех предоставленных массивах, отражая array_intersect() PHP.
+     * пересечение простых массивов на основе значений, возвращая элементы,
+     * присутствующие во всех предоставленных массивах, отражая функцию array_intersect() PHP.
      *
      * @see CoverArray::intersect()
      * @see array_intersect()
      */
-    public function testIntersectMethod(): void
+    public function testIntersectWithSimpleArrays(): void
     {
-        // Test with simple arrays
-        // Тест с простыми массивами
-        $data1 = [1, 2, 3, 4, 5];
+        $data = [1, 2, 3, 4, 5];
         $intersect1 = [2, 3, 6];
         $intersect2 = [3, 4, 7];
 
-        $expected1 = array_intersect($data1, $intersect1, $intersect2);
+        $expected = array_intersect($data, $intersect1, $intersect2);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->intersect($intersect1, $intersect2)->getDataAsArray()
+            $expected,
+            $cover->intersect($intersect1, $intersect2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->intersect(
+            $expected,
+            $cover->intersect(
                 new CoverArray($intersect1),
                 new CoverArray($intersect2)
             )->getDataAsArray()
         );
+    }
 
-        // Test with associative arrays (compares values, not keys)
-        // Тест с ассоциативными массивами (сравнивает значения, не ключи)
-        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
-        $intersect3 = ['banana', 'date', 'elderberry'];
+    /**
+     * Tests the intersect() method with associative arrays.
+     *
+     * This test verifies that the intersect() method correctly computes
+     * the intersection of associative arrays based on values, ignoring keys,
+     * mirroring PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() с ассоциативными массивами.
+     *
+     * Этот тест проверяет, что метод intersect() корректно вычисляет
+     * пересечение ассоциативных массивов на основе значений, игнорируя ключи,
+     * отражая поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithAssociativeArrays(): void
+    {
+        $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry', 'd' => 'date'];
+        $intersect = ['banana', 'date', 'elderberry'];
 
-        $expected2 = array_intersect($data2, $intersect3);
+        $expected = array_intersect($data, $intersect);
 
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->intersect($intersect3)->getDataAsArray()
+            $expected,
+            $cover->intersect($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->intersect(new CoverArray($intersect3))->getDataAsArray()
+            $expected,
+            $cover->intersect(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with multiple arrays for intersection
-        // Тест с несколькими массивами для пересечения
-        $data3 = ['red', 'green', 'blue', 'yellow', 'purple'];
-        $intersect4 = ['green', 'yellow', 'orange'];
-        $intersect5 = ['blue', 'green', 'violet'];
-        $intersect6 = ['green', 'indigo'];
+    /**
+     * Tests the intersect() method with multiple arrays.
+     *
+     * This test verifies that the intersect() method correctly computes
+     * the intersection with multiple arrays, returning elements present
+     * in all provided arrays, mirroring PHP's array_intersect() function.
+     *
+     *
+     * Тестирование метода intersect() с несколькими массивами.
+     *
+     * Этот тест проверяет, что метод intersect() корректно вычисляет
+     * пересечение с несколькими массивами, возвращая элементы, присутствующие
+     * во всех предоставленных массивах, отражая функцию array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithMultipleArrays(): void
+    {
+        $data = ['red', 'green', 'blue', 'yellow', 'purple'];
+        $intersect1 = ['green', 'yellow', 'orange'];
+        $intersect2 = ['blue', 'green', 'violet'];
+        $intersect3 = ['green', 'indigo'];
 
-        $expected3 = array_intersect($data3, $intersect4, $intersect5, $intersect6);
+        $expected = array_intersect($data, $intersect1, $intersect2, $intersect3);
 
-        $cover3 = new CoverArray($data3);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->intersect($intersect4, $intersect5, $intersect6)->getDataAsArray()
+            $expected,
+            $cover->intersect($intersect1, $intersect2, $intersect3)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->intersect(
-                new CoverArray($intersect4),
-                new CoverArray($intersect5),
-                new CoverArray($intersect6)
+            $expected,
+            $cover->intersect(
+                new CoverArray($intersect1),
+                new CoverArray($intersect2),
+                new CoverArray($intersect3)
             )->getDataAsArray()
         );
+    }
 
-        // Test with empty intersection array
-        // Тест с пустым массивом для пересечения
-        $data4 = ['a', 'b', 'c'];
-        $intersect7 = [];
+    /**
+     * Tests the intersect() method with empty intersection array.
+     *
+     * This test verifies that the intersect() method correctly handles
+     * empty intersection arrays, returning an empty result, mirroring
+     * PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() с пустым массивом для пересечения.
+     *
+     * Этот тест проверяет, что метод intersect() корректно обрабатывает
+     * пустые массивы для пересечения, возвращая пустой результат, отражая
+     * поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithEmptyIntersectionArray(): void
+    {
+        $data = ['a', 'b', 'c'];
+        $intersect = [];
 
-        $expected4 = array_intersect($data4, $intersect7);
+        $expected = array_intersect($data, $intersect);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->intersect($intersect7)->getDataAsArray()
+            $expected,
+            $cover->intersect($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->intersect(new CoverArray($intersect7))->getDataAsArray()
+            $expected,
+            $cover->intersect(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with no intersection
-        // Тест без пересечения
-        $data5 = [1, 2, 3];
-        $intersect8 = [4, 5, 6];
+    /**
+     * Tests the intersect() method with no intersection.
+     *
+     * This test verifies that the intersect() method correctly returns
+     * an empty array when there is no intersection between arrays,
+     * mirroring PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() без пересечения.
+     *
+     * Этот тест проверяет, что метод intersect() корректно возвращает
+     * пустой массив, когда нет пересечения между массивами,
+     * отражая поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithNoIntersection(): void
+    {
+        $data = [1, 2, 3];
+        $intersect = [4, 5, 6];
 
-        $expected5 = array_intersect($data5, $intersect8);
+        $expected = array_intersect($data, $intersect);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->intersect($intersect8)->getDataAsArray()
+            $expected,
+            $cover->intersect($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->intersect(new CoverArray($intersect8))->getDataAsArray()
+            $expected,
+            $cover->intersect(new CoverArray($intersect))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the intersect() method with empty data array.
+     *
+     * This test verifies that the intersect() method correctly handles
+     * empty data arrays, returning an empty result, mirroring
+     * PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() с пустым исходным массивом.
+     *
+     * Этот тест проверяет, что метод intersect() корректно обрабатывает
+     * пустые исходные массивы, возвращая пустой результат, отражая
+     * поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithEmptyDataArray(): void
+    {
+        $data = [];
+        $intersect = [1, 2, 3];
+
+        $expected = array_intersect($data, $intersect);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersect($intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersect(new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersect() method with duplicate values.
+     *
+     * This test verifies that the intersect() method correctly handles
+     * arrays with duplicate values, preserving duplicates in the result,
+     * mirroring PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() с дублирующимися значениями.
+     *
+     * Этот тест проверяет, что метод intersect() корректно обрабатывает
+     * массивы с дублирующимися значениями, сохраняя дубликаты в результате,
+     * отражая поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithDuplicateValues(): void
+    {
+        $data = [1, 2, 2, 3, 3, 3];
+        $intersect = [2, 3, 3, 4];
+
+        $expected = array_intersect($data, $intersect);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersect($intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersect(new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersect() method with mixed array and CoverArray arguments.
+     *
+     * This test verifies that the intersect() method correctly handles
+     * a mix of array and CoverArray arguments, computing the intersection
+     * based on values, mirroring PHP's array_intersect() function behavior.
+     *
+     *
+     * Тестирование метода intersect() со смешанными аргументами массив и CoverArray.
+     *
+     * Этот тест проверяет, что метод intersect() корректно обрабатывает
+     * смесь аргументов массива и CoverArray, вычисляя пересечение
+     * на основе значений, отражая поведение функции array_intersect() PHP.
+     *
+     * @see CoverArray::intersect()
+     * @see array_intersect()
+     */
+    public function testIntersectWithMixedArrayAndCoverArrayArguments(): void
+    {
+        $data = ['a', 'b', 'c', 'd', 'e'];
+        $intersect1 = ['b', 'c', 'f'];
+        $intersect2 = ['c', 'd', 'g'];
+
+        $expected = array_intersect($data, $intersect1, $intersect2);
+
+        $cover = new CoverArray($data);
+
+        // Mix of array and CoverArray arguments
+        // Смесь аргументов массив и CoverArray
+        $result = $cover->intersect(
+            $intersect1,
+            new CoverArray($intersect2)
+        );
+
+        $this->assertSame($expected, $result->getDataAsArray());
     }
 }

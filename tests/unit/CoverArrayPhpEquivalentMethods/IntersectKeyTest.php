@@ -12,165 +12,333 @@ use PHPUnit\Framework\TestCase;
 class IntersectKeyTest extends TestCase
 {
     /**
-     * Tests the intersectKey() method (array_intersect_key equivalent).
+     * Tests the intersectKey() method with associative arrays.
      *
      * This test verifies that the intersectKey() method correctly computes
-     * the intersection of arrays using keys for comparison, returning
-     * elements with keys present in all provided arrays, mirroring array_intersect_key().
+     * the intersection of associative arrays using keys for comparison,
+     * returning elements with keys present in all arrays, mirroring
+     * PHP's array_intersect_key() function behavior.
      *
      *
-     * Тестирование метода intersectKey() (эквивалент array_intersect_key).
+     * Тестирование метода intersectKey() с ассоциативными массивами.
      *
      * Этот тест проверяет, что метод intersectKey() корректно вычисляет
-     * пересечение массивов, используя ключи для сравнения, возвращая
-     * элементы с ключами, присутствующими во всех предоставленных массивах,
-     * отражая array_intersect_key().
+     * пересечение ассоциативных массивов, используя ключи для сравнения,
+     * возвращая элементы с ключами, присутствующими во всех массивах,
+     * отражая поведение функции array_intersect_key() PHP.
      *
      * @see CoverArray::intersectKey()
      * @see array_intersect_key()
      */
-    public function testIntersectKeyMethod(): void
+    public function testIntersectKeyWithAssociativeArrays(): void
     {
-        // Test with associative arrays
-        // Тест с ассоциативными массивами
-        $data1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
-        $intersect1 = ['b' => 20, 'c' => 30, 'e' => 50];
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4];
+        $intersect = ['b' => 20, 'c' => 30, 'e' => 50];
 
-        $expected1 = array_intersect_key($data1, $intersect1);
+        $expected = array_intersect_key($data, $intersect);
 
-        $cover1 = new CoverArray($data1);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->intersectKey($intersect1)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->intersectKey(new CoverArray($intersect1))->getDataAsArray()
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with multiple arrays for intersection
-        // Тест с несколькими массивами для пересечения
-        $data2 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
-        $intersect2 = ['a' => 10, 'c' => 30];
-        $intersect3 = ['b' => 200, 'd' => 400, 'e' => 500];
+    /**
+     * Tests the intersectKey() method with multiple arrays.
+     *
+     * This test verifies that the intersectKey() method correctly computes
+     * the intersection with multiple arrays using keys for comparison,
+     * returning elements with keys present in all provided arrays,
+     * mirroring PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() с несколькими массивами.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно вычисляет
+     * пересечение с несколькими массивами, используя ключи для сравнения,
+     * возвращая элементы с ключами, присутствующими во всех предоставленных массивах,
+     * отражая поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithMultipleArrays(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+        $intersect1 = ['a' => 10, 'c' => 30];
+        $intersect2 = ['b' => 200, 'd' => 400, 'e' => 500];
 
-        $expected2 = array_intersect_key($data2, $intersect2, $intersect3);
+        $expected = array_intersect_key($data, $intersect1, $intersect2);
 
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->intersectKey($intersect2, $intersect3)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect1, $intersect2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->intersectKey(
-                new CoverArray($intersect2),
-                new CoverArray($intersect3)
+            $expected,
+            $cover->intersectKey(
+                new CoverArray($intersect1),
+                new CoverArray($intersect2)
             )->getDataAsArray()
         );
+    }
 
-        // Test with numeric keys
-        // Тест с числовыми ключами
-        $data3 = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
-        $intersect4 = [1 => 'ONE', 3 => 'THREE', 4 => 'four'];
+    /**
+     * Tests the intersectKey() method with numeric keys.
+     *
+     * This test verifies that the intersectKey() method correctly handles
+     * numeric keys, returning elements with numeric keys present in all arrays,
+     * mirroring PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() с числовыми ключами.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно обрабатывает
+     * числовые ключи, возвращая элементы с числовыми ключами, присутствующими во всех массивах,
+     * отражая поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithNumericKeys(): void
+    {
+        $data = [0 => 'zero', 1 => 'one', 2 => 'two', 3 => 'three'];
+        $intersect = [1 => 'ONE', 3 => 'THREE', 4 => 'four'];
 
-        $expected3 = array_intersect_key($data3, $intersect4);
+        $expected = array_intersect_key($data, $intersect);
 
-        $cover3 = new CoverArray($data3);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->intersectKey($intersect4)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->intersectKey(new CoverArray($intersect4))->getDataAsArray()
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with mixed key types
-        // Тест со смешанными типами ключей
-        $data4 = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
-        $intersect5 = ['a' => 'apricot', 0 => 'ZERO'];
+    /**
+     * Tests the intersectKey() method with mixed key types.
+     *
+     * This test verifies that the intersectKey() method correctly handles
+     * arrays with mixed key types (string and numeric), using keys for comparison,
+     * mirroring PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() со смешанными типами ключей.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно обрабатывает
+     * массивы со смешанными типами ключей (строка и число), используя ключи для сравнения,
+     * отражая поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithMixedKeyTypes(): void
+    {
+        $data = ['a' => 'apple', 0 => 'zero', '1' => 'one'];
+        $intersect = ['a' => 'apricot', 0 => 'ZERO'];
 
-        $expected4 = array_intersect_key($data4, $intersect5);
+        $expected = array_intersect_key($data, $intersect);
 
-        $cover4 = new CoverArray($data4);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->intersectKey($intersect5)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->intersectKey(new CoverArray($intersect5))->getDataAsArray()
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with empty intersection array (should return empty array)
-        // Тест с пустым массивом для пересечения (должен вернуть пустой массив)
-        $data5 = ['x' => 10, 'y' => 20, 'z' => 30];
-        $intersect6 = [];
+    /**
+     * Tests the intersectKey() method with empty intersection array.
+     *
+     * This test verifies that the intersectKey() method correctly handles
+     * empty intersection arrays, returning an empty result, mirroring
+     * PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() с пустым массивом для пересечения.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно обрабатывает
+     * пустые массивы для пересечения, возвращая пустой результат, отражая
+     * поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithEmptyIntersectionArray(): void
+    {
+        $data = ['x' => 10, 'y' => 20, 'z' => 30];
+        $intersect = [];
 
-        $expected5 = array_intersect_key($data5, $intersect6);
+        $expected = array_intersect_key($data, $intersect);
 
-        $cover5 = new CoverArray($data5);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->intersectKey($intersect6)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->intersectKey(new CoverArray($intersect6))->getDataAsArray()
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
         );
+    }
 
-        // Test with no common keys
-        // Тест без общих ключей
-        $data6 = ['a' => 1, 'b' => 2];
-        $intersect7 = ['c' => 3, 'd' => 4];
+    /**
+     * Tests the intersectKey() method with no common keys.
+     *
+     * This test verifies that the intersectKey() method correctly returns
+     * an empty array when there are no common keys, mirroring
+     * PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() без общих ключей.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно возвращает
+     * пустой массив, когда нет общих ключей, отражая поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithNoCommonKeys(): void
+    {
+        $data = ['a' => 1, 'b' => 2];
+        $intersect = ['c' => 3, 'd' => 4];
 
-        $expected6 = array_intersect_key($data6, $intersect7);
+        $expected = array_intersect_key($data, $intersect);
 
-        $cover6 = new CoverArray($data6);
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected6,
-            $cover6->intersectKey($intersect7)->getDataAsArray()
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected6,
-            $cover6->intersectKey(new CoverArray($intersect7))->getDataAsArray()
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the intersectKey() method with empty data array.
+     *
+     * This test verifies that the intersectKey() method correctly handles
+     * empty data arrays, returning an empty result, mirroring
+     * PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() с пустым исходным массивом.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно обрабатывает
+     * пустые исходные массивы, возвращая пустой результат, отражая
+     * поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithEmptyDataArray(): void
+    {
+        $data = [];
+        $intersect = ['a' => 1, 'b' => 2];
+
+        $expected = array_intersect_key($data, $intersect);
+
+        $cover = new CoverArray($data);
+
+        // arguments as array
+        // аргументы как массив
+        $this->assertSame(
+            $expected,
+            $cover->intersectKey($intersect)->getDataAsArray()
+        );
+
+        // arguments as CoverArray
+        // аргументы как CoverArray
+        $this->assertSame(
+            $expected,
+            $cover->intersectKey(new CoverArray($intersect))->getDataAsArray()
+        );
+    }
+
+    /**
+     * Tests the intersectKey() method with mixed array and CoverArray arguments.
+     *
+     * This test verifies that the intersectKey() method correctly handles
+     * a mix of array and CoverArray arguments, using keys for comparison,
+     * mirroring PHP's array_intersect_key() function behavior.
+     *
+     *
+     * Тестирование метода intersectKey() со смешанными аргументами массив и CoverArray.
+     *
+     * Этот тест проверяет, что метод intersectKey() корректно обрабатывает
+     * смесь аргументов массива и CoverArray, используя ключи для сравнения,
+     * отражая поведение функции array_intersect_key() PHP.
+     *
+     * @see CoverArray::intersectKey()
+     * @see array_intersect_key()
+     */
+    public function testIntersectKeyWithMixedArrayAndCoverArrayArguments(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $intersect1 = ['b' => 20];
+        $intersect2 = ['c' => 30];
+
+        $expected = array_intersect_key($data, $intersect1, $intersect2);
+
+        $cover = new CoverArray($data);
+
+        // Mix of array and CoverArray arguments
+        // Смесь аргументов массив и CoverArray
+        $result = $cover->intersectKey(
+            $intersect1,
+            new CoverArray($intersect2)
+        );
+
+        $this->assertSame($expected, $result->getDataAsArray());
     }
 }
