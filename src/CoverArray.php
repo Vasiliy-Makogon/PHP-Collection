@@ -2749,9 +2749,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * Note: This method differs from map() which does not handle multidimensional arrays
      * recursively and works with multiple input arrays.
      *
-     * Time complexity: O(n) where n is the total number of elements (including nested elements).
-     * Space complexity: O(n) for the new array structure.
-     *
      *
      * Применяет callback-функцию ко всем элементам рекурсивно и возвращает новый CoverArray.
      *
@@ -2766,9 +2763,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      *
      * Примечание: Этот метод отличается от map(), который не обрабатывает многомерные массивы
      * рекурсивно и работает с несколькими входными массивами.
-     *
-     * Временная сложность: O(n), где n - общее количество элементов (включая вложенные элементы).
-     * Пространственная сложность: O(n) для новой структуры массива.
      *
      * @param callable $callback Callback function to apply, must be callback(mixed $value, mixed $key): mixed.
      *                           Callback-функция для применения, должна быть callback(mixed $value, mixed $key): mixed.
