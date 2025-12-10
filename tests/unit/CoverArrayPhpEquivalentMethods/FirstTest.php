@@ -12,6 +12,32 @@ use PHPUnit\Framework\TestCase;
 class FirstTest extends TestCase
 {
     /**
+     * Helper method to assert first() behavior with both approaches.
+     *
+     * Вспомогательный метод для проверки поведения first() двумя подходами.
+     */
+    private function assertFirstCase(array $data, mixed $expected): void
+    {
+        $cover = new CoverArray($data);
+        $result = $cover->first();
+
+        if (function_exists('array_first')) {
+            $nativeResult = array_first($data);
+            $this->assertSame(
+                $nativeResult,
+                $result,
+                "CoverArray::first() should match array_first() for data: " . var_export($data, true)
+            );
+        } else {
+            $this->assertSame(
+                $expected,
+                $result,
+                "CoverArray::first() returned unexpected result for data: " . var_export($data, true)
+            );
+        }
+    }
+
+    /**
      * Tests the first() method with sequential numeric array.
      *
      * This test verifies that the first() method correctly returns the first
@@ -27,12 +53,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithSequentialNumericArray(): void
     {
-        // Test with sequential numeric array
-        // Тест с последовательным числовым массивом
         $data = [10, 20, 30, 40];
-        $cover = new CoverArray($data);
-
-        $this->assertSame(10, $cover->first());
+        $this->assertFirstCase($data, 10);
     }
 
     /**
@@ -51,12 +73,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithAssociativeArray(): void
     {
-        // Test with associative array (preserving insertion order in PHP 7+)
-        // Тест с ассоциативным массивом (сохраняется порядок вставки в PHP 7+)
         $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
-        $cover = new CoverArray($data);
-
-        $this->assertSame('apple', $cover->first());
+        $this->assertFirstCase($data, 'apple');
     }
 
     /**
@@ -75,12 +93,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithEmptyArray(): void
     {
-        // Test with empty array
-        // Тест с пустым массивом
         $data = [];
-        $cover = new CoverArray($data);
-
-        $this->assertNull($cover->first());
+        $this->assertFirstCase($data, null);
     }
 
     /**
@@ -99,12 +113,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithNullAsFirstElement(): void
     {
-        // Test with array containing null as first element
-        // Тест с массивом, содержащим null в качестве первого элемента
         $data = [null, 'second', 'third'];
-        $cover = new CoverArray($data);
-
-        $this->assertNull($cover->first());
+        $this->assertFirstCase($data, null);
     }
 
     /**
@@ -123,12 +133,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithFalseAsFirstElement(): void
     {
-        // Test with array containing false as first element
-        // Тест с массивом, содержащим false в качестве первого элемента
         $data = [false, true, true];
-        $cover = new CoverArray($data);
-
-        $this->assertFalse($cover->first());
+        $this->assertFirstCase($data, false);
     }
 
     /**
@@ -147,12 +153,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithZeroAsFirstElement(): void
     {
-        // Test with array containing zero as first element
-        // Тест с массивом, содержащим 0 в качестве первого элемента
         $data = [0, 1, 2];
-        $cover = new CoverArray($data);
-
-        $this->assertSame(0, $cover->first());
+        $this->assertFirstCase($data, 0);
     }
 
     /**
@@ -171,12 +173,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithEmptyStringAsFirstElement(): void
     {
-        // Test with array containing empty string as first element
-        // Тест с массивом, содержащим пустую строку в качестве первого элемента
         $data = ['', 'not empty', 'another'];
-        $cover = new CoverArray($data);
-
-        $this->assertSame('', $cover->first());
+        $this->assertFirstCase($data, '');
     }
 
     /**
@@ -195,12 +193,8 @@ class FirstTest extends TestCase
      */
     public function testFirstWithMixedKeyTypesArray(): void
     {
-        // Test with mixed key types array
-        // Тест с массивом со смешанными типами ключей
         $data = [0 => 'zero', 'one' => 1, 2 => 'two'];
-        $cover = new CoverArray($data);
-
-        $this->assertSame('zero', $cover->first());
+        $this->assertFirstCase($data, 'zero');
     }
 
     /**
@@ -219,14 +213,12 @@ class FirstTest extends TestCase
      */
     public function testFirstDoesNotAffectArrayPointer(): void
     {
-        // Test that method doesn't affect array pointer (same result on multiple calls)
-        // Тест, что метод не затрагивает указатель массива (одинаковый результат при нескольких вызовах)
         $data = ['first', 'second', 'third'];
         $cover = new CoverArray($data);
 
         $this->assertSame('first', $cover->first());
-        $this->assertSame('first', $cover->first()); // Second call should return same result
-        $this->assertSame('first', $cover->first()); // Third call should return same result
+        $this->assertSame('first', $cover->first());
+        $this->assertSame('first', $cover->first());
     }
 
     /**
@@ -247,14 +239,10 @@ class FirstTest extends TestCase
      */
     public function testFirstWithCoverArrayAsFirstElement(): void
     {
-        // Test with array containing array as first element
-        // Тест с массивом, содержащим массив в качестве первого элемента
         $nestedArray = ['nested' => 'value'];
         $data = [$nestedArray, 'simple', 123];
         $cover = new CoverArray($data);
 
-        // Since CoverArray converts nested arrays to CoverArray instances
-        // Так как CoverArray преобразует вложенные массивы в экземпляры CoverArray
         $firstElement = $cover->first();
         $this->assertInstanceOf(CoverArray::class, $firstElement);
         $this->assertSame($nestedArray, $firstElement->getDataAsArray());
@@ -276,17 +264,65 @@ class FirstTest extends TestCase
      */
     public function testFirstWithCoverArrayObjectAsFirstElement(): void
     {
-        // Test with CoverArray object as first element
-        // Тест с объектом CoverArray в качестве первого элемента
         $innerCover = new CoverArray(['x' => 1, 'y' => 2]);
         $data = [$innerCover, 'simple', 123];
         $cover = new CoverArray($data);
 
         $firstElement = $cover->first();
-
-        // Should return the same CoverArray instance, not a clone
-        // Должен вернуть тот же экземпляр CoverArray, не клон
         $this->assertSame($innerCover, $firstElement);
         $this->assertInstanceOf(CoverArray::class, $firstElement);
+    }
+
+    /**
+     * Tests the first() method with nested array as first element.
+     *
+     * This test verifies that the first() method correctly returns
+     * a nested array converted to CoverArray instance.
+     *
+     *
+     * Тестирование метода first() с вложенным массивом в качестве первого элемента.
+     *
+     * Этот тест проверяет, что метод first() корректно возвращает
+     * вложенный массив, преобразованный в экземпляр CoverArray.
+     *
+     * @see CoverArray::first()
+     */
+    public function testFirstWithNestedArrayAsFirstElement(): void
+    {
+        $data = [['a' => 1, 'b' => 2], 'simple', 123];
+        $expected = ['a' => 1, 'b' => 2];
+
+        $cover = new CoverArray($data);
+        $result = $cover->first();
+
+        if (function_exists('array_first')) {
+            $nativeResult = array_first($data);
+            $this->assertEquals($nativeResult, $result->getDataAsArray());
+        } else {
+            $this->assertSame($expected, $result->getDataAsArray());
+        }
+    }
+
+    /**
+     * Tests the first() method with object as first element.
+     *
+     * This test verifies that the first() method correctly returns
+     * an object when it's the first element.
+     *
+     *
+     * Тестирование метода first() с объектом в качестве первого элемента.
+     *
+     * Этот тест проверяет, что метод first() корректно возвращает
+     * объект, когда он является первым элементом.
+     *
+     * @see CoverArray::first()
+     */
+    public function testFirstWithObjectAsFirstElement(): void
+    {
+        $object = new \stdClass();
+        $object->property = 'value';
+        $data = [$object, 'simple', 123];
+
+        $this->assertFirstCase($data, $object);
     }
 }

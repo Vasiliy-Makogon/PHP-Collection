@@ -12,120 +12,254 @@ use PHPUnit\Framework\TestCase;
 class LastTest extends TestCase
 {
     /**
-     * Tests the last() method (array_last equivalent).
+     * Helper method to assert last() behavior with both approaches.
+     *
+     * Вспомогательный метод для проверки поведения last() двумя подходами.
+     */
+    private function assertLastCase(array $data, mixed $expected): void
+    {
+        $cover = new CoverArray($data);
+        $result = $cover->last();
+
+        if (function_exists('array_last')) {
+            $nativeResult = array_last($data);
+            $this->assertSame(
+                $nativeResult,
+                $result,
+                "CoverArray::last() should match array_last() for data: " . var_export($data, true)
+            );
+        } else {
+            $this->assertSame(
+                $expected,
+                $result,
+                "CoverArray::last() returned unexpected result for data: " . var_export($data, true)
+            );
+        }
+    }
+
+    /**
+     * Tests the last() method with sequential numeric array.
      *
      * This test verifies that the last() method correctly returns
-     * the last element of the CoverArray, or null for empty arrays,
-     * providing convenient access to the final element.
+     * the last element of a sequential numeric array.
      *
      *
-     * Тестирование метода last() (эквивалент array_last).
+     * Тестирование метода last() с последовательным числовым массивом.
      *
      * Этот тест проверяет, что метод last() корректно возвращает
-     * последний элемент CoverArray, или null для пустых массивов,
-     * предоставляя удобный доступ к конечному элементу.
+     * последний элемент последовательного числового массива.
      *
      * @see CoverArray::last()
      */
-    public function testLastMethod(): void
+    public function testLastWithSequentialNumericArray(): void
     {
-        // Test with sequential numeric array
-        // Тест с последовательным числовым массивом
-        $data1 = ['PHP', 'MySql'];
+        $data = ['PHP', 'MySql'];
+        $this->assertLastCase($data, 'MySql');
+    }
 
-        // CoverArray method
-        // метод CoverArray
-        $cover1 = new CoverArray($data1);
-        $this->assertSame('MySql', $cover1->last());
+    /**
+     * Tests the last() method with associative array.
+     *
+     * This test verifies that the last() method correctly returns
+     * the last element of an associative array.
+     *
+     *
+     * Тестирование метода last() с ассоциативным массивом.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * последний элемент ассоциативного массива.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithAssociativeArray(): void
+    {
+        $data = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+        $this->assertLastCase($data, 'cherry');
+    }
 
-        // Test with associative array
-        // Тест с ассоциативным массивом
-        $data2 = ['a' => 'apple', 'b' => 'banana', 'c' => 'cherry'];
+    /**
+     * Tests the last() method with empty array.
+     *
+     * This test verifies that the last() method correctly returns
+     * null for empty arrays.
+     *
+     *
+     * Тестирование метода last() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * null для пустых массивов.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithEmptyArray(): void
+    {
+        $data = [];
+        $this->assertLastCase($data, null);
+    }
 
-        // CoverArray method
-        // метод CoverArray
-        $cover2 = new CoverArray($data2);
-        $this->assertSame('cherry', $cover2->last());
+    /**
+     * Tests the last() method with single element array.
+     *
+     * This test verifies that the last() method correctly returns
+     * the single element when the array contains only one element.
+     *
+     *
+     * Тестирование метода last() с массивом из одного элемента.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * единственный элемент, когда массив содержит только один элемент.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithSingleElementArray(): void
+    {
+        $data = ['single' => 'element'];
+        $this->assertLastCase($data, 'element');
+    }
 
-        // Test with empty array
-        // Тест с пустым массивом
-        $data3 = [];
+    /**
+     * Tests the last() method with mixed key types.
+     *
+     * This test verifies that the last() method correctly handles
+     * arrays with mixed key types and returns the last element.
+     *
+     *
+     * Тестирование метода last() со смешанными типами ключей.
+     *
+     * Этот тест проверяет, что метод last() корректно обрабатывает
+     * массивы со смешанными типами ключей и возвращает последний элемент.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithMixedKeyTypes(): void
+    {
+        $data = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
+        $this->assertLastCase($data, 'one');
+    }
 
-        // CoverArray method
-        // метод CoverArray
-        $cover3 = new CoverArray($data3);
-        $this->assertNull($cover3->last());
+    /**
+     * Tests the last() method with numeric keys not starting from 0.
+     *
+     * This test verifies that the last() method correctly returns
+     * the last element when numeric keys don't start from 0.
+     *
+     *
+     * Тестирование метода last() с числовыми ключами, не начинающимися с 0.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * последний элемент, когда числовые ключи не начинаются с 0.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithNumericKeysNotStartingFromZero(): void
+    {
+        $data = [5 => 'five', 10 => 'ten', 15 => 'fifteen'];
+        $this->assertLastCase($data, 'fifteen');
+    }
 
-        // Test with single element array
-        // Тест с массивом из одного элемента
-        $data4 = ['single' => 'element'];
+    /**
+     * Tests the last() method with null value as last element.
+     *
+     * This test verifies that the last() method correctly returns
+     * null when the last element is null.
+     *
+     *
+     * Тестирование метода last() с null значением в качестве последнего элемента.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * null, когда последний элемент равен null.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithNullValueAsLastElement(): void
+    {
+        $data = ['a' => 1, 'b' => null];
+        $this->assertLastCase($data, null);
+    }
 
-        // CoverArray method
-        // метод CoverArray
-        $cover4 = new CoverArray($data4);
-        $this->assertSame('element', $cover4->last());
+    /**
+     * Tests the last() method with false value as last element.
+     *
+     * This test verifies that the last() method correctly returns
+     * false when the last element is false.
+     *
+     *
+     * Тестирование метода last() со значением false в качестве последнего элемента.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * false, когда последний элемент равен false.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithFalseValueAsLastElement(): void
+    {
+        $data = ['a' => true, 'b' => false];
+        $this->assertLastCase($data, false);
+    }
 
-        // Test with mixed key types
-        // Тест со смешанными типами ключей
-        $data5 = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
+    /**
+     * Tests the last() method with zero value as last element.
+     *
+     * This test verifies that the last() method correctly returns
+     * zero when the last element is 0.
+     *
+     *
+     * Тестирование метода last() с нулевым значением в качестве последнего элемента.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * 0, когда последний элемент равен 0.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithZeroValueAsLastElement(): void
+    {
+        $data = ['a' => 1, 'b' => 0];
+        $this->assertLastCase($data, 0);
+    }
 
-        // CoverArray method
-        // метод CoverArray
-        $cover5 = new CoverArray($data5);
-        $this->assertSame('one', $cover5->last());
+    /**
+     * Tests the last() method with empty string as last element.
+     *
+     * This test verifies that the last() method correctly returns
+     * empty string when the last element is an empty string.
+     *
+     *
+     * Тестирование метода last() с пустой строкой в качестве последнего элемента.
+     *
+     * Этот тест проверяет, что метод last() корректно возвращает
+     * пустую строку, когда последний элемент является пустой строкой.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastWithEmptyStringAsLastElement(): void
+    {
+        $data = ['a' => 'not empty', 'b' => ''];
+        $this->assertLastCase($data, '');
+    }
 
-        // Test with numeric keys not starting from 0
-        // Тест с числовыми ключами, не начинающимися с 0
-        $data6 = [5 => 'five', 10 => 'ten', 15 => 'fifteen'];
+    /**
+     * Tests that last() method returns same result on multiple calls.
+     *
+     * This test verifies that the last() method doesn't affect
+     * the internal array pointer and returns the same result
+     * on multiple calls.
+     *
+     *
+     * Тестирование, что метод last() возвращает одинаковый результат при нескольких вызовах.
+     *
+     * Этот тест проверяет, что метод last() не затрагивает
+     * внутренний указатель массива и возвращает одинаковый результат
+     * при нескольких вызовах.
+     *
+     * @see CoverArray::last()
+     */
+    public function testLastReturnsSameResultOnMultipleCalls(): void
+    {
+        $data = ['first', 'second', 'third'];
+        $cover = new CoverArray($data);
 
-        // CoverArray method
-        // метод CoverArray
-        $cover6 = new CoverArray($data6);
-        $this->assertSame('fifteen', $cover6->last());
-
-        // Test with null value as last element
-        // Тест с null значением в качестве последнего элемента
-        $data7 = ['a' => 1, 'b' => null];
-
-        // CoverArray method
-        // метод CoverArray
-        $cover7 = new CoverArray($data7);
-        $this->assertNull($cover7->last());
-
-        // Test with false value as last element
-        // Тест со значением false в качестве последнего элемента
-        $data8 = ['a' => true, 'b' => false];
-
-        // CoverArray method
-        // метод CoverArray
-        $cover8 = new CoverArray($data8);
-        $this->assertFalse($cover8->last());
-
-        // Test with zero value as last element
-        // Тест с нулевым значением в качестве последнего элемента
-        $data9 = ['a' => 1, 'b' => 0];
-
-        // CoverArray method
-        // метод CoverArray
-        $cover9 = new CoverArray($data9);
-        $this->assertSame(0, $cover9->last());
-
-        // Test with empty string as last element
-        // Тест с пустой строкой в качестве последнего элемента
-        $data10 = ['a' => 'not empty', 'b' => ''];
-
-        // CoverArray method
-        // метод CoverArray
-        $cover10 = new CoverArray($data10);
-        $this->assertSame('', $cover10->last());
-
-        // Test that method doesn't affect array pointer (same result on multiple calls)
-        // Тест, что метод не затрагивает указатель массива (одинаковый результат при нескольких вызовах)
-        $data11 = ['first', 'second', 'third'];
-        $cover11 = new CoverArray($data11);
-
-        $this->assertSame('third', $cover11->last());
-        $this->assertSame('third', $cover11->last()); // Second call should return same result
-        $this->assertSame('third', $cover11->last()); // Third call should return same result
+        $this->assertSame('third', $cover->last());
+        $this->assertSame('third', $cover->last()); // Второй вызов должен вернуть тот же результат
+        $this->assertSame('third', $cover->last()); // Третий вызов должен вернуть тот же результат
     }
 }
