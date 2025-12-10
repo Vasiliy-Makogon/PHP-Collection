@@ -443,4 +443,47 @@ class DiffUkeyTest extends TestCase
         $result = $cover->diffUkey($callback, $diff1, $diff2, $diff3);
         $this->assertSame($expected, $result->getDataAsArray());
     }
+
+    /**
+     * Tests the diffUkey() method with three diff arrays all as CoverArray objects.
+     *
+     * This test verifies that the diffUkey() method correctly computes
+     * the difference of arrays with three diff arrays all as CoverArray objects,
+     * using a user-defined callback function for key comparison,
+     * mirroring PHP's array_diff_ukey().
+     *
+     *
+     * Тестирование метода diffUkey() с тремя массивами для сравнения, все как объекты CoverArray.
+     *
+     * Этот тест проверяет, что метод diffUkey() корректно вычисляет
+     * расхождение массивов с тремя массивами для сравнения, все как объекты CoverArray,
+     * с использованием пользовательской callback-функции для сравнения ключей,
+     * отражая array_diff_ukey() PHP.
+     *
+     * @see CoverArray::diffUkey()
+     * @see array_diff_ukey()
+     */
+    public function testDiffUkeyWithThreeDiffArraysAllCoverArray(): void
+    {
+        $callback = $this->getStandardCallback();
+
+        // Test with three diff arrays, all as CoverArray
+        // Тест с тремя массивами для сравнения, все как CoverArray
+        $data = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6];
+        $diff1 = ['a' => 10, 'b' => 20];
+        $diff2 = ['c' => 30, 'd' => 40];
+        $diff3 = ['e' => 50];
+
+        $expected = array_diff_ukey($data, $diff1, $diff2, $diff3, $callback);
+
+        $cover = new CoverArray($data);
+
+        $result = $cover->diffUkey(
+            $callback,
+            new CoverArray($diff1),
+            new CoverArray($diff2),
+            new CoverArray($diff3)
+        );
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 }
