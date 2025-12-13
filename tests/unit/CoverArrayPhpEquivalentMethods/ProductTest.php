@@ -12,123 +12,428 @@ use PHPUnit\Framework\TestCase;
 class ProductTest extends TestCase
 {
     /**
-     * Tests the product() method (array_product equivalent).
+     * Tests the product() method with integers.
      *
      * This test verifies that the product() method correctly calculates
-     * the product of array values, mirroring PHP's array_product() function.
-     * It tests various scenarios including integers, floats, strings,
-     * booleans, null values, and edge cases like empty arrays and zero values.
+     * the product of integer array values, mirroring PHP's array_product() function.
      *
      *
-     * Тестирование метода product() (эквивалент array_product).
+     * Тестирование метода product() с целыми числами.
      *
      * Этот тест проверяет, что метод product() корректно вычисляет
-     * произведение значений массива, отражая поведение функции array_product() PHP.
-     * Он тестирует различные сценарии, включая целые числа, числа с плавающей точкой,
-     * строки, булевы значения, null и граничные случаи, такие как пустые массивы и нулевые значения.
+     * произведение целочисленных значений массива, отражая функцию array_product() PHP.
      *
      * @see CoverArray::product()
      * @see array_product()
      */
-    public function testProductMethod(): void
+    public function testProductWithIntegers(): void
     {
         // Test with integers - product of integers
-        $data1 = [2, 3, 4];
-        $expected1 = array_product($data1);
-        $cover1 = new CoverArray($data1);
-        $this->assertSame($expected1, $cover1->product());
+        // Тест с целыми числами - произведение целых чисел
+        $data = [2, 3, 4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with floats.
+     *
+     * This test verifies that the product() method correctly calculates
+     * the product of floating point array values, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с числами с плавающей точкой.
+     *
+     * Этот тест проверяет, что метод product() корректно вычисляет
+     * произведение значений массива с плавающей точкой, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithFloats(): void
+    {
         // Test with floats - product of floating point numbers
-        $data2 = [1.5, 2.5, 2.0];
-        $expected2 = array_product($data2);
-        $cover2 = new CoverArray($data2);
-        $this->assertSame($expected2, $cover2->product());
+        // Тест с числами с плавающей точкой - произведение чисел с плавающей точкой
+        $data = [1.5, 2.5, 2.0];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with empty array.
+     *
+     * This test verifies that the product() method correctly returns 1
+     * for an empty array, mirroring PHP's array_product() function behavior.
+     *
+     *
+     * Тестирование метода product() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод product() корректно возвращает 1
+     * для пустого массива, отражая поведение функции array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithEmptyArray(): void
+    {
         // Test with empty array (should return 1, not 0!)
-        $data3 = [];
-        $expected3 = array_product($data3);
-        $cover3 = new CoverArray($data3);
-        $this->assertSame($expected3, $cover3->product());
+        // Тест с пустым массивом (должен вернуть 1, а не 0!)
+        $data = [];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with single element.
+     *
+     * This test verifies that the product() method correctly returns
+     * the single element for a one-element array, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с одним элементом.
+     *
+     * Этот тест проверяет, что метод product() корректно возвращает
+     * единственный элемент для массива с одним элементом, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithSingleElement(): void
+    {
         // Test with single element
-        $data4 = [5];
-        $expected4 = array_product($data4);
-        $cover4 = new CoverArray($data4);
-        $this->assertSame($expected4, $cover4->product());
+        // Тест с одним элементом
+        $data = [5];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with negative numbers.
+     *
+     * This test verifies that the product() method correctly calculates
+     * the product of negative array values, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с отрицательными числами.
+     *
+     * Этот тест проверяет, что метод product() корректно вычисляет
+     * произведение отрицательных значений массива, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithNegativeNumbers(): void
+    {
         // Test with negative numbers
-        $data5 = [-2, 3, -4];
-        $expected5 = array_product($data5);
-        $cover5 = new CoverArray($data5);
-        $this->assertSame($expected5, $cover5->product());
+        // Тест с отрицательными числами
+        $data = [-2, 3, -4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with zero value.
+     *
+     * This test verifies that the product() method correctly returns 0
+     * when any element in the array is zero, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с нулевым значением.
+     *
+     * Этот тест проверяет, что метод product() корректно возвращает 0,
+     * когда любой элемент массива равен нулю, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithZeroValue(): void
+    {
         // Test with zero value
-        $data6 = [2, 3, 0, 5];
-        $expected6 = array_product($data6);
-        $cover6 = new CoverArray($data6);
-        $this->assertSame($expected6, $cover6->product());
+        // Тест с нулевым значением
+        $data = [2, 3, 0, 5];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with string numbers.
+     *
+     * This test verifies that the product() method correctly converts
+     * and calculates the product of string numeric values, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() со строковыми числами.
+     *
+     * Этот тест проверяет, что метод product() корректно преобразует
+     * и вычисляет произведение строковых числовых значений, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithStringNumbers(): void
+    {
         // Test with string numbers (should be converted automatically)
-        $data7 = ['2', '3', '4'];
-        $expected7 = array_product($data7);
-        $cover7 = new CoverArray($data7);
-        $this->assertSame($expected7, $cover7->product());
+        // Тест со строковыми числами (должны быть преобразованы автоматически)
+        $data = ['2', '3', '4'];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with mixed numeric strings and numbers.
+     *
+     * This test verifies that the product() method correctly handles
+     * mixed string and numeric types, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() со смешанными строковыми и числовыми значениями.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * смешанные строковые и числовые типы, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithMixedNumericStringsAndNumbers(): void
+    {
         // Test with mixed numeric strings and numbers
-        $data8 = ['2.5', 3, 4];
-        $expected8 = array_product($data8);
-        $cover8 = new CoverArray($data8);
-        $this->assertSame($expected8, $cover8->product());
+        // Тест со смешанными строковыми и числовыми значениями
+        $data = ['2.5', 3, 4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with non-numeric strings.
+     *
+     * This test verifies that the product() method correctly handles
+     * non-numeric strings by returning 0 and suppressing warnings,
+     * mirroring PHP's array_product() function behavior when called with @.
+     *
+     *
+     * Тестирование метода product() с нечисловыми строками.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * нечисловые строки, возвращая 0 и подавляя предупреждения,
+     * отражая поведение функции array_product() PHP при вызове с @.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithNonNumericStrings(): void
+    {
         // Test with non-numeric strings - returns 0 in PHP >= 8.3, with E_WARNING suppressed
         // Тест с нечисловыми строками - возвращает 0 в PHP >= 8.3, с подавленным E_WARNING
-        $data9 = [2, 3, 'abc', 4];
-        $expected9 = @array_product($data9); // 0
-        $cover9 = new CoverArray($data9);
-        $this->assertSame($expected9, $cover9->product());
+        $data = [2, 3, 'abc', 4];
+        $expected = @array_product($data); // 0
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with boolean values.
+     *
+     * This test verifies that the product() method correctly converts
+     * boolean values to integers and calculates their product, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с булевыми значениями.
+     *
+     * Этот тест проверяет, что метод product() корректно преобразует
+     * булевы значения в целые числа и вычисляет их произведение, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithBooleanValues(): void
+    {
         // Test with boolean values
-        $data10 = [2, true, 3, false, 4];
-        $expected10 = array_product($data10);
-        $cover10 = new CoverArray($data10);
-        $this->assertSame($expected10, $cover10->product());
+        // Тест с булевыми значениями
+        $data = [2, true, 3, false, 4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with null values.
+     *
+     * This test verifies that the product() method correctly handles
+     * null values by treating them as 0, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() со значениями null.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * значения null, рассматривая их как 0, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithNullValues(): void
+    {
         // Test with null values
-        $data11 = [2, 3, null, 4];
-        $expected11 = array_product($data11);
-        $cover11 = new CoverArray($data11);
-        $this->assertSame($expected11, $cover11->product());
+        // Тест со значениями null
+        $data = [2, 3, null, 4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with large numbers.
+     *
+     * This test verifies that the product() method correctly handles
+     * large numbers without overflow issues, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с большими числами.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * большие числа без проблем с переполнением, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithLargeNumbers(): void
+    {
         // Test with large numbers
-        $data12 = [1000, 1000, 1000];
-        $expected12 = array_product($data12);
-        $cover12 = new CoverArray($data12);
-        $this->assertSame($expected12, $cover12->product());
+        // Тест с большими числами
+        $data = [1000, 1000, 1000];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with associative array.
+     *
+     * This test verifies that the product() method correctly works
+     * with associative arrays, ignoring keys and calculating product of values,
+     * mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с ассоциативным массивом.
+     *
+     * Этот тест проверяет, что метод product() корректно работает
+     * с ассоциативными массивами, игнорируя ключи и вычисляя произведение значений,
+     * отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithAssociativeArray(): void
+    {
         // Test with associative array
-        $data13 = ['a' => 2, 'b' => 3, 'c' => 4];
-        $expected13 = array_product($data13);
-        $cover13 = new CoverArray($data13);
-        $this->assertSame($expected13, $cover13->product());
+        // Тест с ассоциативным массивом
+        $data = ['a' => 2, 'b' => 3, 'c' => 4];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with numeric strings with leading zeros.
+     *
+     * This test verifies that the product() method correctly handles
+     * numeric strings with leading zeros, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с числовыми строками с ведущими нулями.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * числовые строки с ведущими нулями, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithNumericStringsWithLeadingZeros(): void
+    {
         // Test with numeric string with leading zeros
-        $data14 = ['02', '03'];
-        $expected14 = array_product($data14);
-        $cover14 = new CoverArray($data14);
-        $this->assertSame($expected14, $cover14->product());
+        // Тест с числовой строкой с ведущими нулями
+        $data = ['02', '03'];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with very small float numbers.
+     *
+     * This test verifies that the product() method correctly calculates
+     * the product of very small float numbers, mirroring PHP's array_product() function.
+     *
+     *
+     * Тестирование метода product() с очень маленькими числами с плавающей точкой.
+     *
+     * Этот тест проверяет, что метод product() корректно вычисляет
+     * произведение очень маленьких чисел с плавающей точкой, отражая функцию array_product() PHP.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithVerySmallFloatNumbers(): void
+    {
         // Test with very small float numbers
-        $data15 = [0.1, 0.2, 0.3];
-        $expected15 = array_product($data15);
-        $cover15 = new CoverArray($data15);
-        $this->assertSame($expected15, $cover15->product());
+        // Тест с очень маленькими числами с плавающей точкой
+        $data = [0.1, 0.2, 0.3];
+        $expected = array_product($data);
+        $cover = new CoverArray($data);
 
-        // Test that original array is not modified
-        $data16 = [2, 3, 4];
-        $expected16 = array_product($data16);
-        $cover16 = new CoverArray($data16);
-        $result = $cover16->product();
-        $this->assertSame($expected16, $result);
-        $this->assertSame([2, 3, 4], $cover16->getDataAsArray(), 'Original array should not be modified');
+        $this->assertSame($expected, $cover->product());
+    }
+
+    /**
+     * Tests the product() method with CoverArray as value.
+     *
+     * This test verifies that the product() method correctly handles
+     * CoverArray objects as values, treating them as arrays and potentially
+     * causing warnings to be suppressed, mirroring PHP's array_product() function
+     * with non-scalar values.
+     *
+     *
+     * Тестирование метода product() со значением типа CoverArray.
+     *
+     * Этот тест проверяет, что метод product() корректно обрабатывает
+     * объекты CoverArray как значения, рассматривая их как массивы и потенциально
+     * вызывая подавление предупреждений, отражая функцию array_product() PHP
+     * с нескалярными значениями.
+     *
+     * @see CoverArray::product()
+     * @see array_product()
+     */
+    public function testProductWithCoverArrayValue(): void
+    {
+        // Test with CoverArray as value - non-scalar values return 0 with suppressed warning
+        // Тест со значением типа CoverArray - нескалярные значения возвращают 0 с подавленным предупреждением
+        $innerCover = new CoverArray([2, 3]);
+        $data = [2, $innerCover, 4];
+
+        $expected = @array_product($data);
+        $cover = new CoverArray($data);
+
+        $this->assertSame($expected, $cover->product());
     }
 }

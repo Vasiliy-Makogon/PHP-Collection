@@ -12,148 +12,318 @@ use PHPUnit\Framework\TestCase;
 class ReverseTest extends TestCase
 {
     /**
-     * Tests the reverse() method (array_reverse equivalent).
+     * Tests the reverse() method without key preservation.
      *
      * This test verifies that the reverse() method correctly returns
-     * a new CoverArray with elements in reverse order, with optional
-     * key preservation, mirroring PHP's array_reverse() function.
-     * The method should not modify the original CoverArray instance.
+     * a new CoverArray with elements in reverse order without preserving
+     * keys for numeric arrays, mirroring PHP's array_reverse() function
+     * with $preserve_keys set to false.
      *
      *
-     * Тестирование метода reverse() (эквивалент array_reverse).
+     * Тестирование метода reverse() без сохранения ключей.
      *
      * Этот тест проверяет, что метод reverse() корректно возвращает
-     * новый CoverArray с элементами в обратном порядке, с опциональным
-     * сохранением ключей, отражая функцию array_reverse() PHP.
-     * Метод не должен изменять исходный экземпляр CoverArray.
+     * новый CoverArray с элементами в обратном порядке без сохранения
+     * ключей для числовых массивов, отражая функцию array_reverse() PHP
+     * с $preserve_keys установленным в false.
      *
      * @see CoverArray::reverse()
      * @see array_reverse()
      */
-    public function testReverseMethod(): void
+    public function testReverseWithoutKeyPreservation(): void
     {
-        // Test 1: Simple numeric array without key preservation (default)
-        // Тест 1: Простой числовой массив без сохранения ключей (по умолчанию)
-        $data1 = ['PHP', 'MySql', 'JavaScript'];
-        $cover1 = new CoverArray($data1);
+        $data = ['PHP', 'MySql', 'JavaScript'];
 
-        $expected1 = array_reverse($data1, false);
-        $result1 = $cover1->reverse();
+        $expected = array_reverse($data, false);
 
-        $this->assertSame(
-            $expected1,
-            $result1->getDataAsArray(),
-            'Simple array should be reversed without key preservation'
-        );
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
 
-        // Test 2: Simple numeric array with key preservation
-        // Тест 2: Простой числовой массив с сохранением ключей
-        $result2 = $cover1->reverse(true);
-        $expected2 = array_reverse($data1, true);
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 
-        $this->assertSame(
-            $expected2,
-            $result2->getDataAsArray(),
-            'Simple array should be reversed with key preservation'
-        );
+    /**
+     * Tests the reverse() method with key preservation.
+     *
+     * This test verifies that the reverse() method correctly returns
+     * a new CoverArray with elements in reverse order while preserving
+     * keys for numeric arrays, mirroring PHP's array_reverse() function
+     * with $preserve_keys set to true.
+     *
+     *
+     * Тестирование метода reverse() с сохранением ключей.
+     *
+     * Этот тест проверяет, что метод reverse() корректно возвращает
+     * новый CoverArray с элементами в обратном порядке с сохранением
+     * ключей для числовых массивов, отражая функцию array_reverse() PHP
+     * с $preserve_keys установленным в true.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithKeyPreservation(): void
+    {
+        $data = ['PHP', 'MySql', 'JavaScript'];
 
-        // Test 3: Verify original object is not modified
-        // Тест 3: Проверяем, что исходный объект не изменен
-        $this->assertSame(
-            $data1,
-            $cover1->getDataAsArray(),
-            'Original CoverArray should not be modified by reverse()'
-        );
+        $expected = array_reverse($data, true);
 
-        // Test 4: Associative array (keys should always be preserved)
-        // Тест 4: Ассоциативный массив (ключи всегда должны сохраняться)
-        $data2 = ['first' => 'PHP', 'second' => 'MySql', 'third' => 'JavaScript'];
-        $cover2 = new CoverArray($data2);
+        $cover = new CoverArray($data);
+        $result = $cover->reverse(true);
 
-        $expected3 = array_reverse($data2, false); // Для ассоциативного массива ключи сохраняются всегда
-        $result3 = $cover2->reverse();
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 
-        $this->assertSame(
-            $expected3,
-            $result3->getDataAsArray(),
-            'Associative array keys should be preserved in reverse'
-        );
+    /**
+     * Tests the reverse() method with associative array.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * associative arrays, preserving keys regardless of the $preserve_keys
+     * parameter, mirroring PHP's array_reverse() function behavior.
+     *
+     *
+     * Тестирование метода reverse() с ассоциативным массивом.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * ассоциативные массивы, сохраняя ключи независимо от параметра
+     * $preserve_keys, отражая поведение функции array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithAssociativeArray(): void
+    {
+        $data = ['first' => 'PHP', 'second' => 'MySql', 'third' => 'JavaScript'];
 
-        // Test 5: Mixed keys (numeric and string)
-        // Тест 5: Смешанные ключи (числовые и строковые)
-        $data3 = [0 => 'PHP', 'lang' => 'MySql', 1 => 'JavaScript', 'db' => 'PostgreSQL'];
-        $cover3 = new CoverArray($data3);
+        $expected = array_reverse($data, false);
 
-        $expected4 = array_reverse($data3, false);
-        $result4 = $cover3->reverse();
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
 
-        $this->assertSame(
-            $expected4,
-            $result4->getDataAsArray(),
-            'Mixed key array should be reversed correctly'
-        );
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 
-        // Test 6: Empty array
-        // Тест 6: Пустой массив
-        $emptyCover = new CoverArray([]);
-        $emptyResult = $emptyCover->reverse();
+    /**
+     * Tests the reverse() method with mixed keys.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * arrays with both numeric and string keys, reversing the order
+     * while appropriately handling key preservation, mirroring PHP's
+     * array_reverse() function.
+     *
+     *
+     * Тестирование метода reverse() со смешанными ключами.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * массивы с числовыми и строковыми ключами, меняя порядок элементов
+     * и правильно обрабатывая сохранение ключей, отражая функцию
+     * array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithMixedKeys(): void
+    {
+        $data = [0 => 'PHP', 'lang' => 'MySql', 1 => 'JavaScript', 'db' => 'PostgreSQL'];
 
-        $this->assertSame(
-            [],
-            $emptyResult->getDataAsArray(),
-            'Empty array should remain empty when reversed'
-        );
+        $expected = array_reverse($data, false);
 
-        // Test 7: Single element array
-        // Тест 7: Массив с одним элементом
-        $singleData = ['only' => 'element'];
-        $singleCover = new CoverArray($singleData);
-        $singleResult = $singleCover->reverse();
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
 
-        $this->assertSame(
-            $singleData, // Обратный массив из одного элемента равен самому себе
-            $singleResult->getDataAsArray(),
-            'Single element array should be unchanged when reversed'
-        );
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 
-        // Test 8: Array with gaps in numeric indices
-        // Тест 8: Массив с пропусками в числовых индексах
-        $data4 = [0 => 'PHP', 2 => 'MySql', 5 => 'JavaScript'];
-        $cover4 = new CoverArray($data4);
+    /**
+     * Tests the reverse() method with empty array.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * empty arrays, returning an empty array without errors,
+     * mirroring PHP's array_reverse() function.
+     *
+     *
+     * Тестирование метода reverse() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * пустые массивы, возвращая пустой массив без ошибок,
+     * отражая функцию array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithEmptyArray(): void
+    {
+        $data = [];
 
-        $expected5 = array_reverse($data4, false);
-        $result5 = $cover4->reverse();
+        $expected = array_reverse($data, false);
 
-        $this->assertSame(
-            $expected5,
-            $result5->getDataAsArray(),
-            'Array with gaps in indices should be reversed correctly'
-        );
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
 
-        // Test 9: Verify method returns CoverArray instance
-        // Тест 9: Проверяем, что метод возвращает экземпляр CoverArray
-        $this->assertInstanceOf(
-            CoverArray::class,
-            $cover1->reverse(),
-            'reverse() should return a CoverArray instance'
-        );
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
 
-        // Test 10: Multidimensional array (reverse only top level)
-        // Тест 10: Многомерный массив (обратный порядок только на верхнем уровне)
-        $multiData = [
+    /**
+     * Tests the reverse() method with single element array.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * arrays with a single element, returning the same array,
+     * mirroring PHP's array_reverse() function.
+     *
+     *
+     * Тестирование метода reverse() с массивом из одного элемента.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * массивы с одним элементом, возвращая тот же массив,
+     * отражая функцию array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithSingleElementArray(): void
+    {
+        $data = ['only' => 'element'];
+
+        $expected = array_reverse($data, false);
+
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the reverse() method with array containing gaps in numeric indices.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * arrays with gaps in numeric indices, reversing the order while
+     * appropriately reindexing numeric keys when not preserving keys,
+     * mirroring PHP's array_reverse() function.
+     *
+     *
+     * Тестирование метода reverse() с массивом с пропусками в числовых индексах.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * массивы с пропусками в числовых индексах, меняя порядок элементов
+     * и правильно переиндексируя числовые ключи при отсутствии сохранения ключей,
+     * отражая функцию array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithArrayHavingGapsInIndices(): void
+    {
+        $data = [0 => 'PHP', 2 => 'MySql', 5 => 'JavaScript'];
+
+        $expected = array_reverse($data, false);
+
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the reverse() method returns CoverArray instance.
+     *
+     * This test verifies that the reverse() method returns a new
+     * CoverArray instance rather than a plain array.
+     *
+     *
+     * Тестирование, что метод reverse() возвращает экземпляр CoverArray.
+     *
+     * Этот тест проверяет, что метод reverse() возвращает новый
+     * экземпляр CoverArray, а не обычный массив.
+     *
+     * @see CoverArray::reverse()
+     */
+    public function testReverseReturnsCoverArrayInstance(): void
+    {
+        $data = ['PHP', 'MySql', 'JavaScript'];
+
+        $cover = new CoverArray($data);
+        $result = $cover->reverse();
+
+        $this->assertInstanceOf(CoverArray::class, $result);
+    }
+
+    /**
+     * Tests the reverse() method with multidimensional array.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * multidimensional arrays, reversing only the top level while
+     * preserving the internal structure of nested arrays,
+     * mirroring PHP's array_reverse() function.
+     *
+     *
+     * Тестирование метода reverse() с многомерным массивом.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * многомерные массивы, меняя порядок только на верхнем уровне
+     * и сохраняя внутреннюю структуру вложенных массивов,
+     * отражая функцию array_reverse() PHP.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithMultidimensionalArray(): void
+    {
+        $data = [
             'first' => ['PHP', 'MySql'],
             'second' => ['HTML', 'CSS'],
             'third' => ['JavaScript', 'TypeScript']
         ];
-        $multiCover = new CoverArray($multiData);
 
-        $expected6 = array_reverse($multiData, true);
-        $result6 = $multiCover->reverse(true);
+        $expected = array_reverse($data, true);
 
-        $this->assertSame(
-            $expected6,
-            $result6->getDataAsArray(),
-            'Multidimensional array should reverse only top level'
-        );
+        $cover = new CoverArray($data);
+        $result = $cover->reverse(true);
+
+        $this->assertSame($expected, $result->getDataAsArray());
+    }
+
+    /**
+     * Tests the reverse() method with CoverArray as value.
+     *
+     * This test verifies that the reverse() method correctly handles
+     * CoverArray objects as values in the array, preserving them
+     * without modification during the reversal process.
+     *
+     *
+     * Тестирование метода reverse() со значением типа CoverArray.
+     *
+     * Этот тест проверяет, что метод reverse() корректно обрабатывает
+     * объекты CoverArray как значения в массиве, сохраняя их
+     * без изменений в процессе обращения порядка.
+     *
+     * @see CoverArray::reverse()
+     * @see array_reverse()
+     */
+    public function testReverseWithCoverArrayValue(): void
+    {
+        $innerCover = new CoverArray(['x' => 1, 'y' => 2]);
+        $anotherCover = new CoverArray(['a' => 'b']);
+
+        $data = [
+            'first' => $innerCover,
+            'second' => 'regular',
+            'third' => $anotherCover
+        ];
+
+        $cover = new CoverArray($data);
+        $result = $cover->reverse(true);
+
+        // Проверяем, что порядок ключей изменился
+        $this->assertSame(['third', 'second', 'first'], array_keys($result->getDataAsArray()));
+
+        // Проверяем, что первый элемент (теперь 'third') содержит правильный CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result['third']);
+        $this->assertSame(['a' => 'b'], $result['third']->getDataAsArray());
+
+        // Проверяем, что второй элемент (теперь 'second') содержит строку
+        $this->assertSame('regular', $result['second']);
+
+        // Проверяем, что третий элемент (теперь 'first') содержит правильный CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result['first']);
+        $this->assertSame(['x' => 1, 'y' => 2], $result['first']->getDataAsArray());
     }
 }

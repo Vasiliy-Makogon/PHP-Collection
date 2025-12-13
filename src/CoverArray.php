@@ -11,6 +11,7 @@ use InvalidArgumentException;
 use IteratorAggregate;
 use JsonSerializable;
 use RuntimeException;
+use Stringable;
 use Traversable;
 use ValueError;
 use JsonException;
@@ -35,7 +36,7 @@ use JsonException;
  * @author Vasiliy Makogon
  * @link https://github.com/Vasiliy-Makogon/PHP-Collection
  */
-class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable
+class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSerializable, Stringable
 {
     use Simple;
 
@@ -94,7 +95,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      * @return string String representation of the object.
      *                Строковое представление объекта.
      */
-    public function __toString()
+    public function __toString(): string
     {
         return '';
     }
@@ -223,18 +224,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Implementing the Countable interface.
-     *
-     * Реализует интерфейс Countable.
-     *
-     * @return int
-     */
-    final public function count(): int
-    {
-        return count($this->data);
-    }
-
-    /**
      * Implements the IteratorAggregate interface.
      * Returns an iterator for the array, allowing foreach loops to work.
      *
@@ -347,7 +336,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function __serialize(): array
     {
-        return $this->getData();
+        return $this->data;
     }
 
     /**
@@ -384,7 +373,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     final public function getDataAsArray(): array
     {
         $data = [];
-        foreach ($this->getData() as $key => $value) {
+        foreach ($this->data as $key => $value) {
             $data[$key] = $value instanceof self ? $value->{__FUNCTION__}() : $value;
         }
 
@@ -1398,29 +1387,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Checks if the given key or index exists in the array (array_key_exists equivalent).
-     *
-     * Returns true if the given key is set in the array, false otherwise.
-     * The key can be any value possible for an array index.
-     *
-     *
-     * Проверяет, содержит ли массив указанный ключ или индекс (эквивалент array_key_exists).
-     *
-     * Возвращает true, если указанный ключ установлен в массиве, иначе false.
-     * Ключом может быть любое значение, возможное для индекса массива.
-     *
-     * @param mixed $key Key or index to check for.
-     *                   Ключ или индекс для проверки.
-     * @return bool True if the key exists, false otherwise.
-     *              Возвращает true, если ключ существует, иначе false.
-     * @see array_key_exists()
-     */
-    final public function keyExists(mixed $key): bool
-    {
-        return array_key_exists($key, $this->data);
-    }
-
-    /**
      * Gets the first key of an array (array_key_first equivalent).
      *
      * Returns the first key of the array without affecting the internal array pointer.
@@ -1514,76 +1480,102 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
-     * Applies a callback function to the elements of arrays (array_map equivalent).
+     * Applies a callback function to the elements and returns a new instance (array_map equivalent).
      *
-     * Returns a new array containing the results of applying the callback function
-     * to the corresponding elements of the current array and additional arrays.
-     * The callback function can receive one parameter per array being processed.
+     * This method is equivalent to PHP's `array_map()` function with these key characteristics:
+     * 1. Returns a NEW CoverArray instance (immutable operation)
+     * 2. Callback receives only VALUES (not keys) unless using null callback
+     * 3. Supports multiple input arrays for parallel processing
+     * 4. Numeric keys are re-indexed (0, 1, 2...), associative keys may be lost
      *
-     * When $callback is null, this method behaves like array_map(null, ...),
-     * returning an array of arrays (or tuples) containing elements from all input arrays
-     * at corresponding positions.
+     * DIFFERENCES from other methods:
+     * - Unlike `each()`, which receives both value AND key, `map()` callback receives only values (unless null callback)
+     * - Unlike `walk()`, which modifies the current instance, `map()` returns a new instance
+     * - Unlike `eachRecursive()` and `walkRecursive()`, which process nested arrays, `map()` works only at the first level
+     * - Unlike `each()` and `walk()`, which preserve original keys, `map()` re-indexes numeric keys
+     * - Unlike all other methods in this group, `map()` can process multiple arrays simultaneously
      *
-     * Note: For associative arrays where you need both key and value, consider using
-     * the each() method instead. The map() method only passes values to the callback,
-     * not keys.
+     * KEY CHARACTERISTICS:
+     * - Immutable operation (returns new CoverArray)
+     * - Numeric keys are re-indexed, associative keys may be lost
+     * - Supports processing multiple arrays in parallel
+     * - Works only at the first nesting level
+     *
+     * Use `map()` when:
+     * - You need to process multiple arrays in parallel
+     * - Keys are not important (or you want numeric re-indexing)
+     * - You want array_map() behavior with object syntax
+     * - You're working only with flat arrays (no nested structures)
+     *
+     * Use `each()`, `walk()`, `eachRecursive()`, or `walkRecursive()` when:
+     * - You need to preserve associative keys (`each()` or `walk()`)
+     * - You need to process nested arrays (`eachRecursive()` or `walkRecursive()`)
+     * - You need to modify the array in-place (`walk()` or `walkRecursive()`)
+     * - You need both value AND key in the callback (`each()` or `walk()`)
      *
      *
-     * Применяет callback-функцию к элементам массивов (эквивалент array_map).
+     * Применяет callback-функцию к элементам и возвращает новый экземпляр (эквивалент array_map).
      *
-     * Возвращает новый массив, содержащий результаты применения callback-функции
-     * к соответствующим элементам текущего массива и дополнительных массивов.
-     * Callback-функция может принимать по одному параметру для каждого обрабатываемого массива.
+     * Этот метод эквивалентен функции PHP `array_map()` с ключевыми особенностями:
+     * 1. Возвращает НОВЫЙ экземпляр CoverArray (иммутабельная операция)
+     * 2. Callback получает только ЗНАЧЕНИЯ (не ключи), если только не используется null callback
+     * 3. Поддерживает несколько входных массивов для параллельной обработки
+     * 4. Числовые ключи переиндексируются (0, 1, 2...), ассоциативные ключи могут быть потеряны
      *
-     * Если $callback равен null, метод ведет себя как array_map(null, ...),
-     * возвращая массив массивов (или кортежей), содержащих элементы из всех входных массивов
-     * на соответствующих позициях.
+     * ОТЛИЧИЯ от других методов:
+     * - В отличие от `each()`, который получает и значение, И ключ, `map()` callback получает только значения (кроме null callback)
+     * - В отличие от `walk()`, который изменяет текущий экземпляр, `map()` возвращает новый экземпляр
+     * - В отличие от `eachRecursive()` и `walkRecursive()`, которые обрабатывают вложенные массивы, `map()` работает только на первом уровне
+     * - В отличие от `each()` и `walk()`, которые сохраняют оригинальные ключи, `map()` переиндексирует числовые ключи
+     * - В отличие от всех других методов в этой группе, `map()` может обрабатывать несколько массивов одновременно
      *
-     * Примечание: Для ассоциативных массивов, где нужны и ключ, и значение, рассмотрите
-     * использование метода each() вместо этого. Метод map() передает в callback только
-     * значения, а не ключи.
+     * КЛЮЧЕВЫЕ ХАРАКТЕРИСТИКИ:
+     * - Иммутабельная операция (возвращает новый CoverArray)
+     * - Числовые ключи переиндексируются, ассоциативные ключи могут быть потеряны
+     * - Поддерживает параллельную обработку нескольких массивов
+     * - Работает только на первом уровне вложенности
      *
-     * @param callable|null $callback Callback function to apply. Signature depends on
-     *                                number of arrays: for 1 array: `fn($value)`,
-     *                                for 2 arrays: `fn($value1, $value2)`, etc.
-     *                                If null, returns an array of arrays/tuples.
-     *                                Callback-функция для применения. Сигнатура зависит от
-     *                                количества массивов: для 1 массива: `fn($value)`,
-     *                                для 2 массивов: `fn($value1, $value2)` и т.д.
-     *                                Если null, возвращает массив массивов/кортежей.
-     * @param CoverArray|array ...$arrays Additional arrays to process.
-     *                                    Дополнительные массивы для обработки.
-     * @return static New CoverArray instance with mapped values.
+     * Используйте `map()`, когда:
+     * - Нужно обрабатывать несколько массивов параллельно
+     * - Ключи не важны (или нужна числовая переиндексация)
+     * - Нужно поведение array_map() с объектным синтаксисом
+     * - Работаете только с плоскими массивами (без вложенных структур)
+     *
+     * Используйте `each()`, `walk()`, `eachRecursive()` или `walkRecursive()`, когда:
+     * - Нужно сохранить ассоциативные ключи (`each()` или `walk()`)
+     * - Нужно обрабатывать вложенные массивы (`eachRecursive()` или `walkRecursive()`)
+     * - Нужно изменить массив на месте (`walk()` или `walkRecursive()`)
+     * - Нужны и значение, И ключ в callback (`each()` или `walk()`)
+     *
+     * @param callable|null $callback Callback function to apply. If null, creates an array of arrays/tuples.
+     *                                Callback signature depends on number of arrays:
+     *                                - 1 array: `function(mixed $value): mixed`
+     *                                - 2 arrays: `function(mixed $value1, mixed $value2): mixed`
+     *                                - etc.
+     *                                Callback-функция для применения. Если null, создаёт массив массивов/кортежей.
+     *                                Сигнатура callback зависит от количества массивов:
+     *                                - 1 массив: `function(mixed $value): mixed`
+     *                                - 2 массива: `function(mixed $value1, mixed $value2): mixed`
+     *                                - и т.д.
+     * @param CoverArray|array ...$arrays Additional arrays to process in parallel.
+     *                                    Дополнительные массивы для параллельной обработки.
+     * @return static New CoverArray instance with transformed values.
      *                Новый экземпляр CoverArray с преобразованными значениями.
+     *
+     * @example
+     * $arr = CoverArray::fromArray(['a' => 1, 'b' => 2, 'c' => 3]);
+     * $result = $arr->map(fn($x) => $x * 2);
+     * // Result: [2, 4, 6] (keys 0, 1, 2 - original keys lost)
+     *
      * @see array_map()
-     * @see CoverArray::each()
-     *
-     * @example
-     * // Basic usage with one array
-     * $arr = CoverArray::fromArray([1, 2, 3]);
-     * $result = $arr->map(fn($x) => $x * 2); // [2, 4, 6]
-     *
-     * @example
-     * // With multiple arrays
-     * $arr1 = CoverArray::fromArray([1, 2, 3]);
-     * $arr2 = CoverArray::fromArray([4, 5, 6]);
-     * $result = $arr1->map(fn($a, $b) => $a + $b, $arr2); // [5, 7, 9]
-     *
-     * @example
-     * // With null callback (creates tuples)
-     * $arr1 = CoverArray::fromArray([1, 2, 3]);
-     * $arr2 = CoverArray::fromArray(['a', 'b', 'c']);
-     * $result = $arr1->map(null, $arr2); // [[1, 'a'], [2, 'b'], [3, 'c']]
-     *
-     * @example
-     * // Using array as callback parameter
-     * $arr = CoverArray::fromArray([1, 2, 3, 4]);
-     * $result = $arr->map('strval'); // ['1', '2', '3', '4']
-     *
-     * @example
-     * // Using class method as callback
-     * $arr = CoverArray::fromArray(['hello', 'world']);
-     * $result = $arr->map([$someObject, 'methodName']);
+     * @see CoverArray::each() For mapping with key preservation
+     *                         Для преобразования с сохранением ключей
+     * @see CoverArray::walk() For in-place modification with key preservation
+     *                         Для изменения на месте с сохранением ключей
+     * @see CoverArray::eachRecursive() For recursive immutable transformation
+     *                                  Для рекурсивного иммутабельного преобразования
+     * @see CoverArray::walkRecursive() For recursive in-place modification
+     *                                  Для рекурсивного изменения на месте
      */
     final public function map(null|callable $callback, CoverArray|array ...$arrays): static
     {
@@ -1836,8 +1828,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return $this->array2cover(array_rand($this->data, $num));
     }
 
-    //////////////////////////////////////////////////////todo
-
     /**
      * Reduces the array to a single value using a callback function (array_reduce equivalent).
      *
@@ -1912,6 +1902,31 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
                     $replacement
                 )
             )
+        );
+    }
+
+    /**
+     * Returns an array with elements in reverse order (array_reverse equivalent).
+     *
+     * Returns a new array with elements in reverse order.
+     * Optionally preserves the original keys.
+     *
+     *
+     * Возвращает массив с элементами в обратном порядке (эквивалент array_reverse).
+     *
+     * Возвращает новый массив с элементами в обратном порядке.
+     * Опционально сохраняет оригинальные ключи.
+     *
+     * @param bool $preserve_keys Whether to preserve keys (true) or re-index (false).
+     *                            Сохранять ключи (true) или переиндексировать (false).
+     * @return static New CoverArray instance with reversed elements.
+     *                Новый экземпляр CoverArray с элементами в обратном порядке.
+     * @see array_reverse()
+     */
+    final public function reverse(bool $preserve_keys = false): static
+    {
+        return new static(
+            array_reverse($this->data, $preserve_keys)
         );
     }
 
@@ -2220,6 +2235,291 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
+     * Removes duplicate values from an array (array_unique equivalent).
+     *
+     * Returns a new array without duplicate values.
+     * The comparison method can be controlled with the flags parameter.
+     *
+     *
+     * Удаляет повторяющиеся значения из массива (эквивалент array_unique).
+     *
+     * Возвращает новый массив без повторяющихся значений.
+     * Метод сравнения может контролироваться параметром flags.
+     *
+     * @param int $flags Sorting behavior flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING).
+     *                   Флаги поведения сортировки (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING).
+     * @return static New CoverArray instance with unique values.
+     *                Новый экземпляр CoverArray с уникальными значениями.
+     * @see array_unique()
+     */
+    final public function unique(int $flags = SORT_STRING): static
+    {
+        return new static(
+            array_unique($this->data, $flags)
+        );
+    }
+
+    /**
+     * Prepends one or more elements to the beginning of an array (array_unshift equivalent).
+     *
+     * Adds one or more elements to the beginning of the array and returns the instance.
+     * Numerical keys will be re-indexed starting from zero.
+     * String keys will be preserved.
+     *
+     *
+     * Добавляет один или несколько элементов в начало массива (эквивалент array_unshift).
+     *
+     * Добавляет один или несколько элементов в начало массива и возвращает экземпляр.
+     * Числовые ключи будут переиндексированы, начиная с нуля.
+     * Строковые ключи будут сохранены.
+     *
+     * @param mixed ...$args Elements to prepend to the array.
+     *                       Элементы для добавления в начало массива.
+     * @return static Current CoverArray instance with prepended elements.
+     *                Текущий экземпляр CoverArray с добавленными в начало элементами.
+     * @see array_unshift()
+     * @see CoverArray::unshift()
+     */
+    final public function prepend(mixed ...$args): static
+    {
+        if (empty($args)) {
+            return $this;
+        }
+
+        $args = array_map([$this, 'array2cover'], $args);
+        array_unshift($this->data, ...$args);
+
+        return $this;
+    }
+
+    /**
+     * Prepends one or more elements to the beginning of an array (prepend() alias).
+     *
+     * Alias for the prepend() method. Adds elements to the beginning of the array.
+     * This method provides compatibility with PHP's array_unshift function name.
+     *
+     *
+     * Добавляет один или несколько элементов в начало массива (псевдоним prepend()).
+     *
+     * Псевдоним метода prepend(). Добавляет элементы в начало массива.
+     * Этот метод обеспечивает совместимость с именем функции PHP array_unshift.
+     *
+     * @param mixed ...$args Elements to prepend to the array.
+     *                       Элементы для добавления в начало массива.
+     * @return static Current CoverArray instance with prepended elements.
+     *                Текущий экземпляр CoverArray с добавленными в начало элементами.
+     * @see CoverArray::prepend()
+     * @see array_unshift()
+     */
+    final public function unshift(mixed ...$args): static
+    {
+        return $this->prepend(...$args);
+    }
+
+    /**
+     * Returns all the values of an array (array_values equivalent).
+     *
+     * Returns all the values from the array and indexes the array numerically.
+     * This function resets the array's internal pointer.
+     *
+     *
+     * Возвращает все значения массива (эквивалент array_values).
+     *
+     * Возвращает все значения из массива и индексирует массив численно.
+     * Эта функция сбрасывает внутренний указатель массива.
+     *
+     * @return static New CoverArray instance containing only the values, numerically indexed.
+     *                Новый экземпляр CoverArray, содержащий только значения с числовой индексацией.
+     * @see array_values()
+     */
+    final public function values(): static
+    {
+        return new static(
+            array_values($this->data)
+        );
+    }
+
+    /**
+     * Applies a callback function to each element in-place (mutates the instance).
+     *
+     * This method is equivalent to PHP's `array_walk()` function with these key characteristics:
+     * 1. Modifies the CURRENT CoverArray instance (mutable operation)
+     * 2. Callback receives value BY REFERENCE (can modify directly)
+     * 3. Preserves all original keys (associative and numeric)
+     * 4. Automatically converts arrays to CoverArray instances when set
+     *
+     * DIFFERENCES from other methods:
+     * - Unlike `each()`, which returns a new instance, `walk()` modifies the current instance
+     * - Unlike `map()`, which re-indexes numeric keys, `walk()` preserves all original keys
+     * - Unlike `walkRecursive()`, which processes nested arrays, `walk()` works only at the first level
+     * - Unlike `eachRecursive()`, which is immutable and recursive, `walk()` is mutable and flat
+     *
+     * This method is the mutable counterpart to the immutable `each()` method.
+     * Use `walk()` when you need to modify the array in-place without creating a copy.
+     * Use `each()` when you need to preserve the original array and work with a transformed copy.
+     *
+     * IMPORTANT: Since this method modifies the current object, it's not suitable for
+     * method chaining where immutability is expected. For chaining immutable operations,
+     * use `each()` instead.
+     *
+     *
+     * Применяет callback-функцию к каждому элементу на месте (изменяет экземпляр).
+     *
+     * Этот метод эквивалентен функции PHP `array_walk()` с ключевыми особенностями:
+     * 1. Изменяет ТЕКУЩИЙ экземпляр CoverArray (мутабельная операция)
+     * 2. Callback получает значение ПО ССЫЛКЕ (может изменять напрямую)
+     * 3. Сохраняет все оригинальные ключи (ассоциативные и числовые)
+     * 4. Автоматически преобразует массивы в экземпляры CoverArray при установке
+     *
+     * ОТЛИЧИЯ от других методов:
+     * - В отличие от `each()`, который возвращает новый экземпляр, `walk()` изменяет текущий экземпляр
+     * - В отличие от `map()`, который переиндексирует числовые ключи, `walk()` сохраняет все оригинальные ключи
+     * - В отличие от `walkRecursive()`, который обрабатывает вложенные массивы, `walk()` работает только на первом уровне
+     * - В отличие от `eachRecursive()`, который иммутабельный и рекурсивный, `walk()` мутабельный и плоский
+     *
+     * Этот метод является мутабельным аналогом иммутабельного метода `each()`.
+     * Используйте `walk()`, когда нужно изменить массив на месте без создания копии.
+     * Используйте `each()`, когда нужно сохранить оригинальный массив и работать с преобразованной копией.
+     *
+     * ВАЖНО: Поскольку этот метод изменяет текущий объект, он не подходит для
+     * цепочек вызовов, где ожидается иммутабельность. Для иммутабельных цепочек
+     * используйте метод `each()`.
+     *
+     * @param callable $callback Callback function that receives value by reference.
+     *                           Signature: `function(mixed &$value, mixed $key): void`
+     *                           The callback can modify $value directly.
+     *                           Callback-функция, получающая значение по ссылке.
+     *                           Сигнатура: `function(mixed &$value, mixed $key): void`
+     *                           Callback может изменять $value напрямую.
+     * @return static Returns $this for method chaining.
+     *                Возвращает $this для цепочек вызовов.
+     *
+     * @example
+     * $arr = CoverArray::fromArray(['a' => 1, 'b' => 2]);
+     * $arr->walk(function(&$value, $key) {
+     *     $value = $key . ':' . ($value * 2);
+     * });
+     * // $arr is now: ['a' => 'a:2', 'b' => 'b:4']
+     *
+     * @see array_walk()
+     * @see CoverArray::each() For immutable transformation
+     *                         Для иммутабельного преобразования
+     * @see CoverArray::map() For transformation without key preservation
+     *                        Для преобразования без сохранения ключей
+     * @see CoverArray::walkRecursive() For recursive mutable transformation
+     *                                  Для рекурсивного мутабельного преобразования
+     */
+    final public function walk(callable $callback): static
+    {
+        foreach ($this->data as $key => &$value) {
+            $callback($value, $key);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Recursively applies a callback function to each element in-place (mutates the instance).
+     *
+     * This method recursively processes all elements of the array, including nested arrays,
+     * applying the callback function to each leaf node. It modifies the CURRENT CoverArray
+     * instance in-place, preserving the complete hierarchical structure.
+     *
+     * DIFFERENCES from other methods:
+     * - Unlike `walk()`, which processes only the first level, `walkRecursive()` processes all nesting levels
+     * - Unlike `eachRecursive()`, which returns a new instance, `walkRecursive()` modifies the current instance
+     * - Unlike `map()`, which re-indexes keys, `walkRecursive()` preserves the complete nested structure
+     * - Unlike `each()`, which is immutable and flat, `walkRecursive()` is mutable and recursive
+     *
+     * KEY CHARACTERISTICS:
+     * - Mutable operation (modifies current CoverArray)
+     * - Recursively processes all nesting levels
+     * - Preserves the complete hierarchical structure
+     * - Automatically converts nested arrays to CoverArray instances
+     * - Callback can modify leaf values by reference
+     *
+     * Use `walkRecursive()` when:
+     * - You need to modify deeply nested arrays in-place
+     * - You want to avoid creating copies of large nested structures
+     * - You need to preserve the complete hierarchical structure
+     * - You need to modify leaf values directly by reference
+     *
+     *
+     * Рекурсивно применяет callback-функцию к каждому элементу на месте (изменяет экземпляр).
+     *
+     * Этот метод рекурсивно обрабатывает все элементы массива, включая вложенные массивы,
+     * применяя callback-функцию к каждому конечному узлу. Он изменяет ТЕКУЩИЙ экземпляр
+     * CoverArray на месте, сохраняя полную иерархическую структуру.
+     *
+     * ОТЛИЧИЯ от других методов:
+     * - В отличие от `walk()`, который обрабатывает только первый уровень, `walkRecursive()` обрабатывает все уровни вложенности
+     * - В отличие от `eachRecursive()`, который возвращает новый экземпляр, `walkRecursive()` изменяет текущий экземпляр
+     * - В отличие от `map()`, который переиндексирует ключи, `walkRecursive()` сохраняет полную вложенную структуру
+     * - В отличие от `each()`, который иммутабельный и плоский, `walkRecursive()` мутабельный и рекурсивный
+     *
+     * КЛЮЧЕВЫЕ ХАРАКТЕРИСТИКИ:
+     * - Мутабельная операция (изменяет текущий CoverArray)
+     * - Рекурсивно обрабатывает все уровни вложенности
+     * - Сохраняет полную иерархическую структуру
+     * - Автоматически преобразует вложенные массивы в экземпляры CoverArray
+     * - Callback может изменять конечные значения по ссылке
+     *
+     * Используйте `walkRecursive()`, когда:
+     * - Нужно изменить глубоко вложенные массивы на месте
+     * - Нужно избежать создания копий больших вложенных структур
+     * - Нужно сохранить полную иерархическую структуру
+     * - Нужно изменять конечные значения напрямую по ссылке
+     *
+     * @param callable $callback Callback function that receives value by reference.
+     *                           Signature: `function(mixed &$value, mixed $key): void`
+     *                           The callback can modify $value directly.
+     *                           Callback-функция, получающая значение по ссылке.
+     *                           Сигнатура: `function(mixed &$value, mixed $key): void`
+     *                           Callback может изменять $value напрямую.
+     * @return static Returns $this for method chaining.
+     *                Возвращает $this для цепочек вызовов.
+     *
+     * @example
+     * $arr = CoverArray::fromArray(['a' => 1, 'b' => ['c' => 2, 'd' => ['e' => 3]]]);
+     * $arr->walkRecursive(function(&$value, $key) {
+     *     if (is_int($value)) {
+     *         $value = $value * 2;
+     *     }
+     * });
+     * // $arr is now: ['a' => 2, 'b' => ['c' => 4, 'd' => ['e' => 6]]]
+     *
+     * @see array_walk_recursive()
+     * @see CoverArray::walk() For flat mutable transformation
+     *                         Для плоского мутабельного преобразования
+     * @see CoverArray::eachRecursive() For recursive immutable transformation
+     *                                  Для рекурсивного иммутабельного преобразования
+     * @see CoverArray::each() For flat immutable transformation
+     *                         Для плоского иммутабельного преобразования
+     */
+    final public function walkRecursive(callable $callback): static
+    {
+        $walker = function (&$data) use (&$walker, $callback) {
+            foreach ($data as $key => &$value) {
+                if (is_array($value) && !is_callable($value)) {
+                    // Recursively process the array
+                    $walker($value);
+                    // Convert array to CoverArray
+                    $data[$key] = new static($value);
+                } elseif ($value instanceof self) {
+                    // If it's already a CoverArray, call walkRecursive on it
+                    $value->walkRecursive($callback);
+                } else {
+                    // Leaf node - apply callback
+                    $callback($value, $key);
+                }
+            }
+        };
+
+        $walker($this->data);
+        return $this;
+    }
+
+    /**
      * Sorts an array in descending order and maintains index association (arsort equivalent).
      *
      * Sorts an array in descending order and maintains index association.
@@ -2279,6 +2579,18 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
+     * Implementing the Countable interface.
+     *
+     * Реализует интерфейс Countable.
+     *
+     * @return int
+     */
+    final public function count(): int
+    {
+        return count($this->data);
+    }
+
+    /**
      * Returns the current element in the array (current equivalent).
      *
      * Returns the current element in the array.
@@ -2293,37 +2605,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         // TODO: Implement current equivalent
         return current($this->data);
-    }
-
-    /**
-     * Applies a callback function to each element (array_walk equivalent for associative arrays).
-     *
-     * Applies a user-defined callback function to each element of the array,
-     * preserving keys. The callback receives both value and key as parameters.
-     * Returns a new CoverArray with the results.
-     *
-     *
-     * Применяет callback-функцию к каждому элементу (эквивалент array_walk для ассоциативных массивов).
-     *
-     * Применяет пользовательскую callback-функцию к каждому элементу массива,
-     * сохраняя ключи. Callback получает и значение, и ключ в качестве параметров.
-     * Возвращает новый CoverArray с результатами.
-     *
-     * @param callable $callback Callback function to apply, must be callback(mixed $value, mixed $key): mixed.
-     *                           Callback-функция для применения, должна быть callback(mixed $value, mixed $key): mixed.
-     * @return static New CoverArray instance with callback applied to each element.
-     *                Новый экземпляр CoverArray с примененным callback к каждому элементу.
-     * @see CoverArray::map()
-     * @see array_walk()
-     */
-    final public function each(callable $callback): static
-    {
-        $result = [];
-        foreach ($this->data as $key => $value) {
-            $result[$key] = $callback($value, $key);
-        }
-
-        return new static($result);
     }
 
     /**
@@ -2404,6 +2685,29 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         // TODO: Implement key equivalent
         return key($this->data);
+    }
+
+    /**
+     * Checks if the given key or index exists in the array (array_key_exists equivalent).
+     *
+     * Returns true if the given key is set in the array, false otherwise.
+     * The key can be any value possible for an array index.
+     *
+     *
+     * Проверяет, содержит ли массив указанный ключ или индекс (эквивалент array_key_exists).
+     *
+     * Возвращает true, если указанный ключ установлен в массиве, иначе false.
+     * Ключом может быть любое значение, возможное для индекса массива.
+     *
+     * @param mixed $key Key or index to check for.
+     *                   Ключ или индекс для проверки.
+     * @return bool True if the key exists, false otherwise.
+     *              Возвращает true, если ключ существует, иначе false.
+     * @see array_key_exists()
+     */
+    final public function keyExists(mixed $key): bool
+    {
+        return array_key_exists($key, $this->data);
     }
 
     /**
@@ -2712,64 +3016,152 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         return $this;
     }
 
-    /**
-     * Alias of count() (sizeof equivalent).
-     *
-     * Alias of count() method.
-     *
-     * Псевдоним метода count() (эквивалент sizeof).
-     *
-     * @return int Number of elements in the array.
-     *             Количество элементов в массиве.
-     * @see sizeof()
-     * @see CoverArray::count()
-     */
-    final public function sizeof(): int
-    {
-        return $this->count();
-    }
-
     // Additional CoverArray-specific methods (not direct equivalents of PHP array functions)
 
     /**
-     * Applies a callback function to all elements recursively and returns a new CoverArray.
+     * Applies a callback function to each element and returns a new instance.
      *
-     * Recursively applies a user-defined callback function to every element in a multidimensional
-     * array structure. The callback function receives both value and key as parameters and
-     * should return the transformed value.
+     * This method transforms each element of the array using the provided callback
+     * function, which receives both the VALUE and KEY of each element. It returns
+     * a NEW CoverArray instance, leaving the original unchanged (immutable operation).
      *
-     * Important: Unlike PHP's array_walk_recursive() function which modifies the original array
-     * by reference, this method returns a new CoverArray instance with the transformed values,
-     * leaving the original object unchanged. This behavior is more similar to a recursive version
-     * of array_map() (which doesn't exist natively in PHP).
+     * DIFFERENCES from other methods:
+     * - Unlike `walk()`, which modifies the current instance, `each()` returns a new instance
+     * - Unlike `map()`, which re-indexes numeric keys, `each()` preserves all original keys
+     * - Unlike `eachRecursive()`, which processes nested arrays, `each()` works only at the first level
+     * - Unlike `walkRecursive()`, which modifies nested structures, `each()` is immutable and flat
      *
-     * Note: This method differs from map() which does not handle multidimensional arrays
-     * recursively and works with multiple input arrays.
+     * KEY CHARACTERISTICS:
+     * - Immutable operation (returns new CoverArray)
+     * - Preserves all original keys (associative and numeric)
+     * - Callback receives both value AND key as parameters
+     * - Works only at the first nesting level
+     *
+     * Use `each()` when:
+     * - You need to preserve associative keys
+     * - You need both value AND key in the transformation
+     * - You want an immutable operation (original unchanged)
+     * - You're transforming only the first level of the array
      *
      *
-     * Применяет callback-функцию ко всем элементам рекурсивно и возвращает новый CoverArray.
+     * Применяет callback-функцию к каждому элементу и возвращает новый экземпляр.
      *
-     * Рекурсивно применяет пользовательскую callback-функцию к каждому элементу в многомерной
-     * структуре массива. Callback-функция получает и значение, и ключ в качестве параметров и
-     * должна возвращать преобразованное значение.
+     * Этот метод преобразует каждый элемент массива с помощью предоставленной callback-функции,
+     * которая получает как ЗНАЧЕНИЕ, так и КЛЮЧ каждого элемента. Он возвращает НОВЫЙ
+     * экземпляр CoverArray, оставляя оригинал неизменным (иммутабельная операция).
      *
-     * Важно: В отличие от функции PHP array_walk_recursive(), которая изменяет исходный массив
-     * по ссылке, этот метод возвращает новый экземпляр CoverArray с преобразованными значениями,
-     * оставляя исходный объект неизменным. Это поведение больше похоже на рекурсивную версию
-     * array_map() (которая не существует нативно в PHP).
+     * ОТЛИЧИЯ от других методов:
+     * - В отличие от `walk()`, который изменяет текущий экземпляр, `each()` возвращает новый экземпляр
+     * - В отличие от `map()`, который переиндексирует числовые ключи, `each()` сохраняет все оригинальные ключи
+     * - В отличие от `eachRecursive()`, который обрабатывает вложенные массивы, `each()` работает только на первом уровне
+     * - В отличие от `walkRecursive()`, который изменяет вложенные структуры, `each()` иммутабельный и плоский
      *
-     * Примечание: Этот метод отличается от map(), который не обрабатывает многомерные массивы
-     * рекурсивно и работает с несколькими входными массивами.
+     * КЛЮЧЕВЫЕ ХАРАКТЕРИСТИКИ:
+     * - Иммутабельная операция (возвращает новый CoverArray)
+     * - Сохраняет все оригинальные ключи (ассоциативные и числовые)
+     * - Callback получает и значение, И ключ в качестве параметров
+     * - Работает только на первом уровне вложенности
      *
-     * @param callable $callback Callback function to apply, must be callback(mixed $value, mixed $key): mixed.
-     *                           Callback-функция для применения, должна быть callback(mixed $value, mixed $key): mixed.
-     * @return static New CoverArray instance with callback applied recursively to all elements.
-     *                Новый экземпляр CoverArray с рекурсивно примененным callback ко всем элементам.
+     * Используйте `each()`, когда:
+     * - Нужно сохранить ассоциативные ключи
+     * - Нужны и значение, И ключ в преобразовании
+     * - Нужна иммутабельная операция (оригинал не изменяется)
+     * - Преобразовываете только первый уровень массива
      *
-     * @see array_walk_recursive()
-     * @see CoverArray::map()
-     * @see CoverArray::each()
-     * @see https://www.php.net/manual/en/function.array-walk-recursive.php
+     * @param callable $callback Callback function: `function(mixed $value, mixed $key): mixed`
+     *                           Callback-функция: `function(mixed $value, mixed $key): mixed`
+     * @return static New CoverArray instance with transformed values.
+     *                Новый экземпляр CoverArray с преобразованными значениями.
+     *
+     * @example
+     * $arr = CoverArray::fromArray(['a' => 1, 'b' => 2]);
+     * $result = $arr->each(fn($v, $k) => $k . ':' . ($v * 2));
+     * // Result: ['a' => 'a:2', 'b' => 'b:4']
+     *
+     * @see CoverArray::map() For transformation with key re-indexing
+     *                        Для преобразования с переиндексацией ключей
+     * @see CoverArray::walk() For mutable transformation
+     *                         Для мутабельного преобразования
+     * @see CoverArray::eachRecursive() For recursive immutable transformation
+     *                                  Для рекурсивного иммутабельного преобразования
+     */
+    final public function each(callable $callback): static
+    {
+        $result = [];
+        foreach ($this->data as $key => $value) {
+            $result[$key] = $callback($value, $key);
+        }
+
+        return new static($result);
+    }
+
+    /**
+     * Recursively applies a callback function to each element and returns a new instance.
+     *
+     * This method transforms each element of the array recursively using the provided callback
+     * function, which receives both the VALUE and KEY of each element at all nesting levels.
+     * It returns a NEW CoverArray instance, leaving the original unchanged (immutable operation).
+     *
+     * DIFFERENCES from other methods:
+     * - Unlike `each()`, which works only at the first level, `eachRecursive()` processes all nested arrays
+     * - Unlike `walkRecursive()`, which modifies the current instance, `eachRecursive()` returns a new instance
+     * - Unlike `map()`, which re-indexes keys, `eachRecursive()` preserves the complete nested structure
+     * - Unlike `walk()`, which is mutable and flat, `eachRecursive()` is immutable and recursive
+     *
+     * KEY CHARACTERISTICS:
+     * - Immutable operation (returns new CoverArray)
+     * - Recursively processes all nesting levels
+     * - Preserves the complete hierarchical structure
+     * - Callback receives both value AND key at each level
+     *
+     * Use `eachRecursive()` when:
+     * - You need to transform deeply nested arrays
+     * - You want to preserve the complete hierarchical structure
+     * - You need an immutable operation that doesn't modify the original
+     * - You need access to keys at all nesting levels
+     *
+     *
+     * Рекурсивно применяет callback-функцию к каждому элементу и возвращает новый экземпляр.
+     *
+     * Этот метод рекурсивно преобразует каждый элемент массива с помощью предоставленной
+     * callback-функции, которая получает как ЗНАЧЕНИЕ, так и КЛЮЧ каждого элемента на всех
+     * уровнях вложенности. Он возвращает НОВЫЙ экземпляр CoverArray, оставляя оригинал
+     * неизменным (иммутабельная операция).
+     *
+     * ОТЛИЧИЯ от других методов:
+     * - В отличие от `each()`, который работает только на первом уровне, `eachRecursive()` обрабатывает все вложенные массивы
+     * - В отличие от `walkRecursive()`, который изменяет текущий экземпляр, `eachRecursive()` возвращает новый экземпляр
+     * - В отличие от `map()`, который переиндексирует ключи, `eachRecursive()` сохраняет полную вложенную структуру
+     * - В отличие от `walk()`, который мутабельный и плоский, `eachRecursive()` иммутабельный и рекурсивный
+     *
+     * КЛЮЧЕВЫЕ ХАРАКТЕРИСТИКИ:
+     * - Иммутабельная операция (возвращает новый CoverArray)
+     * - Рекурсивно обрабатывает все уровни вложенности
+     * - Сохраняет полную иерархическую структуру
+     * - Callback получает и значение, И ключ на каждом уровне
+     *
+     * Используйте `eachRecursive()`, когда:
+     * - Нужно преобразовать глубоко вложенные массивы
+     * - Нужно сохранить полную иерархическую структуру
+     * - Нужна иммутабельная операция, не изменяющая оригинал
+     * - Нужен доступ к ключам на всех уровнях вложенности
+     *
+     * @param callable $callback Callback function: `function(mixed $value, mixed $key): mixed`
+     *                           Callback-функция: `function(mixed $value, mixed $key): mixed`
+     * @return static New CoverArray instance with recursively transformed values.
+     *                Новый экземпляр CoverArray с рекурсивно преобразованными значениями.
+     *
+     * @example
+     * $arr = CoverArray::fromArray(['a' => 1, 'b' => ['c' => 2, 'd' => ['e' => 3]]]);
+     * $result = $arr->eachRecursive(fn($v, $k) => is_int($v) ? $v * 2 : $v);
+     * // Result: ['a' => 2, 'b' => ['c' => 4, 'd' => ['e' => 6]]]
+     *
+     * @see CoverArray::each() For flat immutable transformation
+     *                         Для плоского иммутабельного преобразования
+     * @see CoverArray::walkRecursive() For recursive mutable transformation
+     *                                  Для рекурсивного мутабельного преобразования
+     * @see CoverArray::map() For transformation with key re-indexing
+     *                        Для преобразования с переиндексацией ключей
      */
     final public function eachRecursive(callable $callback): static
     {
@@ -2780,136 +3172,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
 
             return $arr;
         })($callback, $this->getDataAsArray()));
-    }
-
-    /**
-     * Returns an array with elements in reverse order (array_reverse equivalent).
-     *
-     * Returns a new array with elements in reverse order.
-     * Optionally preserves the original keys.
-     *
-     *
-     * Возвращает массив с элементами в обратном порядке (эквивалент array_reverse).
-     *
-     * Возвращает новый массив с элементами в обратном порядке.
-     * Опционально сохраняет оригинальные ключи.
-     *
-     * @param bool $preserve_keys Whether to preserve keys (true) or re-index (false).
-     *                            Сохранять ключи (true) или переиндексировать (false).
-     * @return static New CoverArray instance with reversed elements.
-     *                Новый экземпляр CoverArray с элементами в обратном порядке.
-     * @see array_reverse()
-     */
-    final public function reverse(bool $preserve_keys = false): static
-    {
-        return new static(
-            array_reverse($this->data, $preserve_keys)
-        );
-    }
-
-    /**
-     * Returns all the values of an array (array_values equivalent).
-     *
-     * Returns all the values from the array and indexes the array numerically.
-     * This function resets the array's internal pointer.
-     *
-     *
-     * Возвращает все значения массива (эквивалент array_values).
-     *
-     * Возвращает все значения из массива и индексирует массив численно.
-     * Эта функция сбрасывает внутренний указатель массива.
-     *
-     * @return static New CoverArray instance containing only the values, numerically indexed.
-     *                Новый экземпляр CoverArray, содержащий только значения с числовой индексацией.
-     * @see array_values()
-     */
-    final public function values(): static
-    {
-        return new static(
-            array_values($this->data)
-        );
-    }
-
-    /**
-     * Removes duplicate values from an array (array_unique equivalent).
-     *
-     * Returns a new array without duplicate values.
-     * The comparison method can be controlled with the flags parameter.
-     *
-     *
-     * Удаляет повторяющиеся значения из массива (эквивалент array_unique).
-     *
-     * Возвращает новый массив без повторяющихся значений.
-     * Метод сравнения может контролироваться параметром flags.
-     *
-     * @param int $flags Sorting behavior flags (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING).
-     *                   Флаги поведения сортировки (SORT_REGULAR, SORT_NUMERIC, SORT_STRING, SORT_LOCALE_STRING).
-     * @return static New CoverArray instance with unique values.
-     *                Новый экземпляр CoverArray с уникальными значениями.
-     * @see array_unique()
-     */
-    final public function unique(int $flags = SORT_STRING): static
-    {
-        return new static(
-            array_unique($this->data, $flags)
-        );
-    }
-
-    /**
-     * Prepends one or more elements to the beginning of an array (array_unshift equivalent).
-     *
-     * Adds one or more elements to the beginning of the array and returns the instance.
-     * Numerical keys will be re-indexed starting from zero.
-     * String keys will be preserved.
-     *
-     *
-     * Добавляет один или несколько элементов в начало массива (эквивалент array_unshift).
-     *
-     * Добавляет один или несколько элементов в начало массива и возвращает экземпляр.
-     * Числовые ключи будут переиндексированы, начиная с нуля.
-     * Строковые ключи будут сохранены.
-     *
-     * @param mixed ...$args Elements to prepend to the array.
-     *                       Элементы для добавления в начало массива.
-     * @return static Current CoverArray instance with prepended elements.
-     *                Текущий экземпляр CoverArray с добавленными в начало элементами.
-     * @see array_unshift()
-     * @see CoverArray::unshift()
-     */
-    final public function prepend(mixed ...$args): static
-    {
-        if (empty($args)) {
-            return $this;
-        }
-
-        $args = array_map([$this, 'array2cover'], $args);
-        array_unshift($this->data, ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Prepends one or more elements to the beginning of an array (prepend() alias).
-     *
-     * Alias for the prepend() method. Adds elements to the beginning of the array.
-     * This method provides compatibility with PHP's array_unshift function name.
-     *
-     *
-     * Добавляет один или несколько элементов в начало массива (псевдоним prepend()).
-     *
-     * Псевдоним метода prepend(). Добавляет элементы в начало массива.
-     * Этот метод обеспечивает совместимость с именем функции PHP array_unshift.
-     *
-     * @param mixed ...$args Elements to prepend to the array.
-     *                       Элементы для добавления в начало массива.
-     * @return static Current CoverArray instance with prepended elements.
-     *                Текущий экземпляр CoverArray с добавленными в начало элементами.
-     * @see CoverArray::prepend()
-     * @see array_unshift()
-     */
-    final public function unshift(mixed ...$args): static
-    {
-        return $this->prepend(...$args);
     }
 
     /*******************************************************************************************************************
@@ -2955,7 +3217,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
             return $value;
         }
 
-        // Do not convert callable-arrays
         if (is_callable($value)) {
             return $value;
         }

@@ -12,140 +12,306 @@ use PHPUnit\Framework\TestCase;
 class PopTest extends TestCase
 {
     /**
-     * Tests the pop() method (array_pop equivalent).
+     * Tests the pop() method with sequential array.
      *
      * This test verifies that the pop() method correctly removes
-     * and returns the last element of the CoverArray, shortening
-     * the array by one element, mirroring PHP's array_pop() function.
+     * and returns the last element of a sequential CoverArray,
+     * shortening the array by one element, mirroring PHP's array_pop() function.
      *
      *
-     * Тестирование метода pop() (эквивалент array_pop).
+     * Тестирование метода pop() с последовательным массивом.
      *
      * Этот тест проверяет, что метод pop() корректно удаляет
-     * и возвращает последний элемент CoverArray, уменьшая
-     * массив на один элемент, отражая поведение функции array_pop() PHP.
+     * и возвращает последний элемент последовательного CoverArray,
+     * уменьшая массив на один элемент, отражая поведение функции array_pop() PHP.
      *
      * @see CoverArray::pop()
      * @see array_pop()
      */
-    public function testPopMethod(): void
+    public function testPopWithSequentialArray(): void
     {
-        // Test popping from a sequential array
-        // Тест извлечения из последовательного массива
-        $data1 = [1, 2, 3];
-        $expectedArray1 = $data1;
-        $expectedValue1 = array_pop($expectedArray1);
+        $data = [1, 2, 3];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover1 = new CoverArray($data1);
-        $actualValue1 = $cover1->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        $this->assertSame($expectedValue1, $actualValue1);
-        $this->assertSame($expectedArray1, $cover1->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test popping from an associative array
-        // Тест извлечения из ассоциативного массива
-        $data2 = ['a' => 1, 'b' => 2, 'c' => 3];
-        $expectedArray2 = $data2;
-        $expectedValue2 = array_pop($expectedArray2);
+    /**
+     * Tests the pop() method with associative array.
+     *
+     * This test verifies that the pop() method correctly removes
+     * and returns the last element of an associative CoverArray,
+     * shortening the array by one element, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() с ассоциативным массивом.
+     *
+     * Этот тест проверяет, что метод pop() корректно удаляет
+     * и возвращает последний элемент ассоциативного CoverArray,
+     * уменьшая массив на один элемент, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithAssociativeArray(): void
+    {
+        $data = ['a' => 1, 'b' => 2, 'c' => 3];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover2 = new CoverArray($data2);
-        $actualValue2 = $cover2->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        $this->assertSame($expectedValue2, $actualValue2);
-        $this->assertSame($expectedArray2, $cover2->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test popping from an empty array (should return null)
-        // Тест извлечения из пустого массива (должен вернуть null)
-        $data3 = [];
-        $expectedArray3 = $data3;
-        $expectedValue3 = array_pop($expectedArray3);
+    /**
+     * Tests the pop() method with empty array.
+     *
+     * This test verifies that the pop() method correctly returns null
+     * when called on an empty CoverArray, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод pop() корректно возвращает null
+     * при вызове на пустом CoverArray, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithEmptyArray(): void
+    {
+        $data = [];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover3 = new CoverArray($data3);
-        $actualValue3 = $cover3->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        $this->assertSame($expectedValue3, $actualValue3);
-        $this->assertSame($expectedArray3, $cover3->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test popping from an array with one element
-        // Тест извлечения из массива с одним элементом
-        $data4 = ['single'];
-        $expectedArray4 = $data4;
-        $expectedValue4 = array_pop($expectedArray4);
+    /**
+     * Tests the pop() method with single element array.
+     *
+     * This test verifies that the pop() method correctly removes
+     * and returns the only element from a single-element CoverArray,
+     * leaving an empty array, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() с массивом из одного элемента.
+     *
+     * Этот тест проверяет, что метод pop() корректно удаляет
+     * и возвращает единственный элемент из одноэлементного CoverArray,
+     * оставляя пустой массив, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithSingleElementArray(): void
+    {
+        $data = ['single'];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover4 = new CoverArray($data4);
-        $actualValue4 = $cover4->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        // original function
-        // оригинальная функция
-        $this->assertSame($expectedValue4, $actualValue4);
-        $this->assertSame($expectedArray4, $cover4->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test popping with mixed value types
-        // Тест извлечения со смешанными типами значений
-        $data5 = ['string', 123, null, false];
-        $expectedArray5 = $data5;
-        $expectedValue5 = array_pop($expectedArray5);
+    /**
+     * Tests the pop() method with mixed value types.
+     *
+     * This test verifies that the pop() method correctly handles
+     * arrays containing mixed value types, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() со смешанными типами значений.
+     *
+     * Этот тест проверяет, что метод pop() корректно обрабатывает
+     * массивы, содержащие смешанные типы значений, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithMixedValueTypes(): void
+    {
+        $data = ['string', 123, null, false];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover5 = new CoverArray($data5);
-        $actualValue5 = $cover5->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        $this->assertSame($expectedValue5, $actualValue5);
-        $this->assertSame($expectedArray5, $cover5->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test popping array value (CoverArray should convert it to CoverArray)
-        // Тест извлечения значения-массива (CoverArray должен преобразовать его в CoverArray)
-        $data6 = [1, 2, ['nested' => 'value']];
-        $expectedArray6 = $data6;
-        $expectedValue6 = array_pop($expectedArray6);
+    /**
+     * Tests the pop() method with array value.
+     *
+     * This test verifies that the pop() method correctly handles
+     * arrays containing array values, converting them to CoverArray
+     * instances when popped, unlike PHP's array_pop() which returns arrays as-is.
+     *
+     *
+     * Тестирование метода pop() со значением-массивом.
+     *
+     * Этот тест проверяет, что метод pop() корректно обрабатывает
+     * массивы, содержащие значения-массивы, преобразуя их в экземпляры CoverArray
+     * при извлечении, в отличие от array_pop() PHP, который возвращает массивы как есть.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithArrayValue(): void
+    {
+        $data = [1, 2, ['nested' => 'value']];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover6 = new CoverArray($data6);
-        $actualValue6 = $cover6->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
         // Проверяем, что возвращенный объект является CoverArray и содержит правильные данные
-        $this->assertInstanceOf(CoverArray::class, $actualValue6);
-        $this->assertSame($expectedValue6, $actualValue6->getDataAsArray());
-        $this->assertSame($expectedArray6, $cover6->getDataAsArray());
+        $this->assertInstanceOf(CoverArray::class, $actualValue);
+        $this->assertSame($expectedValue, $actualValue->getDataAsArray());
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
 
-        // Test that pop() modifies the original array
-        // Тест, что pop() изменяет исходный массив
-        $data7 = [10, 20, 30, 40];
-        $cover7 = new CoverArray($data7);
+    /**
+     * Tests the pop() method with multiple consecutive pops.
+     *
+     * This test verifies that the pop() method correctly removes
+     * elements one by one from the CoverArray until it's empty,
+     * mirroring PHP's array_pop() function behavior.
+     *
+     *
+     * Тестирование метода pop() с несколькими последовательными извлечениями.
+     *
+     * Этот тест проверяет, что метод pop() корректно удаляет
+     * элементы один за другим из CoverArray, пока он не станет пустым,
+     * отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithMultipleConsecutivePops(): void
+    {
+        $data = [10, 20, 30, 40];
+        $cover = new CoverArray($data);
 
+        // First pop
         // Первый pop
-        $firstPop = $cover7->pop();
-        $this->assertSame(40, $firstPop);
-        $this->assertSame([10, 20, 30], $cover7->getDataAsArray());
+        $expectedArray1 = $data;
+        $expectedValue1 = array_pop($expectedArray1);
+        $actualValue1 = $cover->pop();
+        $this->assertSame($expectedValue1, $actualValue1);
+        $this->assertSame($expectedArray1, $cover->getDataAsArray());
 
+        // Second pop
         // Второй pop
-        $secondPop = $cover7->pop();
-        $this->assertSame(30, $secondPop);
-        $this->assertSame([10, 20], $cover7->getDataAsArray());
+        $expectedArray2 = $expectedArray1;
+        $expectedValue2 = array_pop($expectedArray2);
+        $actualValue2 = $cover->pop();
+        $this->assertSame($expectedValue2, $actualValue2);
+        $this->assertSame($expectedArray2, $cover->getDataAsArray());
 
+        // Third pop
         // Третий pop
-        $thirdPop = $cover7->pop();
-        $this->assertSame(20, $thirdPop);
-        $this->assertSame([10], $cover7->getDataAsArray());
+        $expectedArray3 = $expectedArray2;
+        $expectedValue3 = array_pop($expectedArray3);
+        $actualValue3 = $cover->pop();
+        $this->assertSame($expectedValue3, $actualValue3);
+        $this->assertSame($expectedArray3, $cover->getDataAsArray());
 
+        // Fourth pop
         // Четвертый pop
-        $fourthPop = $cover7->pop();
-        $this->assertSame(10, $fourthPop);
-        $this->assertSame([], $cover7->getDataAsArray());
+        $expectedArray4 = $expectedArray3;
+        $expectedValue4 = array_pop($expectedArray4);
+        $actualValue4 = $cover->pop();
+        $this->assertSame($expectedValue4, $actualValue4);
+        $this->assertSame($expectedArray4, $cover->getDataAsArray());
 
+        // Fifth pop (from empty array)
         // Пятый pop (из пустого массива)
-        $fifthPop = $cover7->pop();
-        $this->assertNull($fifthPop);
-        $this->assertSame([], $cover7->getDataAsArray());
+        $expectedArray5 = $expectedArray4;
+        $expectedValue5 = array_pop($expectedArray5);
+        $actualValue5 = $cover->pop();
+        $this->assertSame($expectedValue5, $actualValue5);
+        $this->assertSame($expectedArray5, $cover->getDataAsArray());
+    }
 
-        // Test popping from array with numeric string keys
-        // Тест извлечения из массива с числовыми строковыми ключами
-        $data8 = ['0' => 'a', '1' => 'b', '2' => 'c'];
-        $expectedArray8 = $data8;
-        $expectedValue8 = array_pop($expectedArray8);
+    /**
+     * Tests the pop() method with numeric string keys.
+     *
+     * This test verifies that the pop() method correctly handles
+     * arrays with numeric string keys, mirroring PHP's array_pop() function.
+     *
+     *
+     * Тестирование метода pop() с числовыми строковыми ключами.
+     *
+     * Этот тест проверяет, что метод pop() корректно обрабатывает
+     * массивы с числовыми строковыми ключами, отражая поведение функции array_pop() PHP.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithNumericStringKeys(): void
+    {
+        $data = ['0' => 'a', '1' => 'b', '2' => 'c'];
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
 
-        $cover8 = new CoverArray($data8);
-        $actualValue8 = $cover8->pop();
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
 
-        $this->assertSame($expectedValue8, $actualValue8);
-        $this->assertSame($expectedArray8, $cover8->getDataAsArray());
+        $this->assertSame($expectedValue, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
+    }
+
+    /**
+     * Tests the pop() method with CoverArray as element.
+     *
+     * This test verifies that the pop() method correctly handles
+     * arrays containing CoverArray objects as elements, preserving
+     * the CoverArray instance without additional conversion.
+     *
+     *
+     * Тестирование метода pop() с элементом типа CoverArray.
+     *
+     * Этот тест проверяет, что метод pop() корректно обрабатывает
+     * массивы, содержащие объекты CoverArray как элементы, сохраняя
+     * экземпляр CoverArray без дополнительного преобразования.
+     *
+     * @see CoverArray::pop()
+     * @see array_pop()
+     */
+    public function testPopWithCoverArrayElement(): void
+    {
+        // Тестируем случай, когда последний элемент - объект CoverArray
+        $innerCover = new CoverArray(['x' => 1, 'y' => 2]);
+        $data = ['first', 'second', $innerCover];
+
+        $expectedArray = $data;
+        $expectedValue = array_pop($expectedArray);
+
+        $cover = new CoverArray($data);
+        $actualValue = $cover->pop();
+
+        // Проверяем, что возвращен тот же объект CoverArray
+        $this->assertSame($innerCover, $actualValue);
+        $this->assertInstanceOf(CoverArray::class, $actualValue);
+        $this->assertSame($expectedArray, $cover->getDataAsArray());
     }
 }

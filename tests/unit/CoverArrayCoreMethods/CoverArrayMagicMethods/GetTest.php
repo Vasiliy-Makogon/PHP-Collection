@@ -435,7 +435,7 @@ class GetTest extends TestCase
         $data = new NewTypeArray(['test' => 'value']);
 
         // Method calls should work normally
-        $this->assertIsArray($data->getData());
+        $this->assertIsArray($data->getDataAsArray());
         $this->assertInstanceOf(NewTypeArray::class, $data->copy());
         $this->assertFalse($data->isEmpty());
 
@@ -472,16 +472,16 @@ class GetTest extends TestCase
     public function testPropertyWithMethodNameDoesNotBreakMethodCalls(): void
     {
         $data = new NewTypeArray([
-            'getData' => 'I am a property, not a method',
+            'getDataAsArray' => 'I am a property, not a method',
         ]);
 
         // The property should be accessible via __get()
-        $this->assertSame('I am a property, not a method', $data->getData);
+        $this->assertSame('I am a property, not a method', $data->getDataAsArray);
 
-        // The method getData() should still work and return an array
-        $methodResult = $data->getData();
+        // The method getDataAsArray() should still work and return an array
+        $methodResult = $data->getDataAsArray();
         $this->assertIsArray($methodResult);
-        $this->assertArrayHasKey('getData', $methodResult);
-        $this->assertSame('I am a property, not a method', $methodResult['getData']);
+        $this->assertArrayHasKey('getDataAsArray', $methodResult);
+        $this->assertSame('I am a property, not a method', $methodResult['getDataAsArray']);
     }
 }

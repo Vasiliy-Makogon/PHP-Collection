@@ -186,35 +186,6 @@ trait Simple
     }
 
     /**
-     * Returns the internal data array.
-     *
-     * Returns a reference to the internal $data array.
-     * Warning: This returns the actual internal array, not a copy.
-     * Modifying the returned array will affect the internal state.
-     * For a safe copy that converts nested objects to arrays, use getDataAsArray() in CoverArray.
-     *
-     *
-     * Возвращает внутренний массив данных.
-     *
-     * Возвращает ссылку на внутренний массив $data.
-     * Внимание: Возвращается фактический внутренний массив, а не копия.
-     * Изменение возвращенного массива повлияет на внутреннее состояние.
-     * Для безопасной копии, которая преобразует вложенные объекты в массивы, используйте getDataAsArray() в CoverArray.
-     *
-     * @return array The internal data array (by reference in PHP 7+).
-     *               Внутренний массив данных (по ссылке в PHP 7+).
-     *
-     * @see CoverArray::getDataAsArray()
-     * @example
-     * $data = $obj->getData();
-     * $data['newKey'] = 'value'; // Modifies the internal array
-     */
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    /**
      * Sets the internal data from an iterable source.
      *
      * Replaces all existing data with the provided iterable.
@@ -264,10 +235,6 @@ trait Simple
      *
      * @return static Returns the current instance for method chaining.
      *                Возвращает текущий экземпляр для цепочек вызовов.
-     *
-     * @example
-     * $obj->setData(['key' => 'value'])->clear();
-     * // $obj->getData() returns []
      */
     public function clear(): static
     {

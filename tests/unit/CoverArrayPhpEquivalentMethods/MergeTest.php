@@ -12,220 +12,354 @@ use PHPUnit\Framework\TestCase;
 class MergeTest extends TestCase
 {
     /**
-     * Tests the merge() method (array_merge equivalent).
+     * Tests the merge() method with numeric arrays.
      *
      * This test verifies that the merge() method correctly merges
-     * one or more arrays into the CoverArray, preserving numeric
-     * keys and overwriting string keys, mirroring PHP's array_merge().
+     * numeric arrays by reindexing keys, mirroring PHP's array_merge() function
+     * behavior for numerically indexed arrays.
      *
      *
-     * Тестирование метода merge() (эквивалент array_merge).
+     * Тестирование метода merge() с числовыми массивами.
      *
      * Этот тест проверяет, что метод merge() корректно объединяет
-     * один или несколько массивов в CoverArray, сохраняя числовые
-     * ключи и перезаписывая строковые ключи, отражая array_merge() PHP.
+     * числовые массивы, переиндексируя ключи, отражая поведение
+     * функции array_merge() PHP для числовых индексных массивов.
      *
      * @see CoverArray::merge()
      * @see array_merge()
      */
-    public function testMergeMethod(): void
+    public function testMergeWithNumericArrays(): void
     {
-        // Test merging numeric arrays (keys are reindexed)
-        // Тест объединения числовых массивов (ключи переиндексируются)
-        $data1 = ['PHP', 'MySql'];
-        $merge1 = ['HTML', 'CSS', 'JavaScript'];
+        $data = ['PHP', 'MySql'];
+        $merge = ['HTML', 'CSS', 'JavaScript'];
 
-        $expected1 = array_merge($data1, $merge1);
+        $expected = array_merge($data, $merge);
 
-        $cover1 = new CoverArray($data1);
-        $coverMerge1 = new CoverArray($merge1);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected1, array_merge($data1, $merge1));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected1,
-            $cover1->merge($merge1)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected1,
-            $cover1->merge($coverMerge1)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
 
-        // Test merging associative arrays (string keys are overwritten)
-        // Тест объединения ассоциативных массивов (строковые ключи перезаписываются)
-        $data2 = ['a' => 'apple', 'b' => 'banana'];
-        $merge2 = ['b' => 'blueberry', 'c' => 'cherry'];
+    /**
+     * Tests the merge() method with associative arrays.
+     *
+     * This test verifies that the merge() method correctly merges
+     * associative arrays by overwriting string keys, mirroring
+     * PHP's array_merge() function behavior for associative arrays.
+     *
+     *
+     * Тестирование метода merge() с ассоциативными массивами.
+     *
+     * Этот тест проверяет, что метод merge() корректно объединяет
+     * ассоциативные массивы, перезаписывая строковые ключи, отражая
+     * поведение функции array_merge() PHP для ассоциативных массивов.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithAssociativeArrays(): void
+    {
+        $data = ['a' => 'apple', 'b' => 'banana'];
+        $merge = ['b' => 'blueberry', 'c' => 'cherry'];
 
-        $expected2 = array_merge($data2, $merge2);
+        $expected = array_merge($data, $merge);
 
-        $cover2 = new CoverArray($data2);
-        $coverMerge2 = new CoverArray($merge2);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected2, array_merge($data2, $merge2));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected2,
-            $cover2->merge($merge2)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected2,
-            $cover2->merge($coverMerge2)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
 
-        // Test merging multiple arrays
-        // Тест объединения нескольких массивов
-        $data3 = ['x' => 1, 'y' => 2];
-        $merge3a = ['y' => 20, 'z' => 3];
-        $merge3b = ['z' => 30, 'w' => 4];
+    /**
+     * Tests the merge() method with multiple arrays.
+     *
+     * This test verifies that the merge() method correctly merges
+     * multiple arrays, applying merging rules sequentially,
+     * mirroring PHP's array_merge() function behavior.
+     *
+     *
+     * Тестирование метода merge() с несколькими массивами.
+     *
+     * Этот тест проверяет, что метод merge() корректно объединяет
+     * несколько массивов, применяя правила слияния последовательно,
+     * отражая поведение функции array_merge() PHP.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithMultipleArrays(): void
+    {
+        $data = ['x' => 1, 'y' => 2];
+        $merge1 = ['y' => 20, 'z' => 3];
+        $merge2 = ['z' => 30, 'w' => 4];
 
-        $expected3 = array_merge($data3, $merge3a, $merge3b);
+        $expected = array_merge($data, $merge1, $merge2);
 
-        $cover3 = new CoverArray($data3);
-        $coverMerge3a = new CoverArray($merge3a);
-        $coverMerge3b = new CoverArray($merge3b);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected3, array_merge($data3, $merge3a, $merge3b));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected3,
-            $cover3->merge($merge3a, $merge3b)->getDataAsArray()
+            $expected,
+            $cover->merge($merge1, $merge2)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected3,
-            $cover3->merge($coverMerge3a, $coverMerge3b)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge1), new CoverArray($merge2))->getDataAsArray()
         );
+    }
 
-        // Test merging with mixed numeric and string keys
-        // Тест объединения со смешанными числовыми и строковыми ключами
-        $data4 = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
-        $merge4 = [1 => 'ONE', 'b' => 'banana', 2 => 'two'];
+    /**
+     * Tests the merge() method with mixed numeric and string keys.
+     *
+     * This test verifies that the merge() method correctly handles
+     * arrays with both numeric and string keys, reindexing numeric keys
+     * and overwriting string keys, mirroring PHP's array_merge() function behavior.
+     *
+     *
+     * Тестирование метода merge() со смешанными числовыми и строковыми ключами.
+     *
+     * Этот тест проверяет, что метод merge() корректно обрабатывает
+     * массивы с числовыми и строковыми ключами, переиндексируя числовые ключи
+     * и перезаписывая строковые ключи, отражая поведение функции array_merge() PHP.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithMixedNumericAndStringKeys(): void
+    {
+        $data = [0 => 'zero', 'a' => 'apple', 1 => 'one'];
+        $merge = [1 => 'ONE', 'b' => 'banana', 2 => 'two'];
 
-        $expected4 = array_merge($data4, $merge4);
+        $expected = array_merge($data, $merge);
 
-        $cover4 = new CoverArray($data4);
-        $coverMerge4 = new CoverArray($merge4);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected4, array_merge($data4, $merge4));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected4,
-            $cover4->merge($merge4)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected4,
-            $cover4->merge($coverMerge4)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
 
-        // Test merging empty arrays
-        // Тест объединения пустых массивов
-        $data5 = ['a' => 1, 'b' => 2];
-        $merge5 = [];
+    /**
+     * Tests the merge() method with empty array.
+     *
+     * This test verifies that the merge() method correctly handles
+     * merging with an empty array, returning the original array unchanged,
+     * mirroring PHP's array_merge() function behavior.
+     *
+     *
+     * Тестирование метода merge() с пустым массивом.
+     *
+     * Этот тест проверяет, что метод merge() корректно обрабатывает
+     * слияние с пустым массивом, возвращая исходный массив без изменений,
+     * отражая поведение функции array_merge() PHP.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithEmptyArray(): void
+    {
+        $data = ['a' => 1, 'b' => 2];
+        $merge = [];
 
-        $expected5 = array_merge($data5, $merge5);
+        $expected = array_merge($data, $merge);
 
-        $cover5 = new CoverArray($data5);
-        $coverMerge5 = new CoverArray($merge5);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected5, array_merge($data5, $merge5));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected5,
-            $cover5->merge($merge5)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected5,
-            $cover5->merge($coverMerge5)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
 
-        // Test merging all empty arrays
-        // Тест объединения всех пустых массивов
-        $data6 = [];
-        $merge6 = [];
+    /**
+     * Tests the merge() method with all empty arrays.
+     *
+     * This test verifies that the merge() method correctly handles
+     * merging empty arrays, returning an empty array,
+     * mirroring PHP's array_merge() function behavior.
+     *
+     *
+     * Тестирование метода merge() со всеми пустыми массивами.
+     *
+     * Этот тест проверяет, что метод merge() корректно обрабатывает
+     * слияние пустых массивов, возвращая пустой массив,
+     * отражая поведение функции array_merge() PHP.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithAllEmptyArrays(): void
+    {
+        $data = [];
+        $merge = [];
 
-        $expected6 = array_merge($data6, $merge6);
+        $expected = array_merge($data, $merge);
 
-        $cover6 = new CoverArray($data6);
-        $coverMerge6 = new CoverArray($merge6);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected6, array_merge($data6, $merge6));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected6,
-            $cover6->merge($merge6)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected6,
-            $cover6->merge($coverMerge6)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
 
-        // Test merging with integer keys that are reindexed
-        // Тест объединения с целочисленными ключами, которые переиндексируются
-        $data7 = [10 => 'ten', 20 => 'twenty'];
-        $merge7 = [30 => 'thirty', 40 => 'forty'];
+    /**
+     * Tests the merge() method with integer keys.
+     *
+     * This test verifies that the merge() method correctly reindexes
+     * integer keys during merging, mirroring PHP's array_merge() function behavior.
+     *
+     *
+     * Тестирование метода merge() с целочисленными ключами.
+     *
+     * Этот тест проверяет, что метод merge() корректно переиндексирует
+     * целочисленные ключи при слиянии, отражая поведение функции array_merge() PHP.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithIntegerKeys(): void
+    {
+        $data = [10 => 'ten', 20 => 'twenty'];
+        $merge = [30 => 'thirty', 40 => 'forty'];
 
-        $expected7 = array_merge($data7, $merge7);
+        $expected = array_merge($data, $merge);
 
-        $cover7 = new CoverArray($data7);
-        $coverMerge7 = new CoverArray($merge7);
-
-        // original function
-        // оригинальная функция
-        $this->assertSame($expected7, array_merge($data7, $merge7));
+        $cover = new CoverArray($data);
 
         // arguments as array
         // аргументы как массив
         $this->assertSame(
-            $expected7,
-            $cover7->merge($merge7)->getDataAsArray()
+            $expected,
+            $cover->merge($merge)->getDataAsArray()
         );
 
         // arguments as CoverArray
         // аргументы как CoverArray
         $this->assertSame(
-            $expected7,
-            $cover7->merge($coverMerge7)->getDataAsArray()
+            $expected,
+            $cover->merge(new CoverArray($merge))->getDataAsArray()
         );
+    }
+
+    /**
+     * Tests the merge() method with nested arrays.
+     *
+     * This test verifies that the merge() method correctly merges
+     * arrays containing nested arrays, converting them to CoverArray instances,
+     * mirroring PHP's array_merge() function behavior for nested arrays.
+     *
+     *
+     * Тестирование метода merge() с вложенными массивами.
+     *
+     * Этот тест проверяет, что метод merge() корректно объединяет
+     * массивы, содержащие вложенные массивы, преобразуя их в экземпляры CoverArray,
+     * отражая поведение функции array_merge() PHP для вложенных массивов.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithNestedArrays(): void
+    {
+        $data = ['a' => [1, 2], 'b' => 'test'];
+        $merge = ['a' => [3, 4], 'c' => 'new'];
+
+        $expected = array_merge($data, $merge);
+
+        $cover = new CoverArray($data);
+        $result = $cover->merge($merge);
+
+        $this->assertSame($expected, $result->getDataAsArray());
+
+        // Проверяем, что вложенный массив преобразован в CoverArray
+        $this->assertInstanceOf(CoverArray::class, $result['a']);
+        $this->assertSame([3, 4], $result['a']->getDataAsArray());
+    }
+
+    /**
+     * Tests the merge() method with mixed arguments (array and CoverArray).
+     *
+     * This test verifies that the merge() method correctly handles
+     * mixed argument types (array and CoverArray) in the same call.
+     *
+     *
+     * Тестирование метода merge() со смешанными аргументами (массив и CoverArray).
+     *
+     * Этот тест проверяет, что метод merge() корректно обрабатывает
+     * смешанные типы аргументов (массив и CoverArray) в одном вызове.
+     *
+     * @see CoverArray::merge()
+     * @see array_merge()
+     */
+    public function testMergeWithMixedArguments(): void
+    {
+        $data = ['a' => 1, 'b' => 2];
+        $merge1 = ['b' => 20, 'c' => 3];
+        $merge2 = ['c' => 30, 'd' => 4];
+
+        $expected = array_merge($data, $merge1, $merge2);
+
+        $cover = new CoverArray($data);
+
+        // Mix of array and CoverArray arguments
+        // Смесь аргументов массив и CoverArray
+        $result = $cover->merge($merge1, new CoverArray($merge2));
+
+        $this->assertSame($expected, $result->getDataAsArray());
     }
 }
