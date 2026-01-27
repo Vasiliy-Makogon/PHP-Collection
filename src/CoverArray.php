@@ -125,14 +125,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     /**
      * Sets the internal data for the CoverArray.
      *
-     * Replaces all existing data with the provided iterable, converting
-     * nested arrays to CoverArray instances recursively.
+     * Merges the provided iterable into the existing data, overwriting values
+     * for keys that already exist. Nested arrays are converted to CoverArray
+     * instances recursively. Keys not present in the provided iterable remain unchanged.
      *
      *
      * Устанавливает внутренние данные для CoverArray.
      *
-     * Заменяет все существующие данные предоставленным итерируемым объектом,
-     * преобразуя вложенные массивы в экземпляры CoverArray рекурсивно.
+     * Сливает предоставленный итерируемый объект с существующими данными, перезаписывая
+     * значения для уже существующих ключей. Вложенные массивы преобразуются в экземпляры
+     * CoverArray рекурсивно. Ключи, отсутствующие в предоставленном объекте, остаются без изменений.
      *
      * @param iterable|null $data Data to set, or null to clear the array.
      *                            Данные для установки или null для очистки массива.
