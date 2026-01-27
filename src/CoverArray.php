@@ -2052,18 +2052,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function udiff(callable $value_compare_func, CoverArray|array ...$arrays): static
     {
-        // TODO: Implement array_udiff equivalent
         return new static(
-            array_udiff(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    $value_compare_func
-                )
-            )
+            call_user_func_array('array_udiff', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func]
+            ))
         );
     }
 
@@ -2084,18 +2081,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function udiffAssoc(callable $value_compare_func, CoverArray|array ...$arrays): static
     {
-        // TODO: Implement array_udiff_assoc equivalent
         return new static(
-            array_udiff_assoc(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    [$value_compare_func]
-                )
-            )
+            call_user_func_array('array_udiff_assoc', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func]
+            ))
         );
     }
 
@@ -2121,18 +2115,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         callable $key_compare_func,
         CoverArray|array ...$arrays
     ): static {
-        // TODO: Implement array_udiff_uassoc equivalent
         return new static(
-            array_udiff_uassoc(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    $value_compare_func,
-                    $key_compare_func)
-            )
+            call_user_func_array('array_udiff_uassoc', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func],
+                [$key_compare_func]
+            ))
         );
     }
 
@@ -2153,17 +2145,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function uintersect(callable $value_compare_func, CoverArray|array ...$arrays): static
     {
-        // TODO: Implement array_uintersect equivalent
         return new static(
-            array_uintersect(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    [$value_compare_func])
-            )
+            call_user_func_array('array_uintersect', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func]
+            ))
         );
     }
 
@@ -2184,17 +2174,15 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function uintersectAssoc(callable $value_compare_func, CoverArray|array ...$arrays): static
     {
-        // TODO: Implement array_uintersect_assoc equivalent
         return new static(
-            array_uintersect_assoc(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    [$value_compare_func])
-            )
+            call_user_func_array('array_uintersect_assoc', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func]
+            ))
         );
     }
 
@@ -2220,18 +2208,16 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         callable $key_compare_func,
         CoverArray|array ...$arrays
     ): static {
-        // TODO: Implement array_uintersect_uassoc equivalent
         return new static(
-            array_uintersect_uassoc(
-                $this->data,
-                ...array_merge(
-                    array_map(
-                        [self::class, 'convertToPlain'],
-                        $arrays
-                    ),
-                    [$value_compare_func],
-                    [$key_compare_func])
-            )
+            call_user_func_array('array_uintersect_uassoc', array_merge(
+                [$this->data],
+                array_map(
+                    [self::class, 'convertToPlain'],
+                    $arrays
+                ),
+                [$value_compare_func],
+                [$key_compare_func]
+            ))
         );
     }
 
