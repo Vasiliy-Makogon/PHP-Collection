@@ -1,0 +1,6 @@
+vendor/
+.git/
+.github/
+.phpunit.cache/
+html-cover
+age/

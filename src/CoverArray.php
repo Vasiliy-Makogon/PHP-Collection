@@ -56,12 +56,11 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      *
      * @param iterable|null $data Initial data to populate the array.
      *                            Начальные данные для заполнения массива.
+     * @see CoverArray::fromArray()
      */
     public function __construct(?iterable $data = null)
     {
-        if ($data !== null) {
-            $this->setData($data);
-        }
+        $this->setData($data);
     }
 
     /**
@@ -397,7 +396,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function jsonSerialize(): array
     {
-        return $this->getDataAsArray();
+        return $this->data;
     }
 
     /**
@@ -3011,9 +3010,10 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function usort(callable $callback): static
     {
-        usort($this->data, $callback);
+        $data = $this->getDataAsArray();
+        usort($data, $callback);
 
-        return $this;
+        return $this->clear()->setData($data);
     }
 
     // Additional CoverArray-specific methods (not direct equivalents of PHP array functions)
