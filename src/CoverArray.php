@@ -1388,6 +1388,29 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     }
 
     /**
+     * Checks if the given key or index exists in the array (array_key_exists equivalent).
+     *
+     * Returns true if the given key is set in the array, false otherwise.
+     * The key can be any value possible for an array index.
+     *
+     *
+     * Проверяет, содержит ли массив указанный ключ или индекс (эквивалент array_key_exists).
+     *
+     * Возвращает true, если указанный ключ установлен в массиве, иначе false.
+     * Ключом может быть любое значение, возможное для индекса массива.
+     *
+     * @param mixed $key Key or index to check for.
+     *                   Ключ или индекс для проверки.
+     * @return bool True if the key exists, false otherwise.
+     *              Возвращает true, если ключ существует, иначе false.
+     * @see array_key_exists()
+     */
+    final public function keyExists(mixed $key): bool
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
      * Gets the first key of an array (array_key_first equivalent).
      *
      * Returns the first key of the array without affecting the internal array pointer.
@@ -1657,7 +1680,69 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
         );
     }
 
-    // array_multisort now is empty
+    /**
+     * Sort multiple arrays or a multidimensional array (array_multisort equivalent).
+     *
+     * Sorts the current CoverArray according to the specified order and flags.
+     * This method modifies the current instance (mutating operation).
+     *
+     * For sorting multiple arrays simultaneously, you can pass additional CoverArray
+     * objects which will be rearranged to match the sorted order of the primary array.
+     *
+     * Note: When passing additional CoverArray objects, they must be passed by reference
+     * and will be modified in place to correspond with the sorted order of the primary array.
+     *
+     *
+     * Сортирует несколько массивов или многомерный массив (эквивалент array_multisort).
+     *
+     * Сортирует текущий CoverArray в соответствии с указанным порядком и флагами.
+     * Этот метод изменяет текущий экземпляр (мутирующая операция).
+     *
+     * Для синхронной сортировки нескольких массивов можно передать дополнительные объекты
+     * CoverArray, которые будут переупорядочены в соответствии с порядком сортировки основного массива.
+     *
+     * Примечание: Дополнительные объекты CoverArray должны передаваться по ссылке
+     * и будут изменены на месте для соответствия отсортированному порядку основного массива.
+     *
+     * @param int $order Sort order: SORT_ASC (default) or SORT_DESC.
+     *                   Порядок сортировки: SORT_ASC (по умолчанию) или SORT_DESC.
+     * @param int $flags Sorting type flags: SORT_REGULAR, SORT_NUMERIC, SORT_STRING,
+     *                   SORT_LOCALE_STRING, SORT_NATURAL, SORT_FLAG_CASE.
+     *                   Флаги типа сортировки.
+     * @param CoverArray &...$arrays Additional CoverArray instances to sort correspondingly.
+     *                               Each additional array will be reordered to match the primary sort.
+     *                               Дополнительные экземпляры CoverArray для синхронной сортировки.
+     *                               Каждый дополнительный массив будет переупорядочен в соответствии с основной сортировкой.
+     * @return static Returns the current instance for method chaining.
+     *                Возвращает текущий экземпляр для цепочки вызовов.
+     * @see array_multisort()
+     *
+     * @example Basic sorting:
+     * $arr = new CoverArray([3, 1, 2]);
+     * $arr->multisort(); // [1, 2, 3]
+     * $arr->multisort(SORT_DESC); // [3, 2, 1]
+     *
+     * @example Sorting with additional arrays:
+     * $arr1 = new CoverArray([3, 1, 2]);
+     * $arr2 = new CoverArray(['c', 'a', 'b']);
+     * $arr1->multisort(SORT_ASC, SORT_NUMERIC, $arr2);
+     * // $arr1 = [1, 2, 3], $arr2 = ['a', 'b', 'c']
+     */
+    final public function multisort(
+        int $order = SORT_ASC,
+        int $flags = SORT_REGULAR,
+        CoverArray &...$arrays
+    ): static {
+        $args = [&$this->data, $order, $flags];
+
+        foreach ($arrays as &$coverArray) {
+            $args[] = &$coverArray->data;
+        }
+
+        array_multisort(...$args);
+
+        return $this;
+    }
 
     /**
      * Pad array to the specified length with a value (array_pad equivalent).
@@ -2672,29 +2757,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
     {
         // TODO: Implement key equivalent
         return key($this->data);
-    }
-
-    /**
-     * Checks if the given key or index exists in the array (array_key_exists equivalent).
-     *
-     * Returns true if the given key is set in the array, false otherwise.
-     * The key can be any value possible for an array index.
-     *
-     *
-     * Проверяет, содержит ли массив указанный ключ или индекс (эквивалент array_key_exists).
-     *
-     * Возвращает true, если указанный ключ установлен в массиве, иначе false.
-     * Ключом может быть любое значение, возможное для индекса массива.
-     *
-     * @param mixed $key Key or index to check for.
-     *                   Ключ или индекс для проверки.
-     * @return bool True if the key exists, false otherwise.
-     *              Возвращает true, если ключ существует, иначе false.
-     * @see array_key_exists()
-     */
-    final public function keyExists(mixed $key): bool
-    {
-        return array_key_exists($key, $this->data);
     }
 
     /**
