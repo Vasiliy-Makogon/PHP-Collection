@@ -1,0 +1,181 @@
+English list:
+
+array — Create an array
+array_all — Checks if all array elements satisfy a callback function
+array_any — Checks if at least one array element satisfies a callback function
+array_change_key_case — Changes the case of all keys in an array
+array_chunk — Split an array into chunks
+array_column — Return the values from a single column in the input array
+array_combine — Creates an array by using one array for keys and another for its values
+array_count_values — Counts the occurrences of each distinct value in an array
+array_diff — Computes the difference of arrays
+array_diff_assoc — Computes the difference of arrays with additional index check
+array_diff_key — Computes the difference of arrays using keys for comparison
+array_diff_uassoc — Computes the difference of arrays with additional index check which is performed by a user supplied callback function
+array_diff_ukey — Computes the difference of arrays using a callback function on the keys for comparison
+array_fill — Fill an array with values
+array_fill_keys — Fill an array with values, specifying keys
+array_filter — Filters elements of an array using a callback function
+array_find — Returns the first element satisfying a callback function
+array_find_key — Returns the key of the first element satisfying a callback function
+array_first — Gets the first value of an array
+array_flip — Exchanges all keys with their associated values in an array
+array_intersect — Computes the intersection of arrays
+array_intersect_assoc — Computes the intersection of arrays with additional index check
+array_intersect_key — Computes the intersection of arrays using keys for comparison
+array_intersect_uassoc — Computes the intersection of arrays with additional index check, compares indexes by a callback function
+array_intersect_ukey — Computes the intersection of arrays using a callback function on the keys for comparison
+array_is_list — Checks whether a given array is a list
+array_key_exists — Checks if the given key or index exists in the array
+array_key_first — Gets the first key of an array
+array_key_last — Gets the last key of an array
+array_keys — Return all the keys or a subset of the keys of an array
+array_last — Gets the last value of an array
+array_map — Applies the callback to the elements of the given arrays
+array_merge — Merge one or more arrays
+array_merge_recursive — Merge one or more arrays recursively
+array_multisort — Sort multiple or multi-dimensional arrays
+array_pad — Pad array to the specified length with a value
+array_pop — Pop the element off the end of array
+array_product — Calculate the product of values in an array
+array_push — Push one or more elements onto the end of array
+array_rand — Pick one or more random keys out of an array
+array_reduce — Iteratively reduce the array to a single value using a callback function
+array_replace — Replaces elements from passed arrays into the first array
+array_replace_recursive — Replaces elements from passed arrays into the first array recursively
+array_reverse — Return an array with elements in reverse order
+array_search — Searches the array for a given value and returns the first corresponding key if successful
+array_shift — Shift an element off the beginning of array
+array_slice — Extract a slice of the array
+array_splice — Remove a portion of the array and replace it with something else
+array_sum — Calculate the sum of values in an array
+array_udiff — Computes the difference of arrays by using a callback function for data comparison
+array_udiff_assoc — Computes the difference of arrays with additional index check, compares data by a callback function
+array_udiff_uassoc — Computes the difference of arrays with additional index check, compares data and indexes by a callback function
+array_uintersect — Computes the intersection of arrays, compares data by a callback function
+array_uintersect_assoc — Computes the intersection of arrays with additional index check, compares data by a callback function
+array_uintersect_uassoc — Computes the intersection of arrays with additional index check, compares data and indexes by separate callback functions
+array_unique — Removes duplicate values from an array
+array_unshift — Prepend one or more elements to the beginning of an array
+array_values — Return all the values of an array
+array_walk — Apply a user supplied function to every member of an array
+array_walk_recursive — Apply a user function recursively to every member of an array
+arsort — Sort an array in descending order and maintain index association
+asort — Sort an array in ascending order and maintain index association
+compact — Create array containing variables and their values
+count — Counts all elements in an array or in a Countable object
+current — Return the current element in an array
+each — Return the current key and value pair from an array and advance the array cursor
+end — Set the internal pointer of an array to its last element
+extract — Import variables into the current symbol table from an array
+in_array — Checks if a value exists in an array
+key — Fetch a key from an array
+key_exists — Alias of array_key_exists
+krsort — Sort an array by key in descending order
+ksort — Sort an array by key in ascending order
+list — Assign variables as if they were an array
+natcasesort — Sort an array using a case insensitive "natural order" algorithm
+natsort — Sort an array using a "natural order" algorithm
+next — Advance the internal pointer of an array
+pos — Alias of current
+prev — Rewind the internal array pointer
+range — Create an array containing a range of elements
+reset — Set the internal pointer of an array to its first element
+rsort — Sort an array in descending order
+shuffle — Shuffle an array
+sizeof — Alias of count
+sort — Sort an array in ascending order
+uasort — Sort an array with a user-defined comparison function and maintain index association
+uksort — Sort an array by keys using a user-defined comparison function
+usort — Sort an array by values using a user-defined comparison function
+
+Russian list:
+
+array — Создаёт массив
+array_all — Проверяет, каждый ли элемент массива array удовлетворяет callback-функции
+array_any — Проверяет, содержит ли массив array хотя бы один элемент, который удовлетворяет callback-функции
+array_change_key_case — Изменяет регистр ключей в массиве
+array_chunk — Разбивает массив на части
+array_column — Возвращает массив из значений одного столбца входного массива
+array_combine — Создаёт новый массив с ключами из значений одного массива и значениями из значений другого
+array_count_values — Подсчитывает количество вхождений каждого отдельного значения в массиве
+array_diff — Вычисляет расхождение массивов
+array_diff_assoc — Вычисляет расхождение массивов с дополнительной проверкой индекса
+array_diff_key — Вычисляет расхождение массивов, сравнивая ключи
+array_diff_uassoc — Вычисляет расхождение массивов с дополнительной проверкой индекса через пользовательскую callback-функцию
+array_diff_ukey — Вычисляет расхождение массивов, используя callback-функцию для сравнения ключей
+array_fill — Заполняет массив значениями
+array_fill_keys — Создаёт массив и заполняет его значениями с определёнными ключами
+array_filter — Фильтрует элементы массива через callback-функцию
+array_find — Возвращает первый элемент, который удовлетворяет callback-функции
+array_find_key — Возвращает ключ первого элемента, который удовлетворяет callback-функции
+array_first — Получает первое значение массива
+array_flip — Меняет местами ключи с их значениями в массиве
+array_intersect — Вычисляет пересечение массивов
+array_intersect_assoc — Вычисляет пересечение массивов с дополнительной проверкой индекса
+array_intersect_key — Вычисляет пересечение массивов путём сравнения ключей
+array_intersect_uassoc — Вычисляет пересечение массивов с дополнительной проверкой индекса, сравнивая индексы через callback-функцию
+array_intersect_ukey — Вычисляет пересечение массивов, используя callback-функцию для сравнения ключей
+array_is_list — Проверяет, представляет ли массив array список
+array_key_exists — Проверяет, содержит ли массив ключ или индекс
+array_key_first — Получает первый ключ массива
+array_key_last — Получает последний ключ массива
+array_keys — Возвращает все или некоторое подмножество ключей массива
+array_last — Получает последнее значение массива
+array_map — Применяет callback-функцию к элементам массивов
+array_merge — Сливает один или несколько массивов
+array_merge_recursive — Рекурсивно сливает один или несколько массивов
+array_multisort — Сортирует набор массивов или многомерные массивы
+array_pad — Дополняет массив значением до заданной длины
+array_pop — Извлекает последний элемент массива
+array_product — Вычисляет произведение значений массива
+array_push — Добавляет один или несколько элементов в конец массива
+array_rand — Выбирает один или несколько случайных ключей из массива
+array_reduce — Итеративно сводит массив к единственному значению через callback-функцию
+array_replace — Заменяет элементы массива элементами других массивов
+array_replace_recursive — Рекурсивно заменяет элементы первого массива элементами других массивов
+array_reverse — Возвращает массив с элементами в обратном порядке
+array_search — Ищет значение в массиве, и если находит, возвращает ключ первого найденного элемента
+array_shift — Извлекает первый элемент массива
+array_slice — Выбирает срез массива
+array_splice — Удаляет часть массива и заменяет её новыми элементами
+array_sum — Вычисляет сумму значений массива
+array_udiff — Вычисляет расхождение массивов, используя для сравнения callback-функцию
+array_udiff_assoc — Вычисляет расхождение в массивах с дополнительной проверкой индексов, используя для сравнения значений callback-функцию
+array_udiff_uassoc — Вычисляет расхождение в массивах с дополнительной проверкой индексов, сравнивая значения и индексы через callback-функцию
+array_uintersect — Вычисляет пересечение массивов, используя для сравнения значений callback-функцию
+array_uintersect_assoc — Вычисляет пересечение массивов с дополнительной проверкой индексов, используя для сравнения значений callback-функцию
+array_uintersect_uassoc — Вычисляет пересечение массивов с дополнительной проверкой индекса, используя для сравнения индексов и значений отдельные callback-функции
+array_unique — Удаляет повторяющиеся значения из массива
+array_unshift — Добавляет один или несколько элементов в начало массива
+array_values — Возвращает значения массива
+array_walk — Применяет пользовательскую функцию к каждому элементу массива
+array_walk_recursive — Рекурсивно применяет пользовательскую функцию к каждому элементу массива
+arsort — Сортирует массив в порядке убывания, сохраняя ассоциацию индексов
+asort — Сортирует массив в порядке возрастания, сохраняя ассоциацию индексов
+compact — Создаёт массив из названий и значений переменных
+count — Подсчитывает количество элементов в массиве или в объекте Countable
+current — Возвращает текущий элемент массива
+each — Возвращает текущую пару ключа и значения массива и сдвигает указатель на одну позицию вперёд
+end — Устанавливает внутренний указатель массива на последний элемент
+extract — Переводит элементы массива в переменные текущей таблицы символов
+in_array — Проверяет, содержится ли значение в массиве
+key — Получает ключ массива
+key_exists — Псевдоним array_key_exists
+krsort — Сортирует массив по ключу в порядке убывания
+ksort — Сортирует массив по ключу в порядке возрастания
+list — Присваивает переменным значения как массиву
+natcasesort — Сортирует массив алгоритмом естественной сортировки (natural order) без учёта регистра символов
+natsort — Сортирует массив алгоритмом «естественного упорядочивания»
+next — Сдвигает внутренний указатель массива на одну позицию вперёд
+pos — Псевдоним current
+prev — Сдвигает внутренний указатель массива на одну позицию назад
+range — Создаёт массив, который содержит диапазон элементов
+reset — Устанавливает внутренний указатель массива на первый элемент
+rsort — Сортирует массив в порядке убывания
+shuffle — Перемешивает массив
+sizeof — Псевдоним count
+sort — Сортирует массив по возрастанию
+uasort — Сортирует массив пользовательской функцией сравнения, сохраняя ассоциацию индексов
+uksort — Сортирует массив по ключам пользовательской функцией сравнения
+usort — Сортирует массив по значениям через пользовательскую функцию сравнения элементов
