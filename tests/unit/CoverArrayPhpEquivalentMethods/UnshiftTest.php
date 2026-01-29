@@ -245,7 +245,7 @@ class UnshiftTest extends TestCase
         $nestedArray = ['x', 'y', 'z'];
 
         array_unshift($data, $nestedArray);
-пр        $expected = $data;
+        $expected = $data;
 
         $cover = new CoverArray($dataCopy);
         $result = $cover->unshift($nestedArray);
