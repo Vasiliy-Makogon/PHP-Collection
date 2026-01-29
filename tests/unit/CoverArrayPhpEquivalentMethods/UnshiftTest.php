@@ -245,21 +245,24 @@ class UnshiftTest extends TestCase
         $nestedArray = ['x', 'y', 'z'];
 
         array_unshift($data, $nestedArray);
+пр        $expected = $data;
 
         $cover = new CoverArray($dataCopy);
         $result = $cover->unshift($nestedArray);
 
-        // The nested array becomes a CoverArray instance in the result
+        // Check result matches PHP's array_unshift behavior
         $resultData = $cover->getDataAsArray();
+        $this->assertSame($expected, $resultData);
 
         // Check structure
         $this->assertCount(3, $resultData);
-        $this->assertInstanceOf(CoverArray::class, $resultData[0]);
+        $this->assertSame($nestedArray, $resultData[0]);
         $this->assertSame('b', $resultData[1]);
         $this->assertSame('c', $resultData[2]);
 
-        // Check nested array content
-        $this->assertSame($nestedArray, $resultData[0]->getDataAsArray());
+        // Check that internally the nested array is stored as CoverArray
+        $this->assertInstanceOf(CoverArray::class, $cover[0]);
+        $this->assertSame($nestedArray, $cover[0]->getDataAsArray());
 
         // Check that method returns $this
         $this->assertSame($cover, $result);
