@@ -2632,11 +2632,50 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      *                       Имена переменных.
      * @return static New CoverArray instance with variables and values.
      *                Новый экземпляр CoverArray с переменными и их значениями.
+     * @throws \BadMethodCallException This method cannot be implemented due to PHP limitations.
+     *                                  Этот метод не может быть реализован из-за ограничений PHP.
      * @see compact()
      */
     final public static function compact(mixed ...$vars): static
     {
-        return new static(compact(...$vars));
+        // IMPLEMENTATION IS IMPOSSIBLE / РЕАЛИЗАЦИЯ НЕВОЗМОЖНА
+        //
+        // English:
+        // This method cannot work as intended due to fundamental PHP limitations.
+        // The compact() function operates on variables in the current scope where it is called.
+        // When compact() is called inside this static method, it looks for variables
+        // within the CoverArray::compact() method scope, not in the caller's scope.
+        // This means it cannot access the variables from where CoverArray::compact() was invoked.
+        //
+        // PHP does not provide a mechanism to access local variables from a calling function's scope.
+        // Methods like debug_backtrace() can show the call stack but cannot access local variables.
+        //
+        // Workaround for users:
+        // Instead of: CoverArray::compact('city', 'state')
+        // Use:        new CoverArray(compact('city', 'state'))
+        // Or:         CoverArray::fromArray(compact('city', 'state'))
+        //
+        // Русский:
+        // Этот метод не может работать как задумано из-за фундаментальных ограничений PHP.
+        // Функция compact() работает с переменными в текущей области видимости, где она вызвана.
+        // Когда compact() вызывается внутри этого статического метода, она ищет переменные
+        // внутри области видимости метода CoverArray::compact(), а не в области видимости вызывающего кода.
+        // Это означает, что она не может получить доступ к переменным из места, откуда был вызван CoverArray::compact().
+        //
+        // PHP не предоставляет механизма для доступа к локальным переменным из области видимости вызывающей функции.
+        // Методы вроде debug_backtrace() могут показать стек вызовов, но не могут получить доступ к локальным переменным.
+        //
+        // Обходной путь для пользователей:
+        // Вместо: CoverArray::compact('city', 'state')
+        // Используйте: new CoverArray(compact('city', 'state'))
+        // Или:         CoverArray::fromArray(compact('city', 'state'))
+
+        throw new \BadMethodCallException(
+            'CoverArray::compact() cannot be implemented due to PHP scope limitations. ' .
+            'Use: new CoverArray(compact(...)) or CoverArray::fromArray(compact(...)) instead. ' .
+            'Метод CoverArray::compact() не может быть реализован из-за ограничений области видимости PHP. ' .
+            'Используйте: new CoverArray(compact(...)) или CoverArray::fromArray(compact(...)).'
+        );
     }
 
     /**
@@ -2793,13 +2832,52 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      *                       Переменные для присвоения.
      * @return array Array of assigned values.
      *               Массив присвоенных значений.
+     * @throws \BadMethodCallException This method cannot be implemented due to PHP limitations.
+     *                                  Этот метод не может быть реализован из-за ограничений PHP.
      * @see list()
      */
     final public function list(mixed &...$vars): array
     {
-        // Note: This is tricky to implement as a method
-        //        return list(...$vars) = $this->data;
-        return [];
+        // IMPLEMENTATION IS IMPOSSIBLE / РЕАЛИЗАЦИЯ НЕВОЗМОЖНА
+        //
+        // English:
+        // This method cannot work as intended because list() is a language construct, not a function.
+        // In PHP, list() works at compile time as part of the assignment syntax:
+        //     list($a, $b, $c) = [1, 2, 3];
+        //
+        // A method cannot replicate this behavior because:
+        // 1. PHP methods cannot create variables in the caller's scope
+        // 2. While we can accept parameters by reference (&...$vars), the caller must
+        //    already have variables declared to pass in
+        // 3. This defeats the purpose of list(), which is to declare and assign in one step
+        //
+        // Workaround for users:
+        // Instead of: $cover->list($a, $b, $c)
+        // Use:        list($a, $b, $c) = $cover->getDataAsArray()
+        // Or modern:  [$a, $b, $c] = $cover->getDataAsArray()
+        //
+        // Русский:
+        // Этот метод не может работать как задумано, потому что list() — это языковая конструкция, а не функция.
+        // В PHP list() работает на этапе компиляции как часть синтаксиса присваивания:
+        //     list($a, $b, $c) = [1, 2, 3];
+        //
+        // Метод не может повторить это поведение, потому что:
+        // 1. PHP-методы не могут создавать переменные в области видимости вызывающего кода
+        // 2. Хотя мы можем принимать параметры по ссылке (&...$vars), вызывающий код должен
+        //    уже иметь объявленные переменные для передачи
+        // 3. Это лишает смысла list(), которая создаёт и присваивает переменные за один шаг
+        //
+        // Обходной путь для пользователей:
+        // Вместо: $cover->list($a, $b, $c)
+        // Используйте: list($a, $b, $c) = $cover->getDataAsArray()
+        // Или современный синтаксис: [$a, $b, $c] = $cover->getDataAsArray()
+
+        throw new \BadMethodCallException(
+            'CoverArray::list() cannot be implemented because list() is a language construct, not a function. ' .
+            'Use: list($a, $b) = $cover->getDataAsArray() or [$a, $b] = $cover->getDataAsArray() instead. ' .
+            'Метод CoverArray::list() не может быть реализован, так как list() — это языковая конструкция, а не функция. ' .
+            'Используйте: list($a, $b) = $cover->getDataAsArray() или [$a, $b] = $cover->getDataAsArray().'
+        );
     }
 
     /**

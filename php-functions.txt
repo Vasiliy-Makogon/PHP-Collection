@@ -1,6 +1,5 @@
 English list:
 
-array — Create an array
 array_all — Checks if all array elements satisfy a callback function
 array_any — Checks if at least one array element satisfies a callback function
 array_change_key_case — Changes the case of all keys in an array
@@ -91,7 +90,6 @@ usort — Sort an array by values using a user-defined comparison function
 
 Russian list:
 
-array — Создаёт массив
 array_all — Проверяет, каждый ли элемент массива array удовлетворяет callback-функции
 array_any — Проверяет, содержит ли массив array хотя бы один элемент, который удовлетворяет callback-функции
 array_change_key_case — Изменяет регистр ключей в массиве
