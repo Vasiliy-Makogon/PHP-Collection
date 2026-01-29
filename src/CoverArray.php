@@ -1933,7 +1933,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function reduce(callable $callback, mixed $initial = null): mixed
     {
-        // TODO: Implement array_reduce equivalent
         return array_reduce($this->data, $callback, $initial);
     }
 
@@ -1952,7 +1951,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function replace(CoverArray|array ...$replacement): static
     {
-        // TODO: Implement array_replace equivalent
         return new static(
             array_replace(
                 $this->data,
@@ -1979,7 +1977,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function replaceRecursive(CoverArray|array ...$replacement): static
     {
-        // TODO: Implement array_replace_recursive equivalent
         return new static(
             array_replace_recursive(
                 $this->getDataAsArray(),
@@ -2033,7 +2030,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function search(mixed $needle, bool $strict = false): int|string|false
     {
-        // TODO: Implement array_search equivalent
         return array_search($needle, $this->data, $strict);
     }
 
@@ -2050,7 +2046,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function shift(): mixed
     {
-        // TODO: Implement array_shift equivalent
         return array_shift($this->data);
     }
 
@@ -2073,7 +2068,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function slice(int $offset, ?int $length = null, bool $preserve_keys = false): static
     {
-        // TODO: Implement array_slice equivalent
         return new static(
             array_slice($this->data, $offset, $length, $preserve_keys)
         );
@@ -2098,7 +2092,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function splice(int $offset, ?int $length = null, mixed $replacement = []): static
     {
-        // TODO: Implement array_splice equivalent
         $removed = array_splice($this->data, $offset, $length, $replacement);
         return new static($removed);
     }
@@ -2116,7 +2109,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function sum(): int|float
     {
-        // TODO: Implement array_sum equivalent
         return array_sum($this->data);
     }
 
@@ -2606,7 +2598,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function arsort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement arsort equivalent
         arsort($this->data, $flags);
         return $this;
     }
@@ -2626,7 +2617,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function asort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement asort equivalent
         asort($this->data, $flags);
         return $this;
     }
@@ -2646,7 +2636,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public static function compact(mixed ...$vars): static
     {
-        // TODO: Implement compact equivalent
         return new static(compact(...$vars));
     }
 
@@ -2675,7 +2664,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function current(): mixed
     {
-        // TODO: Implement current equivalent
         return current($this->data);
     }
 
@@ -2692,7 +2680,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function end(): mixed
     {
-        // TODO: Implement end equivalent
         return end($this->data);
     }
 
@@ -2713,7 +2700,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function extract(int $flags = EXTR_OVERWRITE, string $prefix = ''): int
     {
-        // TODO: Implement extract equivalent
         return extract($this->data, $flags, $prefix);
     }
 
@@ -2755,7 +2741,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function key(): int|string|null
     {
-        // TODO: Implement key equivalent
         return key($this->data);
     }
 
@@ -2774,7 +2759,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function krsort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement krsort equivalent
         krsort($this->data, $flags);
         return $this;
     }
@@ -2794,7 +2778,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function ksort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement ksort equivalent
         ksort($this->data, $flags);
         return $this;
     }
@@ -2814,7 +2797,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function list(mixed &...$vars): array
     {
-        // TODO: Implement list equivalent
         // Note: This is tricky to implement as a method
         //        return list(...$vars) = $this->data;
         return [];
@@ -2833,7 +2815,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function natcasesort(): static
     {
-        // TODO: Implement natcasesort equivalent
         natcasesort($this->data);
         return $this;
     }
@@ -2851,7 +2832,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function natsort(): static
     {
-        // TODO: Implement natsort equivalent
         natsort($this->data);
         return $this;
     }
@@ -2869,7 +2849,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function next(): mixed
     {
-        // TODO: Implement next equivalent
         return next($this->data);
     }
 
@@ -2903,7 +2882,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function prev(): mixed
     {
-        // TODO: Implement prev equivalent
         return prev($this->data);
     }
 
@@ -2926,7 +2904,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public static function range(mixed $start, mixed $end, int|float $step = 1): static
     {
-        // TODO: Implement range equivalent
         return new static(range($start, $end, $step));
     }
 
@@ -2943,7 +2920,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function reset(): mixed
     {
-        // TODO: Implement reset equivalent
         return reset($this->data);
     }
 
@@ -2962,7 +2938,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function rsort(int $flags = SORT_REGULAR): static
     {
-        // TODO: Implement rsort equivalent
         rsort($this->data, $flags);
         return $this;
     }
@@ -2980,7 +2955,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function shuffle(): static
     {
-        // TODO: Implement shuffle equivalent
         shuffle($this->data);
         return $this;
     }
@@ -3020,7 +2994,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function uasort(callable $callback): static
     {
-        // TODO: Implement uasort equivalent
         uasort($this->data, $callback);
         return $this;
     }
@@ -3040,7 +3013,6 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function uksort(callable $callback): static
     {
-        // TODO: Implement uksort equivalent
         uksort($this->data, $callback);
         return $this;
     }
