@@ -40,17 +40,17 @@ $users = [
 $filtered = array_filter($users, fn($u) => $u['active'] && $u['age'] >= 18);
 $sorted = usort($filtered, fn($a, $b) => $b['score'] <=> $a['score']) ? $filtered : [];
 $names = array_column($sorted, 'name');
-$result = implode(', ', $names);
+$result = implode(', ', $names); // Charlie, Alice, Diana
 ```
 #### After (CoverArray):
 ```php
 // EVERYTHING IN ONE LINE!
-$result = (CoverArray::fromArray($users))
+$result = CoverArray::fromArray($users)
     ->filter(fn($u) => $u->active && $u->age >= 18)
     ->usort(fn($a, $b) => $b->score <=> $a->score)
     ->values()
     ->column('name')
-    ->implode(', ');
+    ->implode(', '); // Charlie, Alice, Diana
 ```
 ### Key Benefits
 * **No External Dependencies:** Pure PHP implementation, no additional packages required
