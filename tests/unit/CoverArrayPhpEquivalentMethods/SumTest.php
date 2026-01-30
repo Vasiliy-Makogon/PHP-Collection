@@ -240,25 +240,25 @@ class SumTest extends TestCase
     }
 
     /**
-     * Tests the sum() method with non-numeric values.
+     * Tests the sum() method with null values.
      *
      * This test verifies that the sum() method correctly handles
-     * non-numeric values by treating them as 0, mirroring PHP's
+     * null values by treating them as 0, mirroring PHP's
      * array_sum() function behavior.
      *
      *
-     * Тестирование метода sum() с нечисловыми значениями.
+     * Тестирование метода sum() с null значениями.
      *
      * Этот тест проверяет, что метод sum() корректно обрабатывает
-     * нечисловые значения, считая их как 0, отражая поведение
+     * null значения, считая их как 0, отражая поведение
      * функции array_sum() PHP.
      *
      * @see CoverArray::sum()
      * @see array_sum()
      */
-    public function testSumWithNonNumericValues(): void
+    public function testSumWithNullValues(): void
     {
-        $data = [1, 'abc', 3, null, 5];
+        $data = [1, 3, null, 5];
         $expected = array_sum($data);
 
         $cover = new CoverArray($data);

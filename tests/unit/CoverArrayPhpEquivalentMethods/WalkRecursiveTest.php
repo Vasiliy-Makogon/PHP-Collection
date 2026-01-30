@@ -483,4 +483,238 @@ class WalkRecursiveTest extends TestCase
     {
         return 'test';
     }
+
+    /**
+     * Tests the walkRecursive() method with plain PHP arrays injected via Reflection.
+     *
+     * This test covers the code path where plain PHP arrays (not CoverArray instances)
+     * are present in the data. Since CoverArray normally converts arrays during setData,
+     * we use Reflection to inject plain arrays directly into the protected $data property.
+     * This tests lines 2569 ($walker($value)) and 2571 ($data[$key] = new static($value)).
+     *
+     *
+     * Тестирование метода walkRecursive() с простыми PHP-массивами, внедренными через Reflection.
+     *
+     * Этот тест покрывает путь выполнения кода, где простые PHP-массивы (не экземпляры CoverArray)
+     * присутствуют в данных. Поскольку CoverArray обычно преобразует массивы во время setData,
+     * мы используем Reflection для прямого внедрения простых массивов в защищенное свойство $data.
+     * Это тестирует строки 2569 ($walker($value)) и 2571 ($data[$key] = new static($value)).
+     *
+     * @see CoverArray::walkRecursive()
+     */
+    public function testWalkRecursiveWithPlainArraysViaReflection(): void
+    {
+        $cover = new CoverArray();
+
+        // Use Reflection to inject plain PHP arrays directly into the protected $data property
+        // Используем Reflection для прямого внедрения простых PHP-массивов в защищенное свойство $data
+        $reflection = new \ReflectionClass($cover);
+        $dataProperty = $reflection->getProperty('data');
+        $dataProperty->setAccessible(true);
+        $dataProperty->setValue($cover, [
+            'scalar' => 'value',
+            'plainArray' => [1, 2, 3],  // Plain PHP array, not CoverArray
+            'nestedPlain' => [
+                'inner' => [4, 5],  // Nested plain array
+                'value' => 6
+            ]
+        ]);
+
+        $modificationCount = 0;
+        $cover->walkRecursive(function (&$value, $key) use (&$modificationCount) {
+            if (is_string($value)) {
+                $value = strtoupper($value);
+            } elseif (is_int($value)) {
+                $value += 100;
+                $modificationCount++;
+            }
+        });
+
+        // Check that all integer values were modified (1,2,3,4,5,6 = 6 values)
+        // Проверяем, что все целочисленные значения были изменены (1,2,3,4,5,6 = 6 значений)
+        $this->assertSame(6, $modificationCount);
+
+        // Check that string value was modified
+        // Проверяем, что строковое значение было изменено
+        $this->assertSame('VALUE', $cover['scalar']);
+
+        // Check that plain arrays are now CoverArray instances
+        // Проверяем, что простые массивы теперь экземпляры CoverArray
+        $this->assertInstanceOf(CoverArray::class, $cover['plainArray']);
+        $this->assertInstanceOf(CoverArray::class, $cover['nestedPlain']);
+        $this->assertInstanceOf(CoverArray::class, $cover['nestedPlain']['inner']);
+
+        // Check the actual modified values
+        // Проверяем фактические измененные значения
+        $this->assertSame([101, 102, 103], $cover['plainArray']->getDataAsArray());
+        $this->assertSame([104, 105], $cover['nestedPlain']['inner']->getDataAsArray());
+        $this->assertSame(106, $cover['nestedPlain']['value']);
+    }
+
+    /**
+     * Tests walkRecursive() with deeply nested plain arrays via Reflection.
+     *
+     * This test verifies that the recursive processing of plain arrays works correctly
+     * for deeply nested structures, converting each level to CoverArray.
+     *
+     *
+     * Тестирование walkRecursive() с глубоко вложенными простыми массивами через Reflection.
+     *
+     * Этот тест проверяет, что рекурсивная обработка простых массивов работает корректно
+     * для глубоко вложенных структур, преобразуя каждый уровень в CoverArray.
+     *
+     * @see CoverArray::walkRecursive()
+     */
+    public function testWalkRecursiveWithDeeplyNestedPlainArrays(): void
+    {
+        $cover = new CoverArray();
+
+        // Inject deeply nested plain arrays
+        // Внедряем глубоко вложенные простые массивы
+        $reflection = new \ReflectionClass($cover);
+        $dataProperty = $reflection->getProperty('data');
+        $dataProperty->setAccessible(true);
+        $dataProperty->setValue($cover, [
+            'level1' => [
+                'level2' => [
+                    'level3' => [
+                        'level4' => [
+                            'value' => 42
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        $cover->walkRecursive(function (&$value, $key) {
+            if (is_int($value)) {
+                $value = 'processed_' . $value;
+            }
+        });
+
+        // Check that value was processed
+        // Проверяем, что значение было обработано
+        $this->assertSame('processed_42', $cover['level1']['level2']['level3']['level4']['value']);
+
+        // Check that all nested plain arrays are now CoverArray instances
+        // Проверяем, что все вложенные простые массивы теперь экземпляры CoverArray
+        $this->assertInstanceOf(CoverArray::class, $cover['level1']);
+        $this->assertInstanceOf(CoverArray::class, $cover['level1']['level2']);
+        $this->assertInstanceOf(CoverArray::class, $cover['level1']['level2']['level3']);
+        $this->assertInstanceOf(CoverArray::class, $cover['level1']['level2']['level3']['level4']);
+    }
+
+    /**
+     * Tests walkRecursive() with empty plain arrays via Reflection.
+     *
+     * This test verifies that empty plain arrays are correctly converted
+     * to empty CoverArray instances during walkRecursive processing.
+     *
+     *
+     * Тестирование walkRecursive() с пустыми простыми массивами через Reflection.
+     *
+     * Этот тест проверяет, что пустые простые массивы корректно преобразуются
+     * в пустые экземпляры CoverArray во время обработки walkRecursive.
+     *
+     * @see CoverArray::walkRecursive()
+     */
+    public function testWalkRecursiveWithEmptyPlainArrays(): void
+    {
+        $cover = new CoverArray();
+
+        // Inject empty plain arrays
+        // Внедряем пустые простые массивы
+        $reflection = new \ReflectionClass($cover);
+        $dataProperty = $reflection->getProperty('data');
+        $dataProperty->setAccessible(true);
+        $dataProperty->setValue($cover, [
+            'empty1' => [],
+            'nested' => [
+                'empty2' => [],
+                'value' => 'test'
+            ]
+        ]);
+
+        $callbackCalled = false;
+        $cover->walkRecursive(function (&$value, $key) use (&$callbackCalled) {
+            $callbackCalled = true;
+            if (is_string($value)) {
+                $value = strtoupper($value);
+            }
+        });
+
+        // Callback should have been called for the 'test' value
+        // Callback должен был быть вызван для значения 'test'
+        $this->assertTrue($callbackCalled);
+
+        // Check that empty arrays are now CoverArray instances
+        // Проверяем, что пустые массивы теперь экземпляры CoverArray
+        $this->assertInstanceOf(CoverArray::class, $cover['empty1']);
+        $this->assertInstanceOf(CoverArray::class, $cover['nested']);
+        $this->assertInstanceOf(CoverArray::class, $cover['nested']['empty2']);
+
+        // Check that empty arrays remain empty
+        // Проверяем, что пустые массивы остаются пустыми
+        $this->assertSame([], $cover['empty1']->getDataAsArray());
+        $this->assertSame([], $cover['nested']['empty2']->getDataAsArray());
+
+        // Check that value was modified
+        // Проверяем, что значение было изменено
+        $this->assertSame('TEST', $cover['nested']['value']);
+    }
+
+    /**
+     * Tests walkRecursive() with mixed plain arrays and CoverArray instances.
+     *
+     * This test verifies that walkRecursive correctly handles a mix of plain
+     * PHP arrays and existing CoverArray instances in the data structure.
+     *
+     *
+     * Тестирование walkRecursive() со смешанными простыми массивами и экземплярами CoverArray.
+     *
+     * Этот тест проверяет, что walkRecursive корректно обрабатывает смесь простых
+     * PHP-массивов и существующих экземпляров CoverArray в структуре данных.
+     *
+     * @see CoverArray::walkRecursive()
+     */
+    public function testWalkRecursiveWithMixedPlainAndCoverArrays(): void
+    {
+        $cover = new CoverArray();
+        $innerCover = new CoverArray(['x' => 1, 'y' => 2]);
+
+        // Inject a mix of plain arrays and CoverArray instances
+        // Внедряем смесь простых массивов и экземпляров CoverArray
+        $reflection = new \ReflectionClass($cover);
+        $dataProperty = $reflection->getProperty('data');
+        $dataProperty->setAccessible(true);
+        $dataProperty->setValue($cover, [
+            'plainArray' => [10, 20],  // Plain PHP array
+            'coverArray' => $innerCover,  // Existing CoverArray
+            'anotherPlain' => [30, 40]  // Another plain array
+        ]);
+
+        $modificationCount = 0;
+        $cover->walkRecursive(function (&$value, $key) use (&$modificationCount) {
+            if (is_int($value)) {
+                $value += 100;
+                $modificationCount++;
+            }
+        });
+
+        // Check that all 6 integer values were modified (10, 20, 1, 2, 30, 40)
+        // Проверяем, что все 6 целочисленных значений были изменены (10, 20, 1, 2, 30, 40)
+        $this->assertSame(6, $modificationCount);
+
+        // Check that plain arrays are now CoverArray instances
+        // Проверяем, что простые массивы теперь экземпляры CoverArray
+        $this->assertInstanceOf(CoverArray::class, $cover['plainArray']);
+        $this->assertInstanceOf(CoverArray::class, $cover['anotherPlain']);
+
+        // Check values
+        // Проверяем значения
+        $this->assertSame([110, 120], $cover['plainArray']->getDataAsArray());
+        $this->assertSame(101, $cover['coverArray']['x']);
+        $this->assertSame(102, $cover['coverArray']['y']);
+        $this->assertSame([130, 140], $cover['anotherPlain']->getDataAsArray());
+    }
 }

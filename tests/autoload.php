@@ -5,6 +5,7 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 'krugozor\\cover\\tests\\newtypearray' => '/NewTypeArray.php',
+                'krugozor\\cover\\tests\\simpletraittestclass' => '/SimpleTraitTestClass.php',
             );
         }
         $cn = strtolower($class);
