@@ -162,15 +162,17 @@ class SetDataTest extends TestCase
      * Tests setData() with objects (non-arrays) preserves them as-is.
      *
      * This test ensures that objects (other than arrays) passed to
-     * setData() are stored as-is without conversion. Only arrays
-     * are converted to CoverArray objects.
+     * setData() are stored as-is without conversion. Arrays are typically
+     * converted to CoverArray objects, except for callable arrays which
+     * are preserved as regular arrays to maintain their callable functionality.
      *
      *
      * Тестирование сохранения объектов (не массивов) как есть в setData().
      *
      * Этот тест гарантирует, что объекты (кроме массивов), переданные в
-     * setData(), хранятся как есть без преобразования. Только массивы
-     * преобразуются в объекты CoverArray.
+     * setData(), хранятся как есть без преобразования. Массивы обычно
+     * преобразуются в объекты CoverArray, за исключением callable-массивов,
+     * которые сохраняются как обычные массивы для поддержания их callable-функциональности.
      *
      * @see CoverArray::setData()
      */

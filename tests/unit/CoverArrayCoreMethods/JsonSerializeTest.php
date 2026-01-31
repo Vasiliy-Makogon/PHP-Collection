@@ -36,6 +36,7 @@ class JsonSerializeTest extends TestCase
 
         $result = $cover->jsonSerialize();
 
+        $this->assertIsArray($result);
         $this->assertSame($data, $result);
     }
 
@@ -59,6 +60,8 @@ class JsonSerializeTest extends TestCase
 
         $result = $cover->jsonSerialize();
 
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
         $this->assertSame([], $result);
     }
 
@@ -181,6 +184,13 @@ class JsonSerializeTest extends TestCase
 
         $result = $cover->jsonSerialize();
 
+        $this->assertIsArray($result);
         $this->assertSame($data, $result);
+        $this->assertIsString($result['string']);
+        $this->assertIsInt($result['integer']);
+        $this->assertIsFloat($result['float']);
+        $this->assertIsBool($result['boolean_true']);
+        $this->assertIsBool($result['boolean_false']);
+        $this->assertNull($result['null_value']);
     }
 }

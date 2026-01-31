@@ -192,13 +192,15 @@ class FromJsonTest extends TestCase
      * Tests fromJson() with custom depth parameter.
      *
      * This test verifies that fromJson() respects the depth parameter
-     * for deeply nested JSON structures.
+     * for deeply nested JSON structures by comparing results with
+     * different depth values against json_decode() behavior.
      *
      *
      * Тестирование fromJson() с пользовательским параметром глубины.
      *
      * Этот тест проверяет, что fromJson() учитывает параметр глубины
-     * для глубоко вложенных структур JSON.
+     * для глубоко вложенных структур JSON путем сравнения результатов
+     * с различными значениями глубины с поведением json_decode().
      *
      * @see CoverArray::fromJson()
      * @see json_decode()
@@ -206,9 +208,9 @@ class FromJsonTest extends TestCase
     public function testFromJsonWithCustomDepth(): void
     {
         $json = '{"level1":{"level2":{"level3":"value"}}}';
-        $expected = json_decode($json, true, 512);
+        $expected = json_decode($json, true, 100);
 
-        $cover = CoverArray::fromJson($json, 512);
+        $cover = CoverArray::fromJson($json, 100);
 
         $this->assertSame($expected, $cover->getDataAsArray());
     }

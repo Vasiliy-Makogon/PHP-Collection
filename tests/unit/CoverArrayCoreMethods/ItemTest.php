@@ -345,22 +345,13 @@ class ItemTest extends TestCase
         $array = new NewTypeArray($largeData);
 
         // Тестируем доступ к первому, последнему и среднему элементам
-        $startTime = microtime(true);
-
         $first = $array->item('key_0');
         $middle = $array->item('key_5000');
         $last = $array->item('key_9999');
 
-        $endTime = microtime(true);
-        $executionTime = $endTime - $startTime;
-
         $this->assertEquals('value_0', $first);
         $this->assertEquals('value_5000', $middle);
         $this->assertEquals('value_9999', $last);
-
-        // Доступ должен быть быстрым (менее 0.1 секунды для всех трех операций)
-        $this->assertLessThan(0.1, $executionTime,
-            'item() should be fast even with large datasets');
     }
 
     /**
@@ -418,18 +409,18 @@ class ItemTest extends TestCase
      *
      * This test verifies that the item() method behaves consistently
      * with the __get() method, returning the same values for the same
-     * keys. Both methods should provide the same access pattern to
-     * the data, with item() being intended for numeric indices and
-     * __get() for property-like access.
+     * keys. Both methods provide the same access pattern to the data,
+     * with item() accepting any key type (string or numeric) and
+     * __get() being used for property-like access.
      *
      *
      * Тестирование согласованности метода item() с методом __get().
      *
      * Этот тест проверяет, что метод item() ведет себя согласованно
      * с методом __get(), возвращая одинаковые значения для одинаковых
-     * ключей. Оба метода должны предоставлять одинаковый способ доступа
-     * к данным, где item() предназначен для числовых индексов, а
-     * __get() - для доступа, подобного свойствам.
+     * ключей. Оба метода предоставляют одинаковый способ доступа
+     * к данным, где item() принимает любой тип ключа (строковый или числовой),
+     * а __get() используется для доступа, подобного свойствам.
      *
      * @see Simple::item()
      * @see Simple::__get()

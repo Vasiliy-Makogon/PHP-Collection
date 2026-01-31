@@ -1,4 +1,4 @@
-![Cover Array](logo.jpg)
+![Cover Array](docs/logo.jpg)
 
 **Other languages:**
 - [Русская документация](docs/README_ru.md)

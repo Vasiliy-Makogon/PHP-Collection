@@ -51,10 +51,10 @@ class Array2coverTest extends TestCase
      */
     public function testArray2coverMaxDepthExceeded(): void
     {
-        // Создаем глубоко вложенный массив, превышающий maxDepth
+        // Создаем глубоко вложенный массив, превышающий maxDepth (105 уровней для проверки лимита в 100)
         $deepArray = [];
         $current = &$deepArray;
-        for ($i = 0; $i < 600; $i++) {
+        for ($i = 0; $i < 105; $i++) {
             $current['level'] = ['deeper'];
             $current = &$current['level'];
         }

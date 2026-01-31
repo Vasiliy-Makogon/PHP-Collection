@@ -2,6 +2,7 @@
     "name": "krugozor/cover",
     "description": "PHP Array Object (PHP collection)",
     "type": "library",
+    "license": "MIT",
     "keywords": [
         "cover array",
         "php array cover",
@@ -12,7 +13,8 @@
         "array wrapper",
         "php array wrapper",
         "php collection",
-        "php array"
+        "php array",
+        "array"
     ],
     "require": {
         "php": ">=8.0",
@@ -23,12 +25,24 @@
     },
     "authors": [
         {
-            "name": "Vasiliy Makogon"
+            "name": "Vasiliy Makogon",
+            "homepage": "https://github.com/Vasiliy-Makogon/"
         }
     ],
     "autoload": {
         "psr-4": {
             "Krugozor\\Cover\\": "src/"
         }
-    }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Krugozor\\Cover\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

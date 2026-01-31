@@ -261,13 +261,15 @@ class ToJsonTest extends TestCase
     {
         $this->expectException(\JsonException::class);
 
-        $resource = fopen('php://memory', 'r');
+        $resource = tmpfile();
         $cover = new NewTypeArray(['resource' => $resource]);
 
         try {
             $cover->toJson();
         } finally {
-            fclose($resource);
+            if (is_resource($resource)) {
+                fclose($resource);
+            }
         }
     }
 
