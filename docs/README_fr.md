@@ -1,7 +1,7 @@
 ![Cover Array](logo.jpg)
 
 **Autres langues :**
-- [English documentation](README.md)
+- [English documentation](../README.md)
 - [Русская документация](README_ru.md)
 - [Deutsche Dokumentation](README_de.md)
 - [Documentazione italiana](README_it.md)

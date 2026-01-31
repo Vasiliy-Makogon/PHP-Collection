@@ -1,17 +1,17 @@
 ![Cover Array](logo.jpg)
 
 **Other languages:**
-- [Русская документация](README_ru.md)
-- [Documentation française](README_fr.md)
-- [Deutsche Dokumentation](README_de.md)
-- [Documentazione italiana](README_it.md)
-- [日本語ドキュメント](README_jp.md)
-- [Documentación en español](README_es.md)
-- [한국어 문서](README_kr.md)
-- [简体中文文档](README_cn.md)
-- [繁體中文文件](README_tw.md)
-- [Dokumentasi Bahasa Indonesia](README_id.md)
-- [Documentação em Português (BR)](README_br.md)
+- [Русская документация](docs/README_ru.md)
+- [Documentation française](docs/README_fr.md)
+- [Deutsche Dokumentation](docs/README_de.md)
+- [Documentazione italiana](docs/README_it.md)
+- [日本語ドキュメント](docs/README_jp.md)
+- [Documentación en español](docs/README_es.md)
+- [한국어 문서](docs/README_kr.md)
+- [简体中文文档](docs/README_cn.md)
+- [繁體中文文件](docs/README_tw.md)
+- [Dokumentasi Bahasa Indonesia](docs/README_id.md)
+- [Documentação em Português (BR)](docs/README_br.md)
 
 ---
 
