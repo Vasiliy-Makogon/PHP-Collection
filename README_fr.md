@@ -2,7 +2,16 @@
 
 **Autres langues :**
 - [English documentation](README.md)
-- [Русская документация](README_rus.md)
+- [Русская документация](README_ru.md)
+- [Deutsche Dokumentation](README_de.md)
+- [Documentazione italiana](README_it.md)
+- [日本語ドキュメント](README_jp.md)
+- [Documentación en español](README_es.md)
+- [한국어 문서](README_kr.md)
+- [简体中文文档](README_cn.md)
+- [繁體中文文件](README_tw.md)
+- [Dokumentasi Bahasa Indonesia](README_id.md)
+- [Documentação em Português (BR)](README_br.md)
 
 ---
 
