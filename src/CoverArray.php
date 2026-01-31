@@ -315,7 +315,7 @@ class CoverArray implements IteratorAggregate, Countable, ArrayAccess, JsonSeria
      */
     final public function offsetUnset(mixed $offset): void
     {
-        if (isset($this->data[$offset])) {
+        if (array_key_exists($offset, $this->data)) {
             unset($this->data[$offset]);
         }
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CoverArrayCoreMethods\CoverArrayMagicMethods;
+namespace CoverArrayCoreMethods\MagicMethods;
 
 use DateTime;
 use Krugozor\Cover\CoverArray;

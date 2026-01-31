@@ -4,7 +4,12 @@
       "Bash(vendor/bin/phpunit:*)",
       "Bash(php:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(for file in:*)",
+      "Bash(do sed -i 's/namespace CoverArrayCoreMethods\\\\\\\\CoverArrayMagicMethods;/namespace CoverArrayCoreMethods\\\\\\\\MagicMethods;/' \"$file\")",
+      "Bash(done)",
+      "Bash(do sed -i 's/CoverArrayMagicMethods/MagicMethods/g' \"$file\")",
+      "Bash(tree:*)"
     ]
   }
 }
