@@ -1,6 +1,8 @@
 ![Cover Array](logo.jpg)
 
-**![](https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/23px-Flag_of_the_United_States.svg.png) [English documentation](README.md) ![](https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/23px-Flag_of_the_United_States.svg.png)**
+**Другие языки:**
+- [English documentation](README.md)
+- [Documentation française](README_fr.md)
 
 ---
 
