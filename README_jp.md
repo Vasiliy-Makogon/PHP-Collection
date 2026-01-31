@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### 例3: Eコマース注文処理
-```php
-// 注文処理: 統計を計算しレポートを生成
-$orders = CoverArray::fromArray($database->getOrders());
-
-// 先月の完了した高額注文をフィルタ
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// ビジネス指標を計算
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "売上: $" . number_format($totalRevenue, 2) . "\n";
-echo "平均注文額: $" . number_format($averageOrder, 2) . "\n";
-echo "トップ顧客: " . $topCustomers->first()['customer'];
-```
-
-#### 例4: ログ分析とエラーレポート
+#### 例3: ログ分析とエラーレポート
 ```php
 // アプリケーションログを解析し、エラーパターンを抽出
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

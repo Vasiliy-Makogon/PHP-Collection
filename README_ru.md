@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Пример 3: Обработка заказов интернет-магазина
-```php
-// Обработка заказов: расчёт статистики и генерация отчётов
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Фильтрация завершённых крупных заказов за последний месяц
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Расчёт бизнес-метрик
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Выручка: $" . number_format($totalRevenue, 2) . "\n";
-echo "Средний заказ: $" . number_format($averageOrder, 2) . "\n";
-echo "Топ-покупатель: " . $topCustomers->first()['customer'];
-```
-
-#### Пример 4: Анализ логов и отчёты об ошибках
+#### Пример 3: Анализ логов и отчёты об ошибках
 ```php
 // Парсинг логов приложения и выявление паттернов ошибок
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

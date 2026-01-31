@@ -1,6 +1,5 @@
 vendor/
 .git/
-.github/
 .phpunit.cache/
-html-cover
-age/
+html-coverage/
+.claude/

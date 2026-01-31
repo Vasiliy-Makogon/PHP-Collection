@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Contoh 3: Pemrosesan Pesanan E-commerce
-```php
-// Proses pesanan: hitung statistik dan buat laporan
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Filter pesanan bernilai tinggi yang selesai dari bulan lalu
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Hitung metrik bisnis
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Revenue: $" . number_format($totalRevenue, 2) . "\n";
-echo "Average Order: $" . number_format($averageOrder, 2) . "\n";
-echo "Top Customer: " . $topCustomers->first()['customer'];
-```
-
-#### Contoh 4: Analisis Log dan Pelaporan Kesalahan
+#### Contoh 3: Analisis Log dan Pelaporan Kesalahan
 ```php
 // Parse log aplikasi dan ekstrak pola kesalahan
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

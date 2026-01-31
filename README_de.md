@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Beispiel 3: E-Commerce-Auftragsverarbeitung
-```php
-// Aufträge verarbeiten: Statistiken berechnen und Berichte generieren
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Abgeschlossene hochwertige Aufträge des letzten Monats filtern
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Geschäftskennzahlen berechnen
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Umsatz: $" . number_format($totalRevenue, 2) . "\n";
-echo "Durchschnittliche Bestellung: $" . number_format($averageOrder, 2) . "\n";
-echo "Top-Kunde: " . $topCustomers->first()['customer'];
-```
-
-#### Beispiel 4: Protokollanalyse und Fehlerberichterstattung
+#### Beispiel 3: Protokollanalyse und Fehlerberichterstattung
 ```php
 // Anwendungsprotokolle parsen und Fehlermuster extrahieren
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

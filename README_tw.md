@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### 範例 3：電子商務訂單處理
-```php
-// 處理訂單：計算統計資料並生成報表
-$orders = CoverArray::fromArray($database->getOrders());
-
-// 篩選上個月完成的高價值訂單
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// 計算業務指標
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "營收：$" . number_format($totalRevenue, 2) . "\n";
-echo "平均訂單：$" . number_format($averageOrder, 2) . "\n";
-echo "最佳客戶：" . $topCustomers->first()['customer'];
-```
-
-#### 範例 4：日誌分析和錯誤報告
+#### 範例 3：日誌分析和錯誤報告
 ```php
 // 解析應用程式日誌並提取錯誤模式
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

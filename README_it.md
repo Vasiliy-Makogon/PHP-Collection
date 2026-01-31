@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Esempio 3: Elaborazione degli Ordini E-commerce
-```php
-// Elabora gli ordini: calcola statistiche e genera report
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Filtra ordini completati di alto valore dell'ultimo mese
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Calcola metriche di business
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Revenue: $" . number_format($totalRevenue, 2) . "\n";
-echo "Average Order: $" . number_format($averageOrder, 2) . "\n";
-echo "Top Customer: " . $topCustomers->first()['customer'];
-```
-
-#### Esempio 4: Analisi dei Log e Segnalazione degli Errori
+#### Esempio 3: Analisi dei Log e Segnalazione degli Errori
 ```php
 // Analizza i log dell'applicazione ed estrae pattern di errori
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

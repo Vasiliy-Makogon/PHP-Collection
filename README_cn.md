@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### 示例 3：电子商务订单处理
-```php
-// 处理订单：计算统计数据并生成报告
-$orders = CoverArray::fromArray($database->getOrders());
-
-// 过滤上个月完成的高价值订单
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// 计算业务指标
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "收入: $" . number_format($totalRevenue, 2) . "\n";
-echo "平均订单: $" . number_format($averageOrder, 2) . "\n";
-echo "最高客户: " . $topCustomers->first()['customer'];
-```
-
-#### 示例 4：日志分析和错误报告
+#### 示例 3：日志分析和错误报告
 ```php
 // 解析应用程序日志并提取错误模式
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

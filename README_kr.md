@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### 예제 3: 전자상거래 주문 처리
-```php
-// 주문 처리: 통계 계산 및 보고서 생성
-$orders = CoverArray::fromArray($database->getOrders());
-
-// 지난 달의 완료된 고액 주문 필터링
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// 비즈니스 메트릭 계산
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Revenue: $" . number_format($totalRevenue, 2) . "\n";
-echo "Average Order: $" . number_format($averageOrder, 2) . "\n";
-echo "Top Customer: " . $topCustomers->first()['customer'];
-```
-
-#### 예제 4: 로그 분석 및 오류 보고
+#### 예제 3: 로그 분석 및 오류 보고
 ```php
 // 애플리케이션 로그 파싱 및 오류 패턴 추출
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

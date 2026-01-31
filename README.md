@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Example 3: E-commerce Order Processing
-```php
-// Process orders: calculate statistics and generate reports
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Filter completed high-value orders from last month
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Calculate business metrics
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Revenue: $" . number_format($totalRevenue, 2) . "\n";
-echo "Average Order: $" . number_format($averageOrder, 2) . "\n";
-echo "Top Customer: " . $topCustomers->first()['customer'];
-```
-
-#### Example 4: Log Analysis and Error Reporting
+#### Example 3: Log Analysis and Error Reporting
 ```php
 // Parse application logs and extract error patterns
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))

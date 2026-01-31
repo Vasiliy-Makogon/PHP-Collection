@@ -141,31 +141,7 @@ $apiResponse = CoverArray::fromJson($httpResponse)
 $userOptions = $apiResponse->column('name', 'id')->getDataAsArray();
 ```
 
-#### Exemple 3 : Traitement des commandes e-commerce
-```php
-// Traiter les commandes : calculer les statistiques et générer des rapports
-$orders = CoverArray::fromArray($database->getOrders());
-
-// Filtrer les commandes complétées de haute valeur du mois dernier
-$recentOrders = $orders
-    ->filter(fn($order) => $order['status'] === 'completed')
-    ->filter(fn($order) => $order['amount'] > 100)
-    ->filter(fn($order) => strtotime($order['date']) > strtotime('-30 days'));
-
-// Calculer les métriques commerciales
-$totalRevenue = $recentOrders->column('amount')->sum();
-$averageOrder = $totalRevenue / $recentOrders->count();
-$topCustomers = $recentOrders
-    ->map(fn($o) => ['customer' => $o['customer_name'], 'amount' => $o['amount']])
-    ->usort(fn($a, $b) => $b['amount'] <=> $a['amount'])
-    ->slice(0, 10);
-
-echo "Revenus : $" . number_format($totalRevenue, 2) . "\n";
-echo "Commande moyenne : $" . number_format($averageOrder, 2) . "\n";
-echo "Meilleur client : " . $topCustomers->first()['customer'];
-```
-
-#### Exemple 4 : Analyse des logs et rapports d'erreurs
+#### Exemple 3 : Analyse des logs et rapports d'erreurs
 ```php
 // Analyser les logs d'application et extraire les modèles d'erreurs
 $logLines = CoverArray::fromExplode("\n", file_get_contents('app.log'))
