@@ -2,5 +2,10 @@
 /composer.lock
 /vendor
 /.phpunit.cache
+/.phpunit.result.cache
 /html-coverage
+/coverage.xml
 /src/test.php
+/todo.txt
+/src/config.json
+/src/app.log
