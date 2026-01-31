@@ -93,8 +93,8 @@ $result = CoverArray::fromArray($users)
 $config = CoverArray::fromJson(file_get_contents('config.json'));
 
 // Direct nested access with default fallbacks
-$dbHost = $config->get('database.connections.mysql.host', fn() => 'localhost');
-$dbPort = $config->get('database.connections.mysql.port', fn() => 3306);
+$dbHost = $config->get('database.connections.mysql.host', fn($value) => $value ?? 'localhost');
+$dbPort = $config->get('database.connections.mysql.port', fn($value) => $value ?? 3306);
 
 // Access with callback for complex defaults
 $apiKeys = $config->get('services.payment.keys', function($keys) {

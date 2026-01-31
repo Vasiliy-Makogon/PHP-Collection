@@ -93,8 +93,8 @@ $result = CoverArray::fromArray($users)
 $config = CoverArray::fromJson(file_get_contents('config.json'));
 
 // Accès direct imbriqué avec valeurs par défaut
-$dbHost = $config->get('database.connections.mysql.host', fn() => 'localhost');
-$dbPort = $config->get('database.connections.mysql.port', fn() => 3306);
+$dbHost = $config->get('database.connections.mysql.host', fn($value) => $value ?? 'localhost');
+$dbPort = $config->get('database.connections.mysql.port', fn($value) => $value ?? 3306);
 
 // Accès avec callback pour valeurs par défaut complexes
 $apiKeys = $config->get('services.payment.keys', function($keys) {

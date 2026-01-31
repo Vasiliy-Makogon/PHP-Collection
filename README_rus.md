@@ -93,8 +93,8 @@ $result = CoverArray::fromArray($users)
 $config = CoverArray::fromJson(file_get_contents('config.json'));
 
 // Прямой доступ к вложенным данным со значениями по умолчанию
-$dbHost = $config->get('database.connections.mysql.host', fn() => 'localhost');
-$dbPort = $config->get('database.connections.mysql.port', fn() => 3306);
+$dbHost = $config->get('database.connections.mysql.host', fn($value) => $value ?? 'localhost');
+$dbPort = $config->get('database.connections.mysql.port', fn($value) => $value ?? 3306);
 
 // Доступ с callback для сложных значений по умолчанию
 $apiKeys = $config->get('services.payment.keys', function($keys) {
