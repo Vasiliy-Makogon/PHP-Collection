@@ -67,6 +67,9 @@ trait Simple
      * $obj->key = 'value';
      * echo $obj->key; // 'value'
      * echo $obj->nonExistent; // null
+     *
+     * @see https://www.php.net/manual/en/language.oop5.overloading.php#object.get
+     * @see Simple::item()
      */
     public function __get(string $key): mixed
     {
@@ -95,6 +98,8 @@ trait Simple
      * @example
      * $obj->name = 'John';
      * $obj->age = 30;
+     *
+     * @see https://www.php.net/manual/en/language.oop5.overloading.php#object.set
      */
     public function __set(string $key, mixed $value): void
     {
@@ -122,6 +127,9 @@ trait Simple
      * $obj->key = 'value';
      * isset($obj->key); // true
      * isset($obj->nonExistent); // false
+     *
+     * @see https://www.php.net/manual/en/language.oop5.overloading.php#object.isset
+     * @see isset()
      */
     public function __isset(string $key): bool
     {
@@ -147,6 +155,9 @@ trait Simple
      * $obj->key = 'value';
      * unset($obj->key);
      * echo $obj->key; // null
+     *
+     * @see https://www.php.net/manual/en/language.oop5.overloading.php#object.unset
+     * @see unset()
      */
     public function __unset(string $key): void
     {
@@ -179,6 +190,8 @@ trait Simple
      * $obj->item(0); // Returns value for numeric index 0
      * $key = 'dynamicKey';
      * $obj->item($key); // Returns value for dynamic key
+     *
+     * @see Simple::__get()
      */
     public function item(mixed $key): mixed
     {
@@ -207,6 +220,8 @@ trait Simple
      * @example
      * $obj->setData(['name' => 'John', 'age' => 30]);
      * $obj->setData(new ArrayIterator(['key' => 'value']));
+     *
+     * @see Simple::clear()
      */
     public function setData(?iterable $data): static
     {
@@ -235,6 +250,8 @@ trait Simple
      *
      * @return static Returns the current instance for method chaining.
      *                Возвращает текущий экземпляр для цепочек вызовов.
+     *
+     * @see Simple::setData()
      */
     public function clear(): static
     {
