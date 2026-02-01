@@ -12,6 +12,8 @@
 - [繁體中文文件](docs/README_tw.md)
 - [Dokumentasi Bahasa Indonesia](docs/README_id.md)
 - [Documentação em Português (BR)](docs/README_br.md)
+- [हिंदी दस्तावेज़](docs/README_hi.md)
+- [التوثيق بالعربية](docs/README_ar.md)
 
 ---
 

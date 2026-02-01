@@ -12,6 +12,8 @@
 - [简体中文文档](README_cn.md)
 - [繁體中文文件](README_tw.md)
 - [Documentação em Português (BR)](README_br.md)
+- [हिंदी दस्तावेज़](README_hi.md)
+- [التوثيق بالعربية](README_ar.md)
 
 ---
 
