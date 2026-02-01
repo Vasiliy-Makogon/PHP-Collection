@@ -14,6 +14,8 @@
 - [Documentação em Português (BR)](docs/README_br.md)
 - [हिंदी दस्तावेज़](docs/README_hi.md)
 - [التوثيق بالعربية](docs/README_ar.md)
+- [Türkçe Dokümantasyon](docs/README_tr.md)
+- [Tài liệu tiếng Việt](docs/README_vi.md)
 
 ---
 

@@ -14,6 +14,8 @@
 - [Dokumentasi Bahasa Indonesia](README_id.md)
 - [Documentação em Português (BR)](README_br.md)
 - [التوثيق بالعربية](README_ar.md)
+- [Türkçe Dokümantasyon](README_tr.md)
+- [Tài liệu tiếng Việt](README_vi.md)
 
 ---
 
