@@ -235,6 +235,37 @@ trait Simple
     }
 
     /**
+     * Returns the internal data array as-is.
+     *
+     * Returns the raw internal $data array without any conversion or transformation.
+     * Unlike CoverArray::getDataAsArray(), this method does not recursively convert
+     * nested objects — it returns the data exactly as stored.
+     *
+     *
+     * Возвращает внутренний массив данных как есть.
+     *
+     * Возвращает необработанный внутренний массив $data без какого-либо преобразования
+     * или трансформации. В отличие от CoverArray::getDataAsArray(), этот метод не выполняет
+     * рекурсивное преобразование вложенных объектов — он возвращает данные в точности
+     * так, как они хранятся.
+     *
+     * @return array The internal data array.
+     *               Внутренний массив данных.
+     *
+     * @example
+     * $obj->name = 'John';
+     * $obj->age = 30;
+     * $obj->getData(); // ['name' => 'John', 'age' => 30]
+     *
+     * @see Simple::setData()
+     * @see Simple::clear()
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * Clears all data from the internal array.
      *
      * Resets the internal $data array to an empty array.
